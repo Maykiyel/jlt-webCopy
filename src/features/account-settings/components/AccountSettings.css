@@ -1,0 +1,62 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;;
+}
+
+/* Override global button styles for Mantine Tabs */
+[role="tab"] {
+  border: none !important;
+  background-color: transparent !important;
+  padding: 0 1rem !important;
+  border-bottom: 4px solid transparent !important;
+  transition: border-bottom-color 0.2s ease, color 0.2s ease !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+[role="tab"]:hover {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+[role="tab"]:focus,
+[role="tab"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-bottom: 4px solid transparent !important;
+  color: #ffffff !important;
+}
+
+[role="tab"][aria-selected="true"] {
+  border-bottom-color: #FF9933 !important;
+}
+
+/* Hide Mantine default indicator */
+[role="tablist"] .mantine-Tabs-indicator {
+  display: none !important;
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}

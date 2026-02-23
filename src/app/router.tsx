@@ -12,6 +12,9 @@ const LoginPage = lazy(() => import("./routes/auth/LoginPage"));
 const DashboardPage = lazy(
   () => import("./routes/app/dashboard/DashboardPage"),
 );
+const AccountSettings = lazy(
+  () => import("@/features/account-settings/components/AccountSettings"),
+);
 // const Quotations = lazy(() => import("./routes/app/qoutations/Quotations"));
 
 export const router = createBrowserRouter([
@@ -42,6 +45,11 @@ export const router = createBrowserRouter([
           {
             index: true,
             Component: DashboardPage,
+          },
+          // Account Settings
+          {
+            path: "account-settings",
+            Component: AccountSettings,
           },
           // {
           //   path: "tools",

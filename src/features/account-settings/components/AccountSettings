@@ -1,0 +1,683 @@
+import './App.css';
+import { Tabs, Card } from '@mantine/core';
+import accountBg from './assets/account-bg.jpg';
+import userIcon from './assets/user-icon.png';
+import uploadIcon from './assets/upload-icon.png';
+import { MantineProvider, Badge, Avatar } from '@mantine/core';
+import { theme } from './themes/mantine-themes';
+import { useState, useRef } from 'react';
+
+function App() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const selectRef = useRef(null);
+
+  const handleEditClick = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleArrowClick = () => {
+    if (selectRef.current) {
+      if (isSelectOpen) {
+        selectRef.current.blur();
+        setIsSelectOpen(false);
+      } else {
+        selectRef.current.focus();
+        setIsSelectOpen(true);
+      }
+    }
+  };
+
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordUpdated, setPasswordUpdated] = useState(false);
+
+  const handleUpdatePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Please fill out all password fields.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert('New password and confirmation do not match.');
+      return;
+    }
+    // Simulate successful update
+    setPasswordUpdated(true);
+  };
+
+  const handleCloseModal = () => {
+    setPasswordModalOpen(false);
+    setPasswordUpdated(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+  return (
+    <MantineProvider theme={theme}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          backgroundColor: '#f0f0f0',
+          padding: '2rem',
+          boxSizing: 'border-box',
+        }}
+      >
+        <Card
+          radius="md"
+          withBorder
+          style={{
+            width: 1300,
+            height: 730,
+            overflow: 'hidden',
+            position: 'relative',
+            background: '#fff',
+            borderRadius: '10px',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Background image */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${accountBg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 0.3,
+              borderRadius: '10px',
+              zIndex: 1,
+            }}
+          />
+
+          {/* Tabs */}
+          <Tabs 
+            defaultValue="account" 
+            withIndicator={false}
+            styles={{
+              tab: {
+                "&:hover": {
+                  color: "#ffffff",
+                  textShadow: "0 0 8px rgba(255,255,255,0.8)",
+                },
+                "&[aria-selected='true']": {
+                  color: "#ffffff",
+                  borderBottomColor: "#FF9933",
+                },
+              },
+            }}
+          >
+            <Tabs.List>
+              <Tabs.Tab value="account">ACCOUNT SETTINGS</Tabs.Tab>
+              <Tabs.Tab value="notifications">NOTIFICATION SETTINGS</Tabs.Tab>
+            </Tabs.List>
+
+            <Tabs.Panel value="account">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  padding: '1rem',
+                  zIndex: 2,
+                  position: 'relative',
+                  flex: 1,
+                  overflow: 'auto',
+                }}
+              >
+                {/* Top row */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      paddingLeft: '50px',
+                      paddingTop: '40px',
+                      paddingBottom: '40px',
+                    }}
+                  >
+                    <div
+                      onClick={() => setUploadModalOpen(true)}
+                      title="Change profile image"
+                      style={{ position: 'relative', width: 86, height: 86, cursor: 'pointer' }}
+                    >
+                      <Avatar src={userIcon} alt="User" radius={100} size={86} />
+
+                      <Badge
+                        variant="filled"
+                        color="#FF9933"
+                        style={{
+                          position: 'absolute',
+                          right: -6,
+                          bottom: 8,
+                          width: 26,
+                          height: 26,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 999,
+                          fontSize: 16,
+                          lineHeight: 1,
+                          padding: 0,
+                        }}
+                      >
+                      </Badge>
+                    </div>
+                    <div>
+                      <div
+                        style={{
+                          fontSize: '24px',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        JENNY CARLA DELA CRUZ
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '0.875rem',
+                          color: '#888',
+                          fontWeight: 'bold',
+                          display: 'flex',
+                          justifyContent: 'left',
+                        }}
+                      >
+                        JLTCB
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleEditClick}
+                    style={{
+                      position: 'absolute',
+                      right: '40px',
+                      background: '#4E6174',
+                      color: '#fff',
+                      padding: '0.5rem 1.5rem',
+                      fontSize: '0.875rem',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isEditing ? 'SAVE' : 'EDIT'}
+                  </button>
+                </div>
+
+                {/* Form rows */}
+                <div style={{ display: 'flex', gap: '1rem', paddingLeft: '25px', paddingBottom: '10px' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '16px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'left' }}>FIRST NAME</label>
+                    <input
+                      type="text"
+                      placeholder="Jenny Carla"
+                      readOnly={!isEditing}
+                      style={{
+                        width: '550px',
+                        borderRadius: '3px',
+                        border: '1px solid #888',
+                        padding: '0.75rem',
+                        fontSize: '1rem',
+                        lineHeight: '1.2',
+                        boxSizing: 'border-box',
+                        color: isEditing ? '#1f2a3d' : '#000',
+                        backgroundColor: isEditing ? '#fff' : '#f5f5f5',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '16px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'left' }}>LAST NAME</label>
+                    <input
+                      type="text"
+                      placeholder="Dela Cruz"
+                      readOnly={!isEditing}
+                      style={{
+                        width: '550px',
+                        borderRadius: '3px',
+                        border: '1px solid #888',
+                        padding: '0.75rem',
+                        fontSize: '1rem',
+                        lineHeight: '1.2',
+                        boxSizing: 'border-box',
+                        color: isEditing ? '#1f2a3d' : '#000',
+                        backgroundColor: isEditing ? '#fff' : '#f5f5f5',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', paddingLeft: '25px', paddingBottom: '10px' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                  <label style={{ fontSize: '16px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'left' }}>
+                    POSITION
+                  </label>
+                  {isEditing ? (
+                    <>
+                      <select
+                        ref={selectRef}
+                        onFocus={() => setIsSelectOpen(true)}
+                        onBlur={() => setIsSelectOpen(false)}
+                        style={{
+                          width: '550px',
+                          borderRadius: '3px',
+                          border: '1px solid #888',
+                          padding: '0.75rem',
+                          fontSize: '1rem',
+                          lineHeight: '1.2',
+                          boxSizing: 'border-box',
+                          color: '#1f2a3d',
+                          backgroundColor: '#fff',
+                          cursor: 'pointer',
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          MozAppearance: 'none',
+                        }}
+                      >
+                        <option value="Account Specialist">ACCOUNT SPECIALIST</option>
+                        <option value="Marketing">MARKETING</option>
+                      </select>
+
+                      {/* Arrow toggle */}
+                      <div
+                        onClick={handleArrowClick}
+                        style={{
+                          position: 'absolute',
+                          right: '2rem',
+                          top: '2.20rem',
+                          fontSize: '24px',
+                          color: '#1f2a3d',
+                          cursor: 'pointer',
+                          zIndex: 10,
+                          transform: `rotate(${isSelectOpen ? 90: 0}deg)`,
+                          transition: 'transform 0.2s ease',
+                        }}
+                      >
+                        ▶
+                      </div>
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="Account Specialist"
+                      readOnly={true}
+                      style={{
+                        width: '550px',
+                        borderRadius: '3px',
+                        border: '1px solid #888',
+                        padding: '0.75rem',
+                        fontSize: '1rem',
+                        lineHeight: '1.2',
+                        boxSizing: 'border-box',
+                        color: '#000',
+                        backgroundColor: '#f5f5f5',
+                      }}
+                    />
+                  )}
+                </div>
+
+
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '16px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'left' }}>CONTACT NUMBER</label>
+                    <input
+                      type="text"
+                      placeholder="0918 - 888 - 8899"
+                      readOnly={!isEditing}
+                      style={{
+                        width: '550px',
+                        borderRadius: '3px',
+                        border: '1px solid #888',
+                        padding: '0.75rem',
+                        fontSize: '1rem',
+                        lineHeight: '1.2',
+                        boxSizing: 'border-box',
+                        color: isEditing ? '#1f2a3d' : '#000',
+                        backgroundColor: isEditing ? '#fff' : '#f5f5f5',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ position: 'relative', display: 'flex', gap: '1rem', paddingLeft: '25px' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '16px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'left' }}>EMAIL ADDRESS</label>
+                    <input
+                      type="text"
+                      placeholder="JLTCB"
+                      readOnly={!isEditing}
+                      style={{
+                        width: '550px',
+                        borderRadius: '3px',
+                        border: '1px solid #888',
+                        padding: '0.75rem',
+                        fontSize: '1rem',
+                        lineHeight: '1.2',
+                        boxSizing: 'border-box',
+                        color: isEditing ? '#1f2a3d' : '#000',
+                        backgroundColor: isEditing ? '#fff' : '#f5f5f5',
+                      }}
+                    />
+                  </div>
+
+                  {!isEditing && (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <label style={{ fontSize: '16px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'left' }}>PASSWORD</label>
+                      <input
+                        type="password"
+                        placeholder="************"
+                        readOnly={true}
+                        style={{
+                          width: '550px',
+                          borderRadius: '3px',
+                          border: '1px solid #888',
+                          padding: '0.75rem',
+                          fontSize: '1rem',
+                          lineHeight: '1.2',
+                          boxSizing: 'border-box',
+                          color: '#000',
+                          backgroundColor: '#f5f5f5',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {!isEditing && (
+                    <div
+                      onClick={() => setPasswordModalOpen(true)}
+                      style={{
+                        position: 'absolute',
+                        right: '26px',
+                        top: 0,
+                        fontStyle: 'italic',
+                        fontSize: '14px',
+                        color: '#FF9933',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Change password
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="notifications">
+              <div
+                style={{
+                  padding: '2rem',
+                  zIndex: 2,
+                  position: 'relative',
+                  color: '#333',
+                }}
+              >
+                Notification settings will go here.
+              </div>
+            </Tabs.Panel>
+          </Tabs>
+        </Card>
+                {passwordModalOpen && (
+                  <div
+                    style={{
+                      position: 'fixed',
+                      inset: 0,
+                      backgroundColor: '#1D274E4D',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 9999,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 320,
+                        height: 300,
+                        background: '#fff',
+                        borderRadius: 8,
+                        padding: '50px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                        position: 'relative',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <button
+                        onClick={handleCloseModal}
+                        aria-label="Close"
+                        style={{
+                          position: 'absolute',
+                          right: 12,
+                          top: 8,
+                          border: 'none',
+                          background: 'transparent',
+                          fontSize: 20,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ×
+                      </button>
+                      {!passwordUpdated ? (
+                <>
+                  <div style={{ fontSize: 18, fontWeight: '450', marginBottom: 0, color: '#000' }}>CHANGE PASSWORD</div>
+                  <div
+                    style={{
+                      height: 1,
+                      background: '#eee',
+                      boxShadow: '0 1px 0 rgba(0,0,0,0.03)',
+                      margin: '12px 0 20px',
+                    }}
+                  />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <label style={{ fontSize: 14, fontWeight: '500', marginBottom: 4, color: '#000' }}>Current Password</label>
+                      <input
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        style={{
+                          padding: '10px',
+                          fontSize: 14,
+                          borderRadius: 4,
+                          border: '1px solid #ccc',
+                          width: '100%',
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <label style={{ fontSize: 14, fontWeight: '500', marginBottom: 4, color: '#000' }}>New Password</label>
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        style={{
+                          padding: '10px',
+                          fontSize: 14,
+                          borderRadius: 4,
+                          border: '1px solid #ccc',
+                          width: '100%',
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <label style={{ fontSize: 14, fontWeight: '500', marginBottom: 4, color: '#000' }}>Confirm New Password</label>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        style={{
+                          padding: '10px',
+                          fontSize: 14,
+                          borderRadius: 4,
+                          border: '1px solid #ccc',
+                          width: '100%',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleUpdatePassword}
+                    style={{
+                      marginTop: 20,
+                      background: '#4E6174',
+                      color: '#fff',
+                      padding: '10px 16px',
+                      borderRadius: 6,
+                      border: 'none',
+                      cursor: 'pointer',
+                      width: '80%',
+                      fontWeight: '250',
+                    }}
+                  >
+                    UPDATE PASSWORD
+                  </button>
+                </>
+            ): (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                  <div style={{ fontSize: 20, color: '#000', fontWeight: '400', marginTop: -17}}>CHANGE PASSWORD</div>
+                  <div style={{ width: 375, border: '1px solid #BEBEBE', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 25 }}/> 
+                  <div style={{ width: 76, height: 76, borderRadius: 100, border: '3px solid #39E442', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#39E442', fontSize: 44, fontWeight: 'bold' }}>
+                    ✓
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: '500', color: '#000', paddingTop: 10 }}>Password Updated!</div>
+                  <div style={{ color: '#000', maxWidth: 450, marginTop: -10, lineHeight: 1.2 }}>Your password has been changed successfully. Use your new password to log in.</div>
+                  <button
+                    onClick={handleCloseModal}
+                    style={{
+                      marginTop: 30,
+                      background: '#4E6174',
+                      color: '#fff',
+                      padding: '8px 14px',
+                      borderRadius: 7,
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: '150',
+                      width: 120,
+                    }}
+                  >
+                    OKAY
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      {uploadModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#1D274E4D',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              width: 320,
+              maxWidth: '100%',
+              height: 350,
+              background: '#fff',
+              borderRadius: 10,
+              padding: '36px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              position: 'relative',
+              textAlign: 'center',
+            }}
+          >
+            <button
+              onClick={() => setUploadModalOpen(false)}
+              aria-label="Close"
+              style={{
+                position: 'absolute',
+                right: 12,
+                top: 8,
+                border: 'none',
+                background: 'transparent',
+                fontSize: 20,
+                cursor: 'pointer',
+              }}
+            >
+              ×
+            </button>
+
+            <div style={{ fontSize: 18, fontWeight: 400, marginBottom: 12, fontFamily: 'Inter, sans-serif' }}>Upload an image</div>
+
+            <div
+              style={{
+                marginTop: 6,
+                marginBottom: 18,
+                border: '2px dashed #BDBDBD',
+                borderRadius: 10,
+                padding: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <img src={uploadIcon} alt="upload" style={{ width: 76, height: 76, marginBottom: 10 }} />
+
+              <div style={{ fontWeight: 500, color: '#000', fontFamily: 'Inter, sans-serif',  }}>Drag and drop an image to upload</div>
+              <div style={{ color: '#8a8a8a', fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif', marginTop: -15 }}>
+                Your image will be private until you
+                <br />
+                publish your profile
+              </div>
+
+              <button
+                style={{
+                  marginTop: 20,
+                  background: '#4E6174',
+                  color: '#fff',
+                  padding: '6px 12px',
+                  fontSize: 13,
+                  borderRadius: 15,
+                  border: '1px solid #CCC',
+                  cursor: 'pointer',
+                  marginBottom: 20,
+                }}
+              >
+                Select files
+              </button>
+            </div>
+
+            <button
+              onClick={() => setUploadModalOpen(false)}
+              style={{
+                marginTop: 6,
+                background: '#4E6174',
+                color: '#fff',
+                padding: '10px 20px',
+                borderRadius: 7,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              UPLOAD
+            </button>
+          </div>
+        </div>
+      )}
+    </MantineProvider>
+  );
+}
+
+export default App;
