@@ -1,18 +1,3 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #f0f0f0;;
-}
-
-/* Override global button styles for Mantine Tabs */
 [role="tab"] {
   border: none !important;
   background-color: transparent !important;
