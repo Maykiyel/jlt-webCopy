@@ -4,16 +4,11 @@ import { GuestRoute } from "@/components/guards/GuestRoute";
 import { AppLayout } from "@/components/layouts/AppLayout";
 import { lazy } from "react";
 import NotFound from "./routes/NotFound";
-import { RoleGuard } from "@/components/guards/RoleGuard";
-import { ROLES } from "@/types/roles";
 import { Loader } from "@mantine/core";
-// const ToolsPage = lazy(() => import("@/features/dashboard/pages/ToolsPage"));
+
 const LoginPage = lazy(() => import("./routes/auth/LoginPage"));
 const DashboardPage = lazy(
   () => import("./routes/app/dashboard/DashboardPage"),
-);
-const AccountSettings = lazy(
-  () => import("@/features/account-settings/components/AccountSettings"),
 );
 // const Quotations = lazy(() => import("./routes/app/qoutations/Quotations"));
 
@@ -46,11 +41,6 @@ export const router = createBrowserRouter([
             index: true,
             Component: DashboardPage,
           },
-          // Account Settings
-          {
-            path: "account-settings",
-            Component: AccountSettings,
-          },
           // {
           //   path: "tools",
           //   Component: ProtectedToolsPage,
@@ -69,13 +59,5 @@ export const router = createBrowserRouter([
         ],
       },
     ],
-  },
-
-  // ==========================================
-  // 404
-  // ==========================================
-  {
-    path: "*",
-    Component: NotFound,
   },
 ]);
