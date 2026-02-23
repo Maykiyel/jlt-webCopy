@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../schemas/loginSchema";
 import { TextInputField, PasswordInputField } from "@/components/form";
-import { Button, Box, Stack, Title, Text, Image } from "@mantine/core";
+import { Button, Box, Stack, Title, Text } from "@mantine/core";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 

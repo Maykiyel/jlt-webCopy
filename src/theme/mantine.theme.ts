@@ -1,8 +1,6 @@
 import { createTheme, type MantineColorsTuple } from "@mantine/core";
 
-// ============================================
 // JLT Brand Colors
-// ============================================
 
 // JLT Blue: #1D274E — primary brand color
 const jltBlue: MantineColorsTuple = [
@@ -46,9 +44,7 @@ const jltAccent: MantineColorsTuple = [
   "#283845", // 9 - darkest
 ];
 
-// ============================================
 // Theme
-// ============================================
 
 export const theme = createTheme({
   /** Primary color */
@@ -73,11 +69,11 @@ export const theme = createTheme({
 
   /** Base font sizes — Mantine defaults preserved, extended with 2xl+ */
   fontSizes: {
-    xs: "0.75rem", // 12px  (Mantine default)
-    sm: "0.875rem", // 14px  (Mantine default)
-    md: "1rem", // 16px  (Mantine default)
-    lg: "1.125rem", // 18px  (Mantine default)
-    xl: "1.25rem", // 20px  (Mantine default)
+    xs: "0.75rem", // 12px
+    sm: "0.875rem", // 14px
+    md: "1rem", // 16px
+    lg: "1.125rem", // 18px
+    xl: "1.25rem", // 20px
     "2xl": "1.5rem", // 24px
     "3xl": "1.875rem", // 30px
     "4xl": "2.25rem", // 36px

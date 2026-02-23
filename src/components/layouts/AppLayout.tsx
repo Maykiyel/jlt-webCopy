@@ -1,6 +1,7 @@
 import { Outlet } from "react-router";
 import { AppShell } from "@mantine/core";
 import { AppSidebar } from "@/components/layouts/AppSidebar";
+import { AppHeader } from "@/components/layouts/AppHeader";
 
 export function AppLayout() {
   return (
@@ -11,10 +12,10 @@ export function AppLayout() {
         breakpoint: "sm",
       }}
       padding="md"
+      withBorder={false}
     >
       <AppShell.Header>
-        {/* Header content */}
-        <div>Header</div>
+        <AppHeader />
       </AppShell.Header>
 
       <AppShell.Navbar

@@ -1,28 +1,16 @@
-/**
- * AppSidebar.tsx
- *
- * Mantine components handle all layout, spacing, color, and typography.
- * CSS module only handles what Mantine can't: pseudo-elements (scoops,
- * gradient border), absolute stacking, and transitions on data-* attributes.
- */
-
-import { Box, Stack, Text, UnstyledButton, Tooltip } from "@mantine/core";
+import { Flex, Box, Stack, Text, UnstyledButton, Tooltip } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router";
 import {
-  IconLayoutDashboard,
-  IconUsers,
-  IconShip,
-  IconFileText,
-  IconUserCog,
-  IconFolderCog,
-  IconSettings,
-} from "@tabler/icons-react";
+  Dashboard,
+  DiversityTwo,
+  Box as BoxIcon,
+  RequestQuote,
+  ManageAccounts,
+  FolderManaged,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import classes from "./AppSidebar.module.css";
 
-// ============================================
 // Types
-// ============================================
-
 interface SubItem {
   label: string;
   path: string;
@@ -36,20 +24,18 @@ interface NavItem {
   subItems?: SubItem[];
 }
 
-// ============================================
 // Nav Config
-// ============================================
 
 const NAV_ITEMS: NavItem[] = [
   {
     id: "dashboard",
-    icon: <IconLayoutDashboard size={32} />,
+    icon: <Dashboard width={32} height={32} />,
     label: "Dashboard",
     path: "/",
   },
   {
     id: "leads",
-    icon: <IconUsers size={32} />,
+    icon: <DiversityTwo width={32} height={32} />,
     label: "Leads",
     subItems: [
       { label: "Queries", path: "/leads/queries" },
@@ -59,7 +45,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "shipments",
-    icon: <IconShip size={32} />,
+    icon: <BoxIcon width={32} height={32} />,
     label: "Shipments",
     subItems: [
       { label: "Ongoing", path: "/shipments/ongoing" },
@@ -68,7 +54,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "quotations",
-    icon: <IconFileText size={32} />,
+    icon: <RequestQuote width={32} height={32} />,
     label: "Quotations",
     subItems: [
       { label: "Requests", path: "/quotations/requests" },
@@ -79,7 +65,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "accounts",
-    icon: <IconUserCog size={32} />,
+    icon: <ManageAccounts width={32} height={32} />,
     label: "Accounts",
     subItems: [
       { label: "Clients", path: "/accounts/clients" },
@@ -88,7 +74,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "tools",
-    icon: <IconFolderCog size={32} />,
+    icon: <FolderManaged width={32} height={32} />,
     label: "Tools",
     subItems: [
       { label: "Services", path: "/tools/services" },
@@ -98,13 +84,10 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-// Must stay in sync with CSS --btn-height and .iconRail padding-top
 const BTN_HEIGHT = 56;
 const RAIL_PADDING_TOP = 18;
 
-// ============================================
 // Helpers
-// ============================================
 
 function isPathActive(path: string, currentPath: string): boolean {
   if (path === "/") return currentPath === "/";
@@ -124,9 +107,7 @@ function getActiveItem(currentPath: string): NavItem | null {
   return NAV_ITEMS.find((item) => isItemActive(item, currentPath)) ?? null;
 }
 
-// ============================================
 // Component
-// ============================================
 
 export function AppSidebar() {
   const location = useLocation();
@@ -150,6 +131,7 @@ export function AppSidebar() {
 
   return (
     <Box
+      component="nav"
       pos="relative"
       display="flex"
       h="100%"
@@ -202,10 +184,12 @@ export function AppSidebar() {
       </Box>
 
       {/* ── Icon rail ── */}
-      <Box
-        className={classes.iconRail}
+      <Flex
         bg="jltBlue.8"
         pos="relative"
+        align="center"
+        direction="column"
+        wrap="wrap"
         pt={RAIL_PADDING_TOP}
         style={{ zIndex: 2, flexShrink: 0, overflow: "visible" }}
         w={89}
@@ -226,10 +210,16 @@ export function AppSidebar() {
               key={item.id}
               label={item.label}
               position="right"
-              withArrow
-              offset={16}
+              offset={8}
+              transitionProps={{ transition: "slide-right", duration: 200 }}
+              color="jltOrange.5"
               zIndex={300}
               disabled={active}
+              styles={{
+                tooltip: {
+                  color: "var(--mantine-color-jltBlue)",
+                },
+              }}
             >
               <UnstyledButton
                 onClick={() => handleIconClick(item)}
@@ -246,7 +236,6 @@ export function AppSidebar() {
                   overflow: "visible",
                   color: active ? "var(--mantine-color-jltBlue-8)" : "white",
                   transition: "color 150ms ease",
-                  paddingInline: "16px 0",
                 }}
               >
                 {item.icon}
@@ -254,7 +243,7 @@ export function AppSidebar() {
             </Tooltip>
           );
         })}
-      </Box>
+      </Flex>
     </Box>
   );
 }

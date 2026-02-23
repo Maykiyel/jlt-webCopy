@@ -1,25 +1,19 @@
 :root {
-  --btn-height: 56px;
-  --scoop: 24px;
+  --pill-height: 56px;
+  --scoop: 22px;
+  --scoop-offset: 8px;
   --panel-width: 127px;
   --rail-width: 89px;
 }
-
-/* ============================================
-   Travelling pill
-   White bg + border-radius set here because
-   they're intrinsic to the pill's visual identity
-   and the ::before/::after scoops depend on them.
-   ============================================ */
 
 .activePill {
   position: absolute;
   top: 0;
   right: 0;
   width: 85%;
-  height: var(--btn-height);
+  height: var(--pill-height);
   background-color: #fff;
-  border-radius: var(--scoop) 0 0 var(--scoop);
+  border-radius: calc(var(--scoop) * 2) 0 0 calc(var(--scoop) * 2);
   pointer-events: none;
   z-index: 0;
   opacity: 0;
@@ -41,7 +35,7 @@
   height: var(--scoop);
   background: transparent;
   border-radius: 50%;
-  box-shadow: 10px 10px 0 #fff;
+  box-shadow: var(--scoop-offset) var(--scoop-offset) 0 #fff;
   pointer-events: none;
 }
 
@@ -54,37 +48,14 @@
   height: var(--scoop);
   background: transparent;
   border-radius: 50%;
-  box-shadow: 10px -10px 0 #fff;
+  box-shadow: var(--scoop-offset) calc(-1 * var(--scoop-offset)) 0 #fff;
   pointer-events: none;
 }
-
-/* ============================================
-   Icon rail
-   overflow:visible needed so scoops bleed out
-   past the rail boundary — can't set via prop
-   ============================================ */
-
-.iconRail {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* ============================================
-   Icon button
-   Only the cursor — everything else is inline
-   ============================================ */
 
 .iconBtn {
   cursor: pointer;
   background: transparent;
 }
-
-/* ============================================
-   Sub-item panel
-   Absolute stacking + slide transition +
-   gradient border (::before) — all CSS-only
-   ============================================ */
 
 .subPanel {
   position: absolute;
@@ -127,12 +98,6 @@
   pointer-events: auto;
 }
 
-/* ============================================
-   Sub-panel inner content blocks
-   All mounted, only active one is visible.
-   Absolute so they stack on top of each other.
-   ============================================ */
-
 .subPanelInner {
   position: absolute;
   inset: 0;
@@ -146,11 +111,6 @@
   opacity: 1;
   pointer-events: auto;
 }
-
-/* ============================================
-   Sub-item button
-   hover color handled inline via Text c= prop
-   ============================================ */
 
 .subItem {
   width: 100%;
