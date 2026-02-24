@@ -11,6 +11,10 @@ const DashboardPage = lazy(
   () => import("./routes/app/dashboard/DashboardPage"),
 );
 
+const AccountSettings = lazy(
+  () => import("./routes/app/account-settings/AccountSettingsPage"),
+);
+
 export const router = createBrowserRouter([
   // ==========================================
   // GUEST ROUTES
@@ -41,7 +45,10 @@ export const router = createBrowserRouter([
             Component: DashboardPage,
           },
 
-          // Catch-all inside AppLayout — renders NotFound with sidebar visible
+          {
+            path: "account-settings",
+            Component: AccountSettings,
+          },
           {
             path: "*",
             Component: NotFound,

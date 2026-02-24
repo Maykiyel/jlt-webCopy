@@ -29,7 +29,15 @@ export function AppLayout() {
         <AppSidebar />
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main
+        style={{
+          backgroundColor: "#EDEDED",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "stretch",
+          justifyContent: "center",
+        }}
+      >
         <Outlet />
       </AppShell.Main>
     </AppShell>

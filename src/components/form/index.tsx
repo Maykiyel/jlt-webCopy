@@ -18,7 +18,7 @@
 import {
   TextInput,
   PasswordInput,
-  Select,
+  NativeSelect,
   MultiSelect,
   Textarea,
   NumberInput,
@@ -28,7 +28,7 @@ import {
   FileInput,
   type TextInputProps,
   type PasswordInputProps,
-  type SelectProps,
+  type NativeSelectProps,
   type MultiSelectProps,
   type TextareaProps,
   type NumberInputProps,
@@ -121,26 +121,25 @@ export function PasswordInputField<T extends FieldValues>({
 // SelectField
 // ============================================
 
-type SelectFieldProps<T extends FieldValues> = BaseFieldProps<T> &
-  Omit<SelectProps, "value" | "onChange" | "onBlur" | "error" | "name">;
+type NativeSelectFieldProps<T extends FieldValues> = BaseFieldProps<T> &
+  Omit<NativeSelectProps, "value" | "onChange" | "onBlur" | "error" | "name">;
 
-export function SelectField<T extends FieldValues>({
+export function NativeSelectField<T extends FieldValues>({
   control,
   name,
   rules,
   ...rest
-}: SelectFieldProps<T>) {
+}: NativeSelectFieldProps<T>) {
   return (
     <Controller
       control={control}
       name={name}
       rules={rules}
       render={({ field, fieldState }) => (
-        <Select
+        <NativeSelect
           {...rest}
-          value={field.value ?? null}
-          onChange={(value) => field.onChange(value)}
-          onBlur={field.onBlur}
+          {...field}
+          value={field.value ?? ""}
           error={fieldState.error?.message}
         />
       )}
@@ -406,7 +405,7 @@ export function FileInputField<T extends FieldValues>({
 export type {
   TextInputFieldProps,
   PasswordInputFieldProps,
-  SelectFieldProps,
+  NativeSelectFieldProps,
   MultiSelectFieldProps,
   TextareaFieldProps,
   NumberInputFieldProps,
