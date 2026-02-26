@@ -12,6 +12,10 @@ const DashboardPage = lazy(
 );
 // const Quotations = lazy(() => import("./routes/app/qoutations/Quotations"));
 
+const AccountSettings = lazy(
+  () => import("./routes/app/account-settings/AccountSettingsPage"),
+);
+
 export const router = createBrowserRouter([
   // ==========================================
   // GUEST ROUTES
@@ -46,6 +50,7 @@ export const router = createBrowserRouter([
           //   Component: ProtectedToolsPage,
           // },
 
+<<<<<<< HEAD
           // Queries feature with nested routes (TODO)
           // {
           //   path: "quotations/new",
@@ -56,6 +61,16 @@ export const router = createBrowserRouter([
           //     },
           //   ],
           // },
+=======
+          {
+            path: "account-settings",
+            Component: AccountSettings,
+          },
+          {
+            path: "*",
+            Component: NotFound,
+          },
+>>>>>>> origin/main
         ],
       },
     ],

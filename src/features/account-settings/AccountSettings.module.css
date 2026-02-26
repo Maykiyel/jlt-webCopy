@@ -1,0 +1,37 @@
+.card {
+  width: 100%;
+  max-width: 1137px;
+  min-height: 687px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Tab overrides */
+
+.tab[data-active] {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.tab[data-active]:hover {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.tab {
+  color: white;
+  transition: background-color 150ms ease;
+}
+
+.tab:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+.tab {
+  border-width: 0 0 6px 0 !important;
+}
+
+.tabList::before {
+  border: none;
+}

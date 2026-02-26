@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/authStore";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/dropzone/styles.css";
 import "./index.css";
 
 // Hydrate auth state from localStorage before first render

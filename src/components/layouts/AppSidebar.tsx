@@ -199,6 +199,7 @@ export function AppSidebar() {
         <Box
           className={classes.activePill}
           data-visible={activeIndex >= 0 || undefined}
+          data-panel-open={panelOpen || undefined}
           style={{ transform: `translateY(${pillTop}px)` }}
         />
 
