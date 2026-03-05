@@ -1,46 +1,51 @@
-import { UnstyledButton, Loader } from "@mantine/core";
+import {
+  UnstyledButton,
+  type UnstyledButtonProps,
+  Loader,
+} from "@mantine/core";
 import type { ComponentType } from "react";
 import classes from "./AppButton.module.css";
 import { ArrowRightAlt } from "@nine-thirty-five/material-symbols-react/outlined";
 
 type AppButtonVariant = "primary" | "secondary";
 
-interface AppButtonProps {
+interface AppButtonProps extends UnstyledButtonProps {
   variant?: AppButtonVariant;
-  children?: React.ReactNode;
-  onClick?: () => void;
   type?: "button" | "submit" | "reset";
+  onClick?: () => void;
   loading?: boolean;
   disabled?: boolean;
-  className?: string;
+  children?: React.ReactNode;
+  form?: string;
   icon?: ComponentType<{ width?: number | string; height?: number | string }>;
 }
 
 export function AppButton({
   variant = "primary",
-  children,
   className,
   loading,
   disabled,
-  type = "button",
-  onClick,
-  icon: BadgeIcon = ArrowRightAlt,
+  children,
+  icon: BadgeIcon,
+  ...rest
 }: AppButtonProps) {
+  const ResolvedIcon =
+    BadgeIcon ?? (variant === "primary" ? ArrowRightAlt : null);
+
   return (
     <UnstyledButton
       className={`${classes.root} ${classes[variant]} ${className ?? ""}`}
-      onClick={onClick}
-      type={type}
       disabled={disabled || loading}
+      {...rest}
     >
       <span className={classes.label}>{children}</span>
 
-      {variant === "primary" && (
-        <span className={classes.arrowBadge}>
+      {ResolvedIcon && (
+        <span className={classes.orangeBadge}>
           {loading ? (
             <Loader size="1rem" color="#1e2d45" />
           ) : (
-            <BadgeIcon width="1.25rem" height="1.25rem" />
+            <ResolvedIcon width="1.25rem" height="1.25rem" />
           )}
         </span>
       )}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Modal, Button, Stack, Divider, Text } from "@mantine/core";
+import { Modal, Stack, Divider, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
 import { PasswordInputField } from "@/components/form";
@@ -11,7 +11,7 @@ import {
 } from "../schemas/accountSettings.schema";
 import { accountSettingsService } from "../api/accountSettings.service";
 import { CheckCircle } from "@nine-thirty-five/material-symbols-react/outlined";
-
+import { AppButton } from "@/components/ui/AppButton";
 interface ChangePasswordModalProps {
   opened: boolean;
   onClose: () => void;
@@ -84,14 +84,15 @@ export function ChangePasswordModal({
             to log in.
           </Text>
 
-          <Button
+          <AppButton
+            variant="secondary"
             mt="lg"
             w={"7.688rem"}
-            color="jltAccent.7"
+            h={"2.625rem"}
             onClick={handleClose}
           >
             OKAY
-          </Button>
+          </AppButton>
         </Stack>
       ) : (
         <form onSubmit={handleSubmit((v) => changeMutation.mutate(v))}>
@@ -114,15 +115,18 @@ export function ChangePasswordModal({
               label="Confirm New Password"
             />
 
-            <Button
+            <AppButton
               type="submit"
-              fullWidth
-              mt="md"
-              color="jltAccent.7"
+              variant="secondary"
               loading={changeMutation.isPending}
+              mt="md"
+              w={"13rem"}
+              h={"2.625rem"}
+              fz={"0.938rem"}
+              style={{ alignSelf: "center" }}
             >
               UPDATE PASSWORD
-            </Button>
+            </AppButton>
           </Stack>
         </form>
       )}

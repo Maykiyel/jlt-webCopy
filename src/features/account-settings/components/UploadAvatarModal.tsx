@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Modal, Button, Stack, Text, Image, Group } from "@mantine/core";
+import { Modal, Button, Stack, Text, Image } from "@mantine/core";
 import {
   Dropzone,
   IMAGE_MIME_TYPE,
@@ -15,6 +15,7 @@ import { Cancel } from "@nine-thirty-five/material-symbols-react/rounded/filled"
 import { accountSettingsService } from "../api/accountSettings.service";
 import { userService } from "@/services/user.service";
 import { useAuthStore } from "@/stores/authStore";
+import { AppButton } from "@/components/ui/AppButton";
 
 interface UploadAvatarModalProps {
   opened: boolean;
@@ -170,16 +171,16 @@ export function UploadAvatarModal({
           </Stack>
         )}
 
-        <Group grow>
-          <Button
-            color="jltAccent.7"
-            disabled={files.length === 0}
-            loading={uploadMutation.isPending}
-            onClick={() => files[0] && uploadMutation.mutate(files[0])}
-          >
-            UPLOAD
-          </Button>
-        </Group>
+        <AppButton
+          variant="secondary"
+          h={"2.625rem"}
+          style={{ alignSelf: "center" }}
+          disabled={files.length === 0}
+          loading={uploadMutation.isPending}
+          onClick={() => files[0] && uploadMutation.mutate(files[0])}
+        >
+          UPLOAD
+        </AppButton>
       </Stack>
     </Modal>
   );

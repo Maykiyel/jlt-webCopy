@@ -2,15 +2,12 @@
 .root {
   display: flex;
   align-items: stretch;
-  height: 2.625rem;
   border-radius: 0.5rem;
-  font-size: 1.125rem;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
   border: none;
   overflow: hidden;
   transition: transform 80ms ease;
-  width: 12.0625rem;
   cursor: pointer;
 }
 
@@ -33,14 +30,15 @@
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Primary — dark navy + orange arrow ─────────────────────────────────────── */
+/* ── Primary ────────────────────────────────────────────────────────────────── */
 .primary {
   background-color: var(--mantine-color-jltAccent-7);
   padding-left: 1.25rem;
   padding-right: 0;
+  min-width: fit;
 }
 
-/* ── Secondary — muted slate, no arrow ──────────────────────────────────────── */
+/* ── Secondary ──────────────────────────────────────────────────────────────── */
 .secondary {
   background-color: var(--mantine-color-jltAccent-7);
   padding-inline: 1.25rem;
@@ -51,8 +49,8 @@
   background-color: var(--mantine-color-jltAccent-6);
 }
 
-/* ── Arrow badge — full button height, sharp left slant ─────────────────────── */
-.arrowBadge {
+/* ── Orange badge ───────────────────────────────────────────────────────────── */
+.orangeBadge {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,9 +69,9 @@
 }
 
 .primary:hover .label {
-  transform: translateX(1.125rem);
+  transform: translateX(1.05rem);
 }
 
-.primary:hover .arrowBadge {
+.primary:hover .orangeBadge {
   transform: translateX(100%);
 }

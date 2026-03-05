@@ -1,14 +1,7 @@
-import {
-  Avatar,
-  Group,
-  Stack,
-  Button,
-  Text,
-  ActionIcon,
-  Tooltip,
-} from "@mantine/core";
+import { Avatar, Group, Stack, Text, ActionIcon, Tooltip } from "@mantine/core";
 import type { User } from "@/types/api";
 import { AddTwo } from "@nine-thirty-five/material-symbols-react/rounded";
+import { AppButton } from "@/components/ui/AppButton";
 
 interface ProfileHeaderProps {
   user: User;
@@ -72,20 +65,24 @@ export function ProfileHeader({
         </Stack>
       </Group>
 
-      {/* Right — edit / cancel buttons */}
-      <Group gap={"sm"}>
-        {isEditing ? (
-          <>
-            <Button type="submit" form="profile-form" color="jltAccent.7">
-              SAVE
-            </Button>
-          </>
-        ) : (
-          <Button color="jltAccent.7" onClick={onEdit}>
-            EDIT
-          </Button>
-        )}
-      </Group>
+      {/* Right — edit / save buttons */}
+
+      {isEditing ? (
+        <>
+          <AppButton
+            h={"2.625rem"}
+            variant="secondary"
+            type="submit"
+            form="profile-form"
+          >
+            SAVE
+          </AppButton>
+        </>
+      ) : (
+        <AppButton h={"2.625rem"} variant="secondary" onClick={onEdit}>
+          EDIT
+        </AppButton>
+      )}
     </Group>
   );
 }
