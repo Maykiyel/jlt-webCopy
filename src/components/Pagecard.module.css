@@ -1,5 +1,6 @@
 .root {
-  min-height: 25rem;
+  min-height: fit;
+  
 }
 
 .backButton {

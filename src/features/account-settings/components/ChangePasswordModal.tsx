@@ -9,7 +9,7 @@ import {
   changePasswordSchema,
   type ChangePasswordFormValues,
 } from "../schemas/accountSettings.schema";
-import { accountSettingsService } from "../api/accountSettings.service";
+import { accountSettingsService } from "../services/accountSettings.service";
 import { CheckCircle } from "@nine-thirty-five/material-symbols-react/outlined";
 import { AppButton } from "@/components/ui/AppButton";
 interface ChangePasswordModalProps {

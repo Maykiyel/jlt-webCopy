@@ -67,4 +67,7 @@ export const userService = {
   async refreshCurrentUser(userId: number): Promise<ApiResponse<UserResource>> {
     return this.getById(userId);
   },
+  async getAll(): Promise<ApiResponse<string[]>> {
+    return GET<ApiResponse<string[]>>("/users");
+  },
 };

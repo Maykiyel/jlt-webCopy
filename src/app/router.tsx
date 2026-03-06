@@ -7,6 +7,7 @@ import NotFound from "./routes/NotFound";
 import { Loader } from "@mantine/core";
 
 const LoginPage = lazy(() => import("./routes/auth/LoginPage"));
+
 const DashboardPage = lazy(
   () => import("./routes/app/dashboard/DashboardPage"),
 );
@@ -14,6 +15,8 @@ const DashboardPage = lazy(
 const AccountSettings = lazy(
   () => import("./routes/app/account-settings/AccountSettingsPage"),
 );
+
+const Quotations = lazy(() => import("./routes/app/quotations/QuotationsPage"));
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -49,6 +52,11 @@ export const router = createBrowserRouter([
             path: "account-settings",
             Component: AccountSettings,
           },
+          {
+            path: "quotations/client/:clientId",
+            Component: Quotations,
+          },
+          { path: "quotations/:tab", Component: Quotations },
           {
             path: "*",
             Component: NotFound,

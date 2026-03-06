@@ -44,8 +44,9 @@ export function PageCard({
 
   return (
     <Card
-      withBorder
-      radius="md"
+      withBorder={false}
+      radius={10}
+      shadow={"sm"}
       padding={0}
       className={classes.root}
       pos="relative"
@@ -53,10 +54,10 @@ export function PageCard({
       {withBackground && <Box className={classes.bgImage} />}
 
       {/* ── Header ── */}
-      <Group justify="space-between" px="lg" py="sm" wrap="nowrap">
+      <Group justify="space-between" p="lg" wrap="nowrap">
         <Group gap="xs" wrap="nowrap">
           <UnstyledButton onClick={handleBack} className={classes.backButton}>
-            <ArrowBack width="1.25rem" height="1.25rem"  fill="currentColor" />
+            <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
           </UnstyledButton>
 
           <Group gap="0.5rem" align="baseline" wrap="nowrap">
@@ -64,7 +65,7 @@ export function PageCard({
               {title}
             </Title>
             {subtext && (
-              <Text size="sm" c="dimmed" fs="italic">
+              <Text size="xs" c="dimmed" fs="italic">
                 ({subtext})
               </Text>
             )}
@@ -77,7 +78,9 @@ export function PageCard({
       <Divider size={"sm"} w={"96%"} mx={"auto"} />
 
       {/* ── Body ── */}
-      <Box className={classes.body}>{children}</Box>
+      <Box className={classes.body} px={"xl"} py={"lg"}>
+        {children}
+      </Box>
     </Card>
   );
 }

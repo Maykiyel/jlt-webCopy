@@ -8,7 +8,7 @@ import {
   profileSchema,
   type ProfileFormValues,
 } from "../schemas/accountSettings.schema";
-import { accountSettingsService } from "../api/accountSettings.service";
+import { accountSettingsService } from "../services/accountSettings.service";
 import { useAuthStore } from "@/stores/authStore";
 import { ROLES } from "@/types/roles";
 import type { User } from "@/types/api";

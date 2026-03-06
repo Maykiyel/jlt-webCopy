@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Stack } from "@mantine/core";
-import { fetchDashboard } from "../api/dashboard.service";
+import { fetchDashboard } from "../service/dashboard.service";
 import SocialMediaCards from "../components/SocialMediaCards";
 import StatsOverview from "../components/StatsOverview";
 import ClientsTable from "../components/ClientsTable";

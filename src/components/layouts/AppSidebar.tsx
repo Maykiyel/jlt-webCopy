@@ -57,7 +57,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: <RequestQuote width="2rem" height="2rem" />,
     label: "Quotations",
     subItems: [
-      { label: "Requests", path: "/quotations/requests" },
+      { label: "Requests", path: "/quotations/requested" },
       { label: "Responded", path: "/quotations/responded" },
       { label: "Accepted", path: "/quotations/accepted" },
       { label: "Discarded", path: "/quotations/discarded" },
@@ -97,7 +97,11 @@ function isPathActive(path: string, currentPath: string): boolean {
 
 function isItemActive(item: NavItem, currentPath: string): boolean {
   if (item.path) return isPathActive(item.path, currentPath);
-  return !!item.subItems?.some((sub) => isPathActive(sub.path, currentPath));
+  if (item.subItems?.some((sub) => isPathActive(sub.path, currentPath)))
+    return true;
+  const sectionPrefix = item.subItems?.[0]?.path.split("/")[1];
+  if (sectionPrefix && currentPath.startsWith(`/${sectionPrefix}`)) return true;
+  return false;
 }
 
 function getActiveIndex(currentPath: string): number {

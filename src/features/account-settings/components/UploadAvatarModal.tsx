@@ -12,7 +12,7 @@ import {
   Delete,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { Cancel } from "@nine-thirty-five/material-symbols-react/rounded/filled";
-import { accountSettingsService } from "../api/accountSettings.service";
+import { accountSettingsService } from "../services/accountSettings.service";
 import { userService } from "@/services/user.service";
 import { useAuthStore } from "@/stores/authStore";
 import { AppButton } from "@/components/ui/AppButton";

@@ -1,5 +1,5 @@
 import { useDisclosure } from "@mantine/hooks";
-import { Flex, Stack, Card, Tabs, BackgroundImage } from "@mantine/core";
+import { Stack, Card, Tabs, BackgroundImage } from "@mantine/core";
 import { toUser } from "@/lib/mappers/user.mapper";
 import { useAuthStore } from "@/stores/authStore";
 import { ProfileHeader } from "./components/ProfileHeader";
@@ -24,59 +24,56 @@ export default function AccountSettings() {
   if (!user || !rawUser) return null;
 
   return (
-    <Flex justify="center" align="center" mih="100%">
-      <Card withBorder radius="lg" className={classes.card} p={0}>
-        {/* Faded background */}
-        <BackgroundImage
-          src={accountBg}
-          radius="md"
-          style={{ position: "absolute", inset: 0, opacity: 0.15, zIndex: 0 }}
-        />
+    <Card withBorder radius="lg" className={classes.card} p={0}>
+      {/* Faded background */}
+      <BackgroundImage
+        src={accountBg}
+        radius="md"
+        style={{ position: "absolute", inset: 0, opacity: 0.15, zIndex: 0 }}
+      />
 
-        {/* Content above background */}
-        <div style={{ position: "relative", zIndex: 1, height: "100%" }}>
-          <Tabs
-            defaultValue="account"
-            color="jltOrange.5"
-            classNames={{ tab: classes.tab, list: classes.tabList }}
+      {/* Content above background */}
+      <div style={{ position: "relative", zIndex: 1, height: "100%" }}>
+        <Tabs
+          defaultValue="account"
+          color="jltOrange.5"
+          classNames={{ tab: classes.tab, list: classes.tabList }}
+        >
+          <Tabs.List
+            grow
+            style={{
+              background: "linear-gradient(135deg, #0D2842, #4E6174)",
+              height: "4.25rem",
+              color: "white",
+              fontWeight: 500,
+            }}
           >
-            <Tabs.List
-              grow
-              style={{
-                background: "linear-gradient(135deg, #0D2842, #4E6174)",
-                height: "4.25rem",
-                color: "white",
-                fontWeight: 500,
-              }}
-            >
-              <Tabs.Tab value="account">ACCOUNT SETTINGS</Tabs.Tab>
-              <Tabs.Tab value="notifications">NOTIFICATION SETTINGS</Tabs.Tab>
-            </Tabs.List>
+            <Tabs.Tab value="account">ACCOUNT SETTINGS</Tabs.Tab>
+            <Tabs.Tab value="notifications">NOTIFICATION SETTINGS</Tabs.Tab>
+          </Tabs.List>
 
-            <Tabs.Panel value="account">
-              <Stack>
-                <ProfileHeader
-                  user={user}
-                  onChangeAvatar={openAvatar}
-                  isEditing={isEditing}
-                  onEdit={() => setIsEditing(true)}
-                />
-                <ProfileForm
-                  user={user}
-                  onChangePassword={openPassword}
-                  isEditing={isEditing}
-                  onSaveSuccess={() => setIsEditing(false)}
-                />
-              </Stack>
-            </Tabs.Panel>
+          <Tabs.Panel value="account">
+            <Stack>
+              <ProfileHeader
+                user={user}
+                onChangeAvatar={openAvatar}
+                isEditing={isEditing}
+                onEdit={() => setIsEditing(true)}
+              />
+              <ProfileForm
+                user={user}
+                onChangePassword={openPassword}
+                isEditing={isEditing}
+                onSaveSuccess={() => setIsEditing(false)}
+              />
+            </Stack>
+          </Tabs.Panel>
 
-            <Tabs.Panel value="notifications">
-              <NotificationSettings />
-            </Tabs.Panel>
-          </Tabs>
-        </div>
-      </Card>
-
+          <Tabs.Panel value="notifications">
+            <NotificationSettings />
+          </Tabs.Panel>
+        </Tabs>
+      </div>
       <ChangePasswordModal
         opened={passwordOpened}
         onClose={closePassword}
@@ -88,6 +85,6 @@ export default function AccountSettings() {
         onClose={closeAvatar}
         userId={rawUser.id}
       />
-    </Flex>
+    </Card>
   );
 }
