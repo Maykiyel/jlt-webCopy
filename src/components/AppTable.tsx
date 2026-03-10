@@ -7,7 +7,10 @@ import {
   ActionIcon,
   Box,
 } from "@mantine/core";
-import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
+import {
+  MoreVert,
+  ChevronRight,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import type { ReactNode } from "react";
@@ -104,6 +107,7 @@ export function AppTable<T>({
           value={currentValue}
           onChange={(val) => val && col.onSelectChange?.(row, val)}
           allowDeselect={false}
+          rightSection={<ChevronRight />}
           size="xs"
           styles={{
             root: {

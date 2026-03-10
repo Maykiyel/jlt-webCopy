@@ -6,9 +6,11 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   border: none;
+  min-height: 2.688rem;
   overflow: hidden;
   transition: transform 80ms ease;
   cursor: pointer;
+  z-index: 10;
 }
 
 .root:active {
@@ -69,7 +71,7 @@
 }
 
 .primary:hover .label {
-  transform: translateX(1.05rem);
+  transform: translateX(1.063rem);
 }
 
 .primary:hover .orangeBadge {

@@ -53,7 +53,15 @@ export const router = createBrowserRouter([
             Component: AccountSettings,
           },
           {
-            path: "quotations/client/:clientId",
+            path: "quotations/:tab/client/:clientId/make/:quotationId/documents",
+            Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/client/:clientId/make/:quotationId",
+            Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/client/:clientId",
             Component: Quotations,
           },
           { path: "quotations/:tab", Component: Quotations },

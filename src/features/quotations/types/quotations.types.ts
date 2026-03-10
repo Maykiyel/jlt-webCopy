@@ -30,10 +30,15 @@ export interface QuotationsIndexResponse {
 
 export interface QuotationResource {
   reference_number: string;
-  client: string | null;
+  client: {
+    full_name: string;
+    company_name: string;
+    contact_number: string;
+    email: string;
+  } | null;
   account_specialist: string | null;
   status: string;
-  shipment_status: "ACCEPTED";
+  shipment_status: string;
   created_at: string;
   updated_at: string;
   company: {
@@ -65,6 +70,19 @@ export interface QuotationResource {
     | "No documents available.";
   remarks: string | null;
   conversation_id: string;
+}
+
+// ─── Quotation file resource ───────────────────────────────────────────────────
+
+export interface QuotationFileResource {
+  id: number;
+  uploaded_by: number;
+  quotation_id: number;
+  file_url: string;
+  type: string;
+  file_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // ─── Status filter ─────────────────────────────────────────────────────────────

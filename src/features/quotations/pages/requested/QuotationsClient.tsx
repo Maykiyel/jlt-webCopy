@@ -7,12 +7,12 @@ import {
   NoteAdd,
   Delete,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import { fetchQuotations } from "../services/quotations.service";
+import { fetchQuotations } from "../../services/quotations.service";
 import { userService } from "@/services/user.service";
 import {
   QUOTATION_STATUS,
   type QuotationListItem,
-} from "../types/quotations.types";
+} from "../../types/quotations.types";
 
 export function QuotationsClient() {
   const { clientId } = useParams<{
@@ -104,7 +104,10 @@ export function QuotationsClient() {
           {
             label: "Make Quotation",
             icon: <NoteAdd width={16} height={16} />,
-            onClick: (row) => navigate(`/quotations/${row.id}/make`),
+            onClick: (row) =>
+              navigate(
+                `/quotations/requested/client/${clientId}/make/${row.id}`,
+              ),
           },
           {
             label: "Discard",

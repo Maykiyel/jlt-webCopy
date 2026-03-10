@@ -54,7 +54,12 @@ export function PageCard({
       {withBackground && <Box className={classes.bgImage} />}
 
       {/* ── Header ── */}
-      <Group justify="space-between" p="lg" wrap="nowrap">
+      <Group
+        justify="space-between"
+        p="lg"
+        wrap="nowrap"
+        className={classes.header}
+      >
         <Group gap="xs" wrap="nowrap">
           <UnstyledButton onClick={handleBack} className={classes.backButton}>
             <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
@@ -75,7 +80,7 @@ export function PageCard({
         {action && <Box style={{ flexShrink: 0 }}>{action}</Box>}
       </Group>
 
-      <Divider size={"sm"} w={"96%"} mx={"auto"} />
+      <Divider size={"sm"} w={"96%"} mx={"auto"} className={classes.divider} />
 
       {/* ── Body ── */}
       <Box className={classes.body} px={"xl"} py={"lg"}>

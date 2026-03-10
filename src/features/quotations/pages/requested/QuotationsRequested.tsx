@@ -3,11 +3,11 @@ import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
-import { fetchQuotations } from "../services/quotations.service";
+import { fetchQuotations } from "../../services/quotations.service";
 import {
   QUOTATION_STATUS,
   type QuotationClientGroup,
-} from "../types/quotations.types";
+} from "../../types/quotations.types";
 
 const COLUMNS: AppTableColumn<QuotationClientGroup>[] = [
   {
@@ -72,7 +72,9 @@ export function QuotationsRequested() {
         searchValue={search}
         onSearchChange={setSearch}
         onSearch={setSearchQuery}
-        onRowClick={(row) => navigate(`/quotations/client/${row.client_id}`)}
+        onRowClick={(row) =>
+          navigate(`/quotations/requested/client/${row.client_id}`)
+        }
       />
     </PageCard>
   );

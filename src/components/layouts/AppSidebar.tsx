@@ -144,6 +144,17 @@ export function AppSidebar() {
       h="100%"
       style={{ flexDirection: "row", overflow: "visible" }}
     >
+      {/* Rail background layer */}
+      <Box className={classes.railBg} />
+
+      {/* Travelling pill layer */}
+      <Box
+        className={classes.activePill}
+        data-visible={activeIndex >= 0 || undefined}
+        data-panel-open={panelOpen || undefined}
+        style={{ transform: `translateY(${pillTop})` }}
+      />
+
       {/* ── Sub-item panel ── */}
       <Box
         className={classes.subPanel}
@@ -152,14 +163,8 @@ export function AppSidebar() {
         bg="white"
       >
         {activeItem?.subItems && (
-          <Box
-            className={classes.subPanelInner}
-            data-active
-            pl="lg"
-            py="xl"
-            pt="1.125rem"
-          >
-            <Stack gap="md">
+          <Box className={classes.subPanelInner} data-active py="xl" pt="2rem">
+            <Stack gap="xs">
               {activeItem.subItems.map((sub) => {
                 const active = isPathActive(sub.path, currentPath);
                 return (
@@ -167,6 +172,16 @@ export function AppSidebar() {
                     key={sub.path}
                     onClick={() => navigate(sub.path)}
                     data-active={active || undefined}
+                    style={
+                      active
+                        ? {
+                            background:
+                              "linear-gradient(to right, #ffffff, #d9d9d9)",
+                          }
+                        : undefined
+                    }
+                    pl={"lg"}
+                    py={"0.375rem"}
                     className={classes.subItem}
                   >
                     <Text
@@ -174,7 +189,6 @@ export function AppSidebar() {
                       fw={active ? 700 : 400}
                       tt="uppercase"
                       lts="0.08em"
-                      c={active ? "jltOrange.5" : "jltBlue.8"}
                       style={{
                         whiteSpace: "nowrap",
                         transition: "color 120ms ease",
@@ -192,24 +206,14 @@ export function AppSidebar() {
 
       {/* ── Icon rail ── */}
       <Flex
-        bg="jltBlue.8"
-        pos="relative"
         align="center"
         direction="column"
         wrap="wrap"
         pt="1.125rem"
-        style={{ zIndex: 2, flexShrink: 0, overflow: "visible" }}
+        style={{ zIndex: 3, flexShrink: 0, overflow: "visible" }}
         w="5.5625rem"
         h="100%"
       >
-        {/* Travelling pill */}
-        <Box
-          className={classes.activePill}
-          data-visible={activeIndex >= 0 || undefined}
-          data-panel-open={panelOpen || undefined}
-          style={{ transform: `translateY(${pillTop})` }}
-        />
-
         {/* Nav icon buttons */}
         {NAV_ITEMS.map((item) => {
           const active = isItemActive(item, currentPath);

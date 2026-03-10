@@ -1,6 +1,8 @@
 import { apiClient } from "@/lib/api/client";
 import type {
   QuotationsIndexResponse,
+  QuotationResource,
+  QuotationFileResource,
   QuotationStatus,
 } from "../types/quotations.types";
 
@@ -25,5 +27,23 @@ export async function fetchQuotations(
       },
     },
   );
+  return response.data.data;
+}
+
+export async function fetchQuotation(id: string): Promise<QuotationResource> {
+  const response = await apiClient.get<{ data: QuotationResource }>(
+    `/quotations/${id}`,
+  );
+  return response.data.data;
+}
+
+export async function fetchQuotationFiles(
+  id: string,
+  type: "REQUESTED" | "PROPOSAL" = "REQUESTED",
+): Promise<QuotationFileResource[]> {
+  const response = await apiClient.get<{
+    data: QuotationFileResource[] | string;
+  }>(`/quotations/${id}/files`, { params: { type } });
+  if (typeof response.data.data === "string") return [];
   return response.data.data;
 }

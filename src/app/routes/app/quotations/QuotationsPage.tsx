@@ -1,10 +1,16 @@
-import { Navigate, useParams } from "react-router";
-import { QuotationsRequested } from "@/features/quotations/pages/QuotationsRequested";
-import { QuotationsClient } from "@/features/quotations/pages/QuotationsClient";
+import { Navigate, useParams, useLocation } from "react-router";
+import { QuotationsRequested } from "@/features/quotations/pages/requested/QuotationsRequested";
+import { QuotationsClient } from "@/features/quotations/pages/requested/QuotationsClient";
+import { MakeQuotation } from "@/features/quotations/pages/requested/MakeQuotation";
+import { QuotationDocuments } from "@/features/quotations/pages/requested/QuotationDocuments";
 
 export default function QuotationsPage() {
-  const { tab, clientId } = useParams();
+  const { pathname } = useLocation();
+  const { tab, clientId, quotationId } = useParams();
 
+  if (quotationId && pathname.endsWith("/documents"))
+    return <QuotationDocuments />;
+  if (quotationId) return <MakeQuotation />;
   if (clientId) return <QuotationsClient />;
 
   switch (tab) {
