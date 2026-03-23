@@ -37,6 +37,19 @@ export async function fetchQuotation(id: string): Promise<QuotationResource> {
   return response.data.data;
 }
 
+export async function updateQuotationAssignee(
+  id: string,
+  asId: number,
+): Promise<QuotationResource> {
+  const response = await apiClient.post<{ data: QuotationResource }>(
+    `/quotations/${id}`,
+    {
+      as_id: asId,
+    },
+  );
+  return response.data.data;
+}
+
 export async function fetchQuotationFiles(
   id: string,
   type: "REQUESTED" | "PROPOSAL" = "REQUESTED",

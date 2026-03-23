@@ -40,13 +40,12 @@ export function MakeQuotation() {
   return (
     <PageCard
       title="Client Details"
-      withBackground={true}
       action={
         <AppButton
           icon={Folder}
           onClick={() =>
             navigate(
-              `/quotations/${tab}/client/${clientId}/make/${quotationId}/documents`,
+              `/quotations/${tab}/client/${clientId}/${quotationId}/documents`,
             )
           }
         >
@@ -144,7 +143,11 @@ export function MakeQuotation() {
         <Group justify="center" mt="0.5rem">
           <AppButton
             variant="primary"
-            onClick={() => navigate(`/quotations/${quotationId}/respond`)}
+            onClick={() =>
+              navigate(
+                `/quotations/${tab}/client/${clientId}/${quotationId}/compose`,
+              )
+            }
           >
             Make Quotation
           </AppButton>

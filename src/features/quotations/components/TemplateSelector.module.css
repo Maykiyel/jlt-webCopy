@@ -1,0 +1,54 @@
+.row {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pill {
+  flex: 1;
+  height: 3.75rem;
+  /*
+    Pull the pill far enough left that its rounded left cap
+    sits completely under the blob. The blob is ~3.9rem wide,
+    so we overshoot it by ~0.5rem to guarantee no cap peeks out.
+  */
+  margin-left: -3.5rem;
+  padding-left: 4rem;
+  padding-right: 1.5rem;
+  border-radius: 9999px;
+  background-color: #e3e3e3;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+  transition: background-color 180ms ease;
+}
+
+.row:not(.disabled):hover .pill {
+  background-color: var(--mantine-color-jltOrange-5);
+}
+
+.pillDisabled {
+  background-color: #ebebeb;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mantine-color-dark-7);
+  transition: color 180ms ease;
+}
+
+.row:not(.disabled):hover .label {
+  color: white;
+}
+
+.disabled {
+  cursor: not-allowed;
+}
+
+.disabled .label {
+  color: var(--mantine-color-gray-5);
+}

@@ -3,13 +3,17 @@ import { QuotationsRequested } from "@/features/quotations/pages/requested/Quota
 import { QuotationsClient } from "@/features/quotations/pages/requested/QuotationsClient";
 import { MakeQuotation } from "@/features/quotations/pages/requested/MakeQuotation";
 import { QuotationDocuments } from "@/features/quotations/pages/requested/QuotationDocuments";
+import { TemplateSelection } from "@/features/quotations/pages/compose/TemplateSelection";
 
 export default function QuotationsPage() {
   const { pathname } = useLocation();
-  const { tab, clientId, quotationId } = useParams();
+  const { tab, clientId, quotationId, template } = useParams();
 
   if (quotationId && pathname.endsWith("/documents"))
     return <QuotationDocuments />;
+  if (quotationId && template) return <div>TODO: {template} form</div>; // next step
+  if (quotationId && pathname.includes("/compose"))
+    return <TemplateSelection />;
   if (quotationId) return <MakeQuotation />;
   if (clientId) return <QuotationsClient />;
 

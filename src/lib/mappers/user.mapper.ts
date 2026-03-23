@@ -157,6 +157,14 @@ export function isAccountSpecialist(user: User | UserResource): boolean {
   return hasRole(user, ROLES.ACCOUNT_SPECIALIST);
 }
 
+export function isLeadAccountSpecialist(user: User | UserResource): boolean {
+  return hasRole(user, ROLES.LEAD_ACCOUNT_SPECIALIST);
+}
+
+export function isAccountSpecialistOrLead(user: User | UserResource): boolean {
+  return isAccountSpecialist(user) || isLeadAccountSpecialist(user);
+}
+
 /**
  * Check if user is marketing
  *

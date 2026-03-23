@@ -6,17 +6,26 @@ export const permissions = {
   // Quotations
   canCreateQuotation: (user: User | UserResource) => {
     const role = getUserRole(user);
-    return role === ROLES.CLIENT || role === ROLES.ACCOUNT_SPECIALIST;
+    const isAS =
+      role === ROLES.ACCOUNT_SPECIALIST ||
+      role === ROLES.LEAD_ACCOUNT_SPECIALIST;
+    return role === ROLES.CLIENT || isAS;
   },
 
   canEditQuotation: (user: User | UserResource) => {
     const role = getUserRole(user);
-    return role === ROLES.ACCOUNT_SPECIALIST;
+    const isAS =
+      role === ROLES.ACCOUNT_SPECIALIST ||
+      role === ROLES.LEAD_ACCOUNT_SPECIALIST;
+    return isAS;
   },
 
   canDeleteQuotation: (user: User | UserResource) => {
     const role = getUserRole(user);
-    return role === ROLES.ACCOUNT_SPECIALIST;
+    const isAS =
+      role === ROLES.ACCOUNT_SPECIALIST ||
+      role === ROLES.LEAD_ACCOUNT_SPECIALIST;
+    return isAS;
   },
 
   // Articles
@@ -38,7 +47,11 @@ export const permissions = {
   },
 
   canViewAllQueries: (user: User | UserResource) => {
-    return getUserRole(user) === ROLES.ACCOUNT_SPECIALIST;
+    const role = getUserRole(user);
+    const isAS =
+      role === ROLES.ACCOUNT_SPECIALIST ||
+      role === ROLES.LEAD_ACCOUNT_SPECIALIST;
+    return isAS;
   },
 
   // Dashboards
@@ -46,6 +59,7 @@ export const permissions = {
     const role = getUserRole(user);
     return (
       role === ROLES.ACCOUNT_SPECIALIST ||
+      role === ROLES.LEAD_ACCOUNT_SPECIALIST ||
       role === ROLES.MARKETING ||
       role === ROLES.HUMAN_RESOURCE
     );

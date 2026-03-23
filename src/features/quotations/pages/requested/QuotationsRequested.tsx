@@ -21,7 +21,7 @@ const COLUMNS: AppTableColumn<QuotationClientGroup>[] = [
     label: "DATE",
     width: "15%",
     // Most recent quotation date from the client's list
-    render: (row) => row.quotations[0]?.date ?? "—",
+    render: (row) => row.quotations?.[0]?.date ?? "—",
   },
   {
     key: "name",

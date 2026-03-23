@@ -17,7 +17,6 @@ interface PageCardProps {
   title: string;
   subtext?: string;
   action?: React.ReactNode;
-  withBackground?: boolean;
   fullHeight?: boolean;
   children?: React.ReactNode;
   onBack?: () => void;
@@ -29,7 +28,6 @@ export function PageCard({
   title,
   subtext,
   action,
-  withBackground = false,
   fullHeight = false,
   children,
   onBack,
@@ -58,8 +56,6 @@ export function PageCard({
       }}
       pos="relative"
     >
-      {withBackground && <Box className={classes.bgImage} />}
-
       {/* ── Header ── */}
       <Group
         justify="space-between"

@@ -1,6 +1,11 @@
 import { GET } from "@/lib/api/client";
 import type { ApiResponse, UserResource } from "@/types/api";
 
+export interface AccountSpecialistOption {
+  id: number;
+  full_name: string;
+}
+
 /**
  * User Service
  *
@@ -67,7 +72,11 @@ export const userService = {
   async refreshCurrentUser(userId: number): Promise<ApiResponse<UserResource>> {
     return this.getById(userId);
   },
-  async getAll(): Promise<ApiResponse<string[]>> {
-    return GET<ApiResponse<string[]>>("/users");
+  async getAccountSpecialists(): Promise<
+    ApiResponse<AccountSpecialistOption[]>
+  > {
+    return GET<ApiResponse<AccountSpecialistOption[]>>(
+      "/users/account-specialists",
+    );
   },
 };

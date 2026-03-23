@@ -15,7 +15,7 @@ export function QuotationDocuments() {
   });
 
   return (
-    <PageCard title="Client Documents" withBackground fullHeight>
+    <PageCard title="Client Documents"  fullHeight>
       {!isLoading && files.length === 0 ? (
         <Text size="0.8rem" c="dimmed">
           No documents available.
