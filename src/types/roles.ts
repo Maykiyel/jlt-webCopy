@@ -4,6 +4,7 @@ export const ROLES = {
   LEAD_ACCOUNT_SPECIALIST: "Lead Account Specialist",
   MARKETING: "Marketing",
   HUMAN_RESOURCE: "Human Resource",
+  IT: "IT",
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];

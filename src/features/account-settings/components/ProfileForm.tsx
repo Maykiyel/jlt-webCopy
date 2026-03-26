@@ -65,6 +65,7 @@ export function ProfileForm({
   });
 
   const readOnly = !isEditing;
+  const canEditPosition = user.role === ROLES.IT;
 
   return (
     <form
@@ -92,19 +93,19 @@ export function ProfileForm({
 
         {/* Row 2 */}
         <SimpleGrid cols={2}>
-          {readOnly ? (
-            <TextInput
-              label="POSITION"
-              value={user.role ?? ""}
-              readOnly
-              variant="filled"
-            />
-          ) : (
+          {canEditPosition && isEditing ? (
             <NativeSelectField
               control={control}
               name="position"
               label="POSITION"
               data={ROLE_OPTIONS}
+            />
+          ) : (
+            <TextInput
+              label="POSITION"
+              value={user.role ?? ""}
+              readOnly
+              variant="filled"
             />
           )}
           <TextInputField
