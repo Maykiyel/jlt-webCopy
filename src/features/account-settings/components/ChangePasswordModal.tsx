@@ -95,7 +95,10 @@ export function ChangePasswordModal({
           </AppButton>
         </Stack>
       ) : (
-        <form onSubmit={handleSubmit((v) => changeMutation.mutate(v))}>
+        <form
+          onSubmit={handleSubmit((v) => changeMutation.mutate(v))}
+          autoComplete="off"
+        >
           <Stack gap="sm">
             <Divider mb="xs" />
 
@@ -103,16 +106,19 @@ export function ChangePasswordModal({
               control={control}
               name="current_password"
               label="Current Password"
+              autoComplete="current-password"
             />
             <PasswordInputField
               control={control}
               name="new_password"
               label="New Password"
+              autoComplete="new-password"
             />
             <PasswordInputField
               control={control}
               name="new_password_confirmation"
               label="Confirm New Password"
+              autoComplete="new-password"
             />
 
             <AppButton

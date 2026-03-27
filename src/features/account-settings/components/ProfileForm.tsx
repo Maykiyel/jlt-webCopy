@@ -43,8 +43,13 @@ export function ProfileForm({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (values: ProfileFormValues) =>
-      accountSettingsService.updateProfile(user.id, values),
+    mutationFn: (values: ProfileFormValues) => {
+      const payload = { ...values };
+      if (user.role !== ROLES.IT) {
+        delete payload.position;
+      }
+      return accountSettingsService.updateProfile(user.id, payload);
+    },
     onSuccess: (res) => {
       setUser(res.data);
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
@@ -71,6 +76,7 @@ export function ProfileForm({
     <form
       id="profile-form"
       onSubmit={handleSubmit((v) => updateMutation.mutate(v))}
+      autoComplete="off"
     >
       <Stack gap="md" px={"3.125rem"}>
         {/* Row 1 */}
@@ -79,6 +85,7 @@ export function ProfileForm({
             control={control}
             name="first_name"
             label="FIRST NAME"
+            autoComplete="given-name"
             readOnly={readOnly}
             variant={readOnly ? "filled" : "default"}
           />
@@ -86,6 +93,7 @@ export function ProfileForm({
             control={control}
             name="last_name"
             label="LAST NAME"
+            autoComplete="family-name"
             readOnly={readOnly}
             variant={readOnly ? "filled" : "default"}
           />
@@ -99,11 +107,14 @@ export function ProfileForm({
               name="position"
               label="POSITION"
               data={ROLE_OPTIONS}
+              autoComplete="off"
             />
           ) : (
             <TextInput
               label="POSITION"
+              name="position"
               value={user.role ?? ""}
+              autoComplete="off"
               readOnly
               variant="filled"
             />
@@ -112,6 +123,7 @@ export function ProfileForm({
             control={control}
             name="contact_number"
             label="CONTACT NUMBER"
+            autoComplete="tel"
             readOnly={readOnly}
             variant={readOnly ? "filled" : "default"}
           />
@@ -123,6 +135,7 @@ export function ProfileForm({
             control={control}
             name="email"
             label="EMAIL ADDRESS"
+            autoComplete="email"
             readOnly={readOnly}
             variant={readOnly ? "filled" : "default"}
           />
@@ -145,8 +158,10 @@ export function ProfileForm({
               </Group>
               <TextInput
                 label=""
+                name="password-mask"
                 type="password"
                 value="••••••••••••"
+                autoComplete="off"
                 readOnly
                 variant="filled"
               />
