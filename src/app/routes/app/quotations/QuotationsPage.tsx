@@ -1,9 +1,10 @@
 import { Navigate, useParams, useLocation } from "react-router";
 import { QuotationsRequested } from "@/features/quotations/pages/requested/QuotationsRequested";
 import { QuotationsClient } from "@/features/quotations/pages/requested/QuotationsClient";
-import { MakeQuotation } from "@/features/quotations/pages/requested/MakeQuotation";
+import { QuotationDetailsPage } from "@/features/quotations/pages/requested/QuotationDetailsPage";
 import { QuotationDocuments } from "@/features/quotations/pages/requested/QuotationDocuments";
 import { TemplateSelection } from "@/features/quotations/pages/compose/TemplateSelection";
+import { ComposeQuotationPage } from "@/features/quotations/pages/compose/ComposeQuotationPage";
 
 export default function QuotationsPage() {
   const { pathname } = useLocation();
@@ -11,10 +12,10 @@ export default function QuotationsPage() {
 
   if (quotationId && pathname.endsWith("/documents"))
     return <QuotationDocuments />;
-  if (quotationId && template) return <div>TODO: {template} form</div>; // next step
+  if (quotationId && template) return <ComposeQuotationPage />;
   if (quotationId && pathname.includes("/compose"))
     return <TemplateSelection />;
-  if (quotationId) return <MakeQuotation />;
+  if (quotationId) return <QuotationDetailsPage />;
   if (clientId) return <QuotationsClient />;
 
   switch (tab) {

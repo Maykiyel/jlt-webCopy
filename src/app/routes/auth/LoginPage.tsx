@@ -24,7 +24,7 @@ export default function LoginPage() {
     onError: () => {
       notifications.show({
         title: "Login failed",
-        message: "Invalid email or password. Please try again.",
+        message: "Invalid username/email or password. Please try again.",
         color: "red",
       });
     },

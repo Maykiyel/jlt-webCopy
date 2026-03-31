@@ -1,0 +1,74 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 1.5rem;
+  background: var(--mantine-color-body);
+  border-bottom: 0.03125rem solid var(--mantine-color-gray-3);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.scrollArea {
+  background: #e8e8e8;
+  min-height: calc(100vh - var(--app-shell-header-height) - 3rem);
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.a4 {
+  background: #fff;
+  width: min(21cm, 100%);
+  min-height: 29.7cm;
+  padding: 0;
+  box-shadow: 0 0.125rem 0.75rem rgb(0 0 0 / 12%);
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0.5in;
+  }
+
+  :global(.mantine-AppShell-header),
+  :global(.mantine-AppShell-navbar) {
+    display: none !important;
+  }
+
+  :global(.mantine-AppShell-main) {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+  }
+
+  :global(html),
+  :global(body),
+  :global(#root),
+  :global(.mantine-AppShell-root),
+  :global(.mantine-AppShell-main),
+  :global(.mantine-AppShell-main > div) {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .topBar {
+    display: none;
+  }
+
+  .scrollArea {
+    background: #fff;
+    min-height: auto;
+    display: block;
+    padding: 0;
+  }
+
+  .a4 {
+    width: 100%;
+    min-height: auto;
+    page-break-inside: auto;
+    box-shadow: none;
+  }
+}

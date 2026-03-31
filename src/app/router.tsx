@@ -14,6 +14,9 @@ const AccountSettings = lazy(
   () => import("./routes/app/account-settings/AccountSettingsPage"),
 );
 const Quotations = lazy(() => import("./routes/app/quotations/QuotationsPage"));
+const QuotationViewerPage = lazy(
+  () => import("./routes/app/quotations/QuotationViewerPage"),
+);
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -41,6 +44,10 @@ export const router = createBrowserRouter([
           {
             path: "quotations/:tab/client/:clientId/:quotationId/documents",
             Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/client/:clientId/:quotationId/view",
+            Component: QuotationViewerPage,
           },
           {
             path: "quotations/:tab/client/:clientId/:quotationId/compose/:template",

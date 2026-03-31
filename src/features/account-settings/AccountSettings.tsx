@@ -1,5 +1,5 @@
 import { useDisclosure } from "@mantine/hooks";
-import { Stack, Card, Tabs, BackgroundImage } from "@mantine/core";
+import { Stack, Card, Tabs } from "@mantine/core";
 import { toUser } from "@/lib/mappers/user.mapper";
 import { useAuthStore } from "@/stores/authStore";
 import { ProfileHeader } from "./components/ProfileHeader";
@@ -7,7 +7,6 @@ import { ProfileForm } from "./components/ProfileForm";
 import { ChangePasswordModal } from "./components/ChangePasswordModal";
 import { UploadAvatarModal } from "./components/UploadAvatarModal";
 import { NotificationSettings } from "./components/NotificationSettings";
-import accountBg from "@/assets/abstract-bg.png";
 import classes from "./AccountSettings.module.css";
 import { useState } from "react";
 
@@ -25,13 +24,6 @@ export default function AccountSettings() {
 
   return (
     <Card withBorder radius="lg" className={classes.card} p={0}>
-      {/* Faded background */}
-      <BackgroundImage
-        src={accountBg}
-        radius="md"
-        style={{ position: "absolute", inset: 0, opacity: 0.15, zIndex: 0 }}
-      />
-
       {/* Content above background */}
       <div style={{ position: "relative", zIndex: 1, height: "100%" }}>
         <Tabs

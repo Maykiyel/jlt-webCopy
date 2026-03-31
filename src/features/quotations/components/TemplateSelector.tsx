@@ -3,34 +3,10 @@ import classes from "./TemplateSelector.module.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type QuotationTemplateId =
-  | "accreditation"
-  | "export_clearance"
-  | "permits_licenses"
-  | "freight_forwarding";
-
-interface QuotationTemplate {
-  id: QuotationTemplateId;
-  label: string;
-  enabled: boolean;
-}
-
 interface TemplateSelectorProps {
-  onSelect: (templateId: QuotationTemplateId) => void;
+  templates: { id: string; name: string; enabled: boolean }[];
+  onSelect: (templateId: string) => void;
 }
-
-// ─── Config ───────────────────────────────────────────────────────────────────
-
-const TEMPLATES: QuotationTemplate[] = [
-  { id: "accreditation",    label: "Accreditation",        enabled: true  },
-  { id: "export_clearance", label: "Export Clearance",     enabled: false },
-  { id: "permits_licenses", label: "Permits and Licenses", enabled: false },
-  {
-    id: "freight_forwarding",
-    label: "International Freight Forwarding, Customs Clearance & Delivery",
-    enabled: false,
-  },
-];
 
 // ─── Blob Badge ───────────────────────────────────────────────────────────────
 //
@@ -41,7 +17,13 @@ const TEMPLATES: QuotationTemplate[] = [
 // Aspect ratio after crop: 91 / 60 ≈ 1.517
 // At height 3rem → width = 3rem × (91/60) ≈ 4.55rem
 
-function BlobBadge({ number, disabled }: { number: string; disabled: boolean }) {
+function BlobBadge({
+  number,
+  disabled,
+}: {
+  number: string;
+  disabled: boolean;
+}) {
   return (
     <Box
       style={{
@@ -90,10 +72,13 @@ function BlobBadge({ number, disabled }: { number: string; disabled: boolean }) 
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
+export function TemplateSelector({
+  templates,
+  onSelect,
+}: TemplateSelectorProps) {
   return (
     <Box style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-      {TEMPLATES.map((template, i) => (
+      {templates.map((template, i) => (
         <Box
           key={template.id}
           className={`${classes.row} ${!template.enabled ? classes.disabled : ""}`}
@@ -104,8 +89,10 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
             disabled={!template.enabled}
           />
 
-          <Box className={`${classes.pill} ${!template.enabled ? classes.pillDisabled : ""}`}>
-            <Text className={classes.label}>{template.label}</Text>
+          <Box
+            className={`${classes.pill} ${!template.enabled ? classes.pillDisabled : ""}`}
+          >
+            <Text className={classes.label}>{template.name}</Text>
           </Box>
         </Box>
       ))}

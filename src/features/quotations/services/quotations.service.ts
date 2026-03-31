@@ -41,8 +41,8 @@ export async function updateQuotationAssignee(
   id: string,
   asId: number,
 ): Promise<QuotationResource> {
-  const response = await apiClient.post<{ data: QuotationResource }>(
-    `/quotations/${id}`,
+  const response = await apiClient.put<{ data: QuotationResource }>(
+    `/quotations/${id}/reassign-specialist`,
     {
       as_id: asId,
     },

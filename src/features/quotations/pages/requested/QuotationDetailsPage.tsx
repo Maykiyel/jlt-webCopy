@@ -14,7 +14,7 @@ import { DetailGrid } from "@/components/DetailGrid";
 import { fetchQuotation } from "../../services/quotations.service";
 import { AppButton } from "@/components/ui/AppButton";
 
-export function MakeQuotation() {
+export function QuotationDetailsPage() {
   const { tab, clientId, quotationId } = useParams<{
     tab: string;
     clientId: string;

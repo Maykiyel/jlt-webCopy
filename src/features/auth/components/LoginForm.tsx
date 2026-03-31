@@ -54,8 +54,8 @@ export default function LoginForm({
           <TextInputField
             control={control}
             name="email"
-            placeholder="USERNAME"
-            type="email"
+            placeholder="USERNAME OR EMAIL"
+            type="text"
             required
             size="lg"
           />

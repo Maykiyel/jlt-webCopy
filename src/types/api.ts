@@ -225,6 +225,7 @@ export interface NotFoundError {
 // ============================================
 
 export interface LoginRequest {
+  // Backend currently expects this key name, but value may be username or email.
   email: string;
   password: string;
 }
