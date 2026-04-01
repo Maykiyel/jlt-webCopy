@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/user.service";
 import { useEffect, useState } from "react";
 import { Loader } from "@mantine/core";
+import { isClient, toUser } from "@/lib/mappers/user.mapper";
 
 interface ProtectedRouteProps {
   /**
@@ -42,7 +43,9 @@ export function ProtectedRoute({
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const logout = useAuthStore((state) => state.logout);
   const [isLoading, setIsLoading] = useState(fetchUserData);
+  const isClientUser = user ? isClient(toUser(user)) : false;
 
   useEffect(() => {
     async function fetchUser() {
@@ -62,8 +65,19 @@ export function ProtectedRoute({
     fetchUser();
   }, [fetchUserData, user?.id, setUser]);
 
+  useEffect(() => {
+    if (isAuthenticated && isClientUser) {
+      // Employee-only web app: immediately invalidate client sessions.
+      logout();
+    }
+  }, [isAuthenticated, isClientUser, logout]);
+
   // If not authenticated, redirect to login page
   if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (isClientUser) {
     return <Navigate to="/login" replace />;
   }
 
