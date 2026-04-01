@@ -123,7 +123,6 @@ export function AppTable<T>({
             dropdown: { fontSize: "0.75rem" },
             option: { fontSize: "0.75rem" },
           }}
-          onClick={(e) => e.stopPropagation()}
         />
       );
     }
@@ -212,13 +211,21 @@ export function AppTable<T>({
 
         <Table.Tbody>
           {data.map((row, idx) => (
-            <Table.Tr
-              key={rowKey ? rowKey(row) : idx}
-              onClick={() => onRowClick?.(row)}
-              style={onRowClick ? { cursor: "pointer" } : undefined}
-            >
+            <Table.Tr key={rowKey ? rowKey(row) : idx}>
               {columns.map((col) => (
-                <Table.Td key={String(col.key)}>
+                <Table.Td
+                  key={String(col.key)}
+                  onClick={
+                    onRowClick && col.type !== "select"
+                      ? () => onRowClick(row)
+                      : undefined
+                  }
+                  style={
+                    onRowClick && col.type !== "select"
+                      ? { cursor: "pointer" }
+                      : undefined
+                  }
+                >
                   <>{renderCell(col, row, idx)}</>
                 </Table.Td>
               ))}

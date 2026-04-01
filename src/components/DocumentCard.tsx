@@ -5,7 +5,6 @@ import {
   PictureAsPdf,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { useEffect, useRef, useState } from "react";
-import type { QuotationFileResource } from "@/features/quotations/types/quotations.types";
 
 const DEV_FILE_PROXY_PREFIX = "/__files_proxy";
 
@@ -160,7 +159,12 @@ function PdfThumbnail({ url }: { url: string }) {
 // ─── DocumentCard ──────────────────────────────────────────────────────────────
 
 interface DocumentCardProps {
-  file: QuotationFileResource;
+  file: {
+    id: number;
+    file_name: string;
+    file_url: string;
+    created_at: string;
+  };
 }
 
 export function DocumentCard({ file }: DocumentCardProps) {

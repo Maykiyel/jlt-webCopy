@@ -20,6 +20,9 @@ interface PageCardProps {
   fullHeight?: boolean;
   children?: React.ReactNode;
   onBack?: () => void;
+  hideDivider?: boolean;
+  bodyPx?: string | number;
+  bodyPy?: string | number;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -31,6 +34,9 @@ export function PageCard({
   fullHeight = false,
   children,
   onBack,
+  hideDivider = false,
+  bodyPx = "xl",
+  bodyPy = "lg",
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -83,10 +89,17 @@ export function PageCard({
         {action && <Box style={{ flexShrink: 0 }}>{action}</Box>}
       </Group>
 
-      <Divider size={"sm"} w={"96%"} mx={"auto"} className={classes.divider} />
+      {!hideDivider && (
+        <Divider
+          size={"sm"}
+          w={"96%"}
+          mx={"auto"}
+          className={classes.divider}
+        />
+      )}
 
       {/* ── Body ── */}
-      <Box className={classes.body} px={"xl"} py={"lg"}>
+      <Box className={classes.body} px={bodyPx} py={bodyPy}>
         {children}
       </Box>
     </Card>
