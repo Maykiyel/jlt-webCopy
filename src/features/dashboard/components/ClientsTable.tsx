@@ -1,6 +1,6 @@
 import { Card, Group, Table, Text, Title } from "@mantine/core";
-import type { ClientRow } from "../service/dashboard.service";
-import classes from "../modules/Accountspecialistdashboard.module.css";
+import type { ClientRow } from "../types/dashboard";
+import classes from "../modules/AccountSpecialistDashboard.module.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

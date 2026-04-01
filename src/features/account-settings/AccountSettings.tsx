@@ -1,24 +1,25 @@
-import { useDisclosure } from "@mantine/hooks";
 import { Stack, Card, Tabs } from "@mantine/core";
-import { toUser } from "@/lib/mappers/user.mapper";
-import { useAuthStore } from "@/stores/authStore";
 import { ProfileHeader } from "./components/ProfileHeader";
 import { ProfileForm } from "./components/ProfileForm";
 import { ChangePasswordModal } from "./components/ChangePasswordModal";
 import { UploadAvatarModal } from "./components/UploadAvatarModal";
 import { NotificationSettings } from "./components/NotificationSettings";
+import { useAccountSettingsState } from "./hooks/useAccountSettingsState";
 import classes from "./AccountSettings.module.css";
-import { useState } from "react";
 
 export default function AccountSettings() {
-  const [isEditing, setIsEditing] = useState(false);
-  const rawUser = useAuthStore((s) => s.user);
-  const user = rawUser ? toUser(rawUser) : null;
-
-  const [passwordOpened, { open: openPassword, close: closePassword }] =
-    useDisclosure(false);
-  const [avatarOpened, { open: openAvatar, close: closeAvatar }] =
-    useDisclosure(false);
+  const {
+    isEditing,
+    setIsEditing,
+    rawUser,
+    user,
+    passwordOpened,
+    openPassword,
+    closePassword,
+    avatarOpened,
+    openAvatar,
+    closeAvatar,
+  } = useAccountSettingsState();
 
   if (!user || !rawUser) return null;
 

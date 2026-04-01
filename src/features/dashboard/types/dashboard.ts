@@ -1,18 +1,11 @@
 import type { ApiResponse } from "@/types/api";
-// ============================================
-// Base User Info (in all dashboard responses)
-// ============================================
 
 interface DashboardUser {
   full_name?: string;
   role?: string;
-  company: string;
-  image_path: string;
+  company?: string;
+  image_path?: string;
 }
-
-// ============================================
-// Client Dashboard
-// ============================================
 
 export interface ClientDashboardData {
   user: DashboardUser & {
@@ -28,37 +21,28 @@ export interface ClientDashboardData {
   };
 }
 
-// ============================================
-// Account Specialist Dashboard
-// ============================================
+export interface ClientRow {
+  id: number;
+  full_name: string;
+  total_shipment: number;
+}
 
 export interface AccountSpecialistDashboardData {
-  user: DashboardUser & {
-    role: string;
-  };
-  leads: {
-    queries_count: number;
-    new_count: number;
-    replied_count: number;
+  quotations: {
+    responded_count: number;
+    requested_count: number;
+    total_count: number;
   };
   shipments: {
     ongoing_count: number;
     delivered_count: number;
+    total_count: number;
   };
-  quotations: {
-    new_count: number;
-    responded_count: number;
-    accepted_count: number;
-    discarded_count: number;
-  };
-  accounts: {
-    clients_count: number;
+  clients: {
+    total_count: number;
+    clients: ClientRow[];
   };
 }
-
-// ============================================
-// Marketing Dashboard
-// ============================================
 
 export interface MarketingDashboardData {
   user: DashboardUser & {
@@ -70,18 +54,9 @@ export interface MarketingDashboardData {
   total_articles: string;
 }
 
-// ============================================
-// Human Resource Dashboard
-// ============================================
-
 export interface HumanResourceDashboardData {
-  message: string; // "Generic dashboard data"
-  // Add specific HR metrics when backend implements them
+  message: string;
 }
-
-// ============================================
-// Union Type for All Dashboard Responses
-// ============================================
 
 export type DashboardData =
   | ClientDashboardData
@@ -89,15 +64,7 @@ export type DashboardData =
   | MarketingDashboardData
   | HumanResourceDashboardData;
 
-// ============================================
-// API Response
-// ============================================
-
 export type DashboardResponse = ApiResponse<DashboardData>;
-
-// ============================================
-// Type Guards
-// ============================================
 
 export function isClientDashboard(
   data: DashboardData,
@@ -105,7 +72,6 @@ export function isClientDashboard(
   return (
     "shipments" in data &&
     "quotations" in data &&
-    "ongoing_count" in data.shipments &&
     "completed_count" in data.shipments
   );
 }
@@ -113,19 +79,27 @@ export function isClientDashboard(
 export function isAccountSpecialistDashboard(
   data: DashboardData,
 ): data is AccountSpecialistDashboardData {
-  return "leads" in data && "accounts" in data;
+  return (
+    "clients" in data &&
+    "shipments" in data &&
+    "quotations" in data &&
+    "responded_count" in data.quotations
+  );
 }
 
 export function isMarketingDashboard(
   data: DashboardData,
 ): data is MarketingDashboardData {
   return (
-    "views_count" in data && "total_videos" in data && "total_articles" in data
+    "views_count" in data &&
+    "clients_count" in data &&
+    "total_videos" in data &&
+    "total_articles" in data
   );
 }
 
 export function isHumanResourceDashboard(
   data: DashboardData,
 ): data is HumanResourceDashboardData {
-  return "message" in data && !("shipments" in data) && !("leads" in data);
+  return "message" in data && !isMarketingDashboard(data);
 }

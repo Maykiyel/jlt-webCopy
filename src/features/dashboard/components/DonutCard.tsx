@@ -1,6 +1,6 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
 import { DonutChart } from "@mantine/charts";
-import classes from "../modules/Accountspecialistdashboard.module.css";
+import classes from "../modules/AccountSpecialistDashboard.module.css";
 import { colorToCssVar } from "@/utils/mantine-color";
 import { useEffect, useRef, useState } from "react";
 // ─── Types ────────────────────────────────────────────────────────────────────
