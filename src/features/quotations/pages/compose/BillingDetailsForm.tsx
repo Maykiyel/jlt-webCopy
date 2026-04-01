@@ -8,7 +8,7 @@ import {
   useWatch,
 } from "react-hook-form";
 import * as z from "zod";
-import { NativeSelectField, NumberInputField } from "@/components/form";
+import { NumberInputField, SelectField } from "@/components/form";
 import { PLACEHOLDER_GLOBAL_BILLING_SETTINGS } from "@/features/quotations/data/composePlaceholders";
 import {
   billingDetailsSchema,
@@ -75,14 +75,12 @@ function BillingSectionRows({
         {fieldArray.fields.map((field, index) => (
           <Grid key={field.id} gutter={0} className={classes.row}>
             <Grid.Col span={4} className={classes.cell}>
-              <NativeSelectField
+              <SelectField
                 control={control}
                 name={`sections.${section.id}.${index}.description`}
                 label=""
-                data={[
-                  { value: "", label: "SELECT RECEIPT CHARGES" },
-                  ...section.available_charges,
-                ]}
+                placeholder="SELECT RECEIPT CHARGES"
+                data={section.available_charges}
                 styles={{
                   input: {
                     border: 0,
@@ -100,11 +98,12 @@ function BillingSectionRows({
             </Grid.Col>
 
             <Grid.Col span={2} className={classes.cell}>
-              <NativeSelectField
+              <SelectField
                 control={control}
                 name={`sections.${section.id}.${index}.currency`}
                 label=""
-                data={[{ value: "", label: "CURRENCY" }, ...currencies]}
+                placeholder="CURRENCY"
+                data={currencies}
                 styles={{
                   input: {
                     border: 0,
@@ -122,11 +121,12 @@ function BillingSectionRows({
             </Grid.Col>
 
             <Grid.Col span={2} className={classes.cell}>
-              <NativeSelectField
+              <SelectField
                 control={control}
                 name={`sections.${section.id}.${index}.uom`}
                 label=""
-                data={[{ value: "", label: "UOM" }, ...uoms]}
+                placeholder="UOM"
+                data={uoms}
                 styles={{
                   input: {
                     border: 0,

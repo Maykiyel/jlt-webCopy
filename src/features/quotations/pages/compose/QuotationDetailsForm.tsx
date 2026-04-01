@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Group, SimpleGrid, Stack, Text } from "@mantine/core";
-import { useEffect } from "react";
+import { Group, Select, SimpleGrid, Stack, Text } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   NativeSelectField,
@@ -31,6 +31,9 @@ export function QuotationDetailsForm({
 }: QuotationDetailsFormProps) {
   // TODO: replace with useQuery when GET /message-templates is available
   const messageTemplates = PLACEHOLDER_MESSAGE_TEMPLATES;
+  const [selectedMessageTemplateId, setSelectedMessageTemplateId] = useState<
+    string | null
+  >(null);
 
   const { control, handleSubmit, setValue, formState } =
     useForm<QuotationDetailsValues>({
@@ -76,24 +79,32 @@ export function QuotationDetailsForm({
             <Text size="sm" fw={500}>
               MESSAGE
             </Text>
-            <Group gap="xs">
-              {messageTemplates.slice(0, 3).map((messageTemplate) => (
-                <Button
-                  key={messageTemplate.id}
-                  type="button"
-                  size="xs"
-                  variant="default"
-                  onClick={() =>
-                    setValue("message", messageTemplate.content, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                >
-                  {messageTemplate.label}
-                </Button>
-              ))}
-            </Group>
+            <Select
+              aria-label="Select message template"
+              placeholder="Select message template"
+              value={selectedMessageTemplateId}
+              onChange={(templateId) => {
+                setSelectedMessageTemplateId(templateId);
+
+                if (!templateId) return;
+
+                const selectedTemplate = messageTemplates.find(
+                  (messageTemplate) => messageTemplate.id === templateId,
+                );
+
+                if (!selectedTemplate) return;
+
+                setValue("message", selectedTemplate.content, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }}
+              data={messageTemplates.map((messageTemplate) => ({
+                value: messageTemplate.id,
+                label: messageTemplate.label,
+              }))}
+              w={220}
+            />
           </Group>
 
           <TextareaField
