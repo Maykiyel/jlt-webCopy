@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Copilot/agent standards
+AGENTS.md
+.github/copilot-instructions.md
