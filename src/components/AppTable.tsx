@@ -223,10 +223,20 @@ export function AppTable<T>({
                 </Table.Td>
               ))}
               {hasActions && (
-                <Table.Td style={{ textAlign: "right" }}>
+                <Table.Td
+                  style={{ textAlign: "right" }}
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
                   <Menu shadow="md" width="10rem" position="left-start">
                     <Menu.Target>
-                      <ActionIcon variant="subtle" color="dark" size="sm">
+                      <ActionIcon
+                        variant="subtle"
+                        color="dark"
+                        size="sm"
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
                         <MoreVert width={18} />
                       </ActionIcon>
                     </Menu.Target>
@@ -235,7 +245,10 @@ export function AppTable<T>({
                         <Menu.Item
                           key={action.label}
                           color={action.color}
-                          onClick={() => action.onClick(row)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            action.onClick(row);
+                          }}
                           leftSection={action.icon}
                           styles={{ item: { fontSize: "0.75rem" } }}
                         >

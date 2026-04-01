@@ -140,6 +140,9 @@ export function QuotationsClient() {
         columns={COLUMNS}
         data={isLoading ? [] : quotations}
         rowKey={(row) => row.id}
+        onRowClick={(row) =>
+          navigate(`/quotations/${tab}/client/${clientId}/${row.id}`)
+        }
         withEntryControls
         perPage={perPage}
         onPerPageChange={setPerPage}
