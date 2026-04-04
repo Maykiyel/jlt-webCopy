@@ -48,8 +48,8 @@ const NAV_ITEMS: NavItem[] = [
     icon: <BoxIcon width="2rem" height="2rem" />,
     label: "Shipments",
     subItems: [
-      { label: "Ongoing", path: "/shipments/ongoing" },
-      { label: "Delivered", path: "/shipments/delivered" },
+      { label: "Ongoing", path: "/shipments/logistics/ongoing"},
+      { label: "Delivered", path: "/shipments/logistics/delivered"},
     ],
   },
   {

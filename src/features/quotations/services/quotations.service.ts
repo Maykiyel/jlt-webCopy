@@ -16,18 +16,22 @@ export interface FetchQuotationsParams {
 export async function fetchQuotations(
   params: FetchQuotationsParams,
 ): Promise<QuotationsIndexResponse> {
-  const response = await apiClient.get<{ data: QuotationsIndexResponse }>(
-    "/quotations",
-    {
-      params: {
-        "filter[status]": params.status,
-        ...(params.search ? { search: params.search } : {}),
-        ...(params.perPage ? { perPage: params.perPage } : {}),
-        ...(params.clientId ? { client_id: params.clientId } : {}),
+  try {
+    const response = await apiClient.get<{ data: QuotationsIndexResponse }>(
+      "/quotations",
+      {
+        params: {
+          "filter[status]": params.status,
+          ...(params.search ? { search: params.search } : {}),
+          ...(params.perPage ? { perPage: params.perPage } : {}),
+          ...(params.clientId ? { client_id: params.clientId } : {}),
+        },
       },
-    },
-  );
-  return response.data.data;
+    );
+    return response.data.data || { quotations: [], pagination: { count: 0, per_page: params.perPage || 10, total: 0 } };
+  } catch (error) {
+    return { quotations: [], pagination: { count: 0, per_page: params.perPage || 10, total: 0 } };
+  }
 }
 
 export async function fetchQuotation(id: string): Promise<QuotationResource> {

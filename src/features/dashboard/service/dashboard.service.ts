@@ -29,6 +29,18 @@ export interface AccountSpecialistDashboardData {
 
 export const fetchDashboard =
   async (): Promise<AccountSpecialistDashboardData> => {
-    const res = await apiClient.get("/dashboard");
-    return res.data.data;
+    try {
+      const res = await apiClient.get("/dashboard");
+      return res.data.data || {
+        quotations: { responded_count: 0, requested_count: 0, total_count: 0 },
+        shipments: { ongoing_count: 0, delivered_count: 0, total_count: 0 },
+        clients: { total_count: 0, clients: [] },
+      };
+    } catch (error) {
+      return {
+        quotations: { responded_count: 0, requested_count: 0, total_count: 0 },
+        shipments: { ongoing_count: 0, delivered_count: 0, total_count: 0 },
+        clients: { total_count: 0, clients: [] },
+      };
+    }
   };

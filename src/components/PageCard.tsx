@@ -16,6 +16,7 @@ import classes from "./PageCard.module.css";
 interface PageCardProps {
   title: string;
   subtext?: string;
+  subtextColor?: string;
   action?: React.ReactNode;
   fullHeight?: boolean;
   children?: React.ReactNode;
@@ -27,6 +28,7 @@ interface PageCardProps {
 export function PageCard({
   title,
   subtext,
+  subtextColor = "dimmed",
   action,
   fullHeight = false,
   children,
@@ -73,7 +75,7 @@ export function PageCard({
               {title}
             </Title>
             {subtext && (
-              <Text size="xs" c="dimmed" fs="italic">
+              <Text size="xs" c={subtextColor} fs="italic">
                 ({subtext})
               </Text>
             )}

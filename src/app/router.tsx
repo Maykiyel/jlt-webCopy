@@ -17,6 +17,10 @@ const Quotations = lazy(() => import("./routes/app/quotations/QuotationsPage"));
 const QuotationViewerPage = lazy(
   () => import("./routes/app/quotations/QuotationViewerPage"),
 );
+const Shipments = lazy(() => import("./routes/app/shipments/ShipmentsPage"));
+const ShipmentDetailsPage = lazy(
+  () => import("@/features/shipments/pages/ShipmentDetails").then(m => ({ default: m.ShipmentDetailsPage })),
+);
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -63,6 +67,23 @@ export const router = createBrowserRouter([
           },
           { path: "quotations/:tab/client/:clientId", Component: Quotations },
           { path: "quotations/:tab", Component: Quotations },
+
+          // Shipment routes — most specific first
+          {
+            path: "shipments/:tab/client/:clientId/:shipmentId/documents",
+            Component: ShipmentDetailsPage,
+          },
+          {
+            path: "shipments/:tab/client/:clientId/:shipmentId/compose",
+            Component: ShipmentDetailsPage,
+          },
+          {
+            path: "shipments/:tab/client/:clientId/:shipmentId",
+            Component: ShipmentDetailsPage,
+          },
+          { path: "shipments/:category/:subCategory", Component: Shipments },
+          { path: "shipments/:category", Component: Shipments },
+          { path: "shipments", Component: Shipments },
 
           { path: "*", Component: NotFound },
         ],
