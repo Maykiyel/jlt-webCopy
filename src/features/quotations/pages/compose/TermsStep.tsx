@@ -1,5 +1,5 @@
 import { Box, Group } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AppButton } from "@/components/ui/AppButton";
 import { TermsTemplateSelector } from "@/features/quotations/pages/compose/components/TermsTemplateSelector";
 import { getComposeReferenceData } from "@/features/quotations/pages/compose/utils/composeReferenceData";
@@ -18,21 +18,17 @@ export function TermsStep({ onNext, onChange, savedData }: TermsStepProps) {
   const { standardTemplates } = getComposeReferenceData();
   // TODO: replace with useQuery when GET /standard-templates is available
   const [selectedTemplate, setSelectedTemplate] =
-    useState<StandardTemplate | null>(null);
+    useState<StandardTemplate | null>(() => {
+      if (!savedData?.template_id) {
+        return null;
+      }
+
+      return (
+        standardTemplates.find((item) => item.id === savedData.template_id) ??
+        null
+      );
+    });
   const [currentValues, setCurrentValues] = useState<TermsValues | null>(null);
-
-  useEffect(() => {
-    if (!savedData?.template_id) {
-      return;
-    }
-
-    const template =
-      standardTemplates.find((item) => item.id === savedData.template_id) ??
-      null;
-    if (template) {
-      setSelectedTemplate(template);
-    }
-  }, [savedData?.template_id, standardTemplates]);
 
   function handleSelect(templateId: string) {
     const template =

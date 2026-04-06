@@ -1,12 +1,13 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { ChargeRow } from "@/features/quotations/schemas/compose.schema";
+import type { quotationPdfStyles } from "@/features/quotations/pdf/quotationPdf.styles";
 
 interface QuotationPDFBillingSectionProps {
   sectionId: string;
   sectionTitle: string;
   rows: ChargeRow[];
   total: number;
-  styles: Record<string, any>;
+  styles: typeof quotationPdfStyles;
   formatAmount: (amount?: number | null) => string;
 }
 

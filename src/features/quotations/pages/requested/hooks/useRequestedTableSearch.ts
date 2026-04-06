@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 
 interface UseRequestedTableSearchOptions {
@@ -12,27 +12,23 @@ export function useRequestedTableSearch(
   const { debounceMs = 400, initialPerPage = 10 } = options;
 
   const [search, setSearch] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [immediateQuery, setImmediateQuery] = useState<string | null>(null);
   const [debouncedSearch] = useDebouncedValue(search, debounceMs);
   const [perPage, setPerPage] = useState(initialPerPage);
-
-  useEffect(() => {
-    const nextValue = debouncedSearch.trim();
-    if (nextValue === searchQuery) return;
-    setSearchQuery(nextValue);
-  }, [debouncedSearch, searchQuery]);
+  const searchQuery = immediateQuery ?? debouncedSearch.trim();
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
+    setImmediateQuery(null);
     if (!value.trim()) {
-      setSearchQuery("");
+      setImmediateQuery("");
     }
   };
 
   const handleSearch = (value: string) => {
     const nextValue = value.trim();
     setSearch(nextValue);
-    setSearchQuery(nextValue);
+    setImmediateQuery(nextValue);
   };
 
   return {

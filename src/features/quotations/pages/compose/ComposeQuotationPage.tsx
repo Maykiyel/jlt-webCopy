@@ -63,10 +63,6 @@ export function ComposeQuotationPage() {
     quotationTemplates.find((item) => item.id === templateId) ?? null;
   // TODO: replace with useQuery({ queryKey: ["quotation-template", templateId], queryFn: ... })
 
-  if (!quotationTemplate) {
-    return <div>Template not found</div>;
-  }
-
   const [step, setStep] = useState(0);
   const [isStep0Valid, setIsStep0Valid] = useState(false);
   const [quotationDetailsData, setQuotationDetailsData] =
@@ -98,6 +94,10 @@ export function ComposeQuotationPage() {
   const canOpenSignatoryModal = termsData !== null || signatoryData !== null;
   const canRenderTermsStep =
     quotationDetailsData !== null && billingDetailsData !== null;
+
+  if (!quotationTemplate) {
+    return <div>Template not found</div>;
+  }
 
   function handleStepClick(index: number) {
     if (index < step) setStep(index);

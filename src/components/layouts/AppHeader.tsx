@@ -57,6 +57,7 @@ function UserMenu() {
     try {
       await authService.logout();
     } catch {
+      // Keep local logout flow even if backend logout fails.
     } finally {
       logout();
       navigate("/login", { replace: true });
