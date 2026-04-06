@@ -40,6 +40,25 @@ export const mockShipments: Record<string, ShipmentResource> = {
     },
     person_in_charge: {
       name: "ROBERT DELA CRUZ",
+      remarks: "Shipment arrived at Clark on Sept 1. All items inspected and verified. Received by: Maria Santos",
+    },
+    billing_summary: {
+      terms_of_payment: "Net 30 days",
+      description_of_charges: {
+        value: "₱15,000.00",
+        fields: {
+          bureau_of_customs_accreditation_fee: "₱5,000.00",
+          certificate_of_accreditation: "₱10,000.00",
+        },
+      },
+      jltcb_service_charges: {
+        value: "₱8,000.00",
+        fields: {
+          certificate_of_accreditation: "₱3,000.00",
+          royal_fee: "₱5,000.00",
+        },
+      },
+      estimated_total_landed_cost: "₱23,000.00",
     },
     origin: "SHANGHAI",
     destination: "CLARK",
@@ -49,6 +68,7 @@ export const mockShipments: Record<string, ShipmentResource> = {
     container_size: "40ft",
     remarks: "Delivered on schedule. Received by: Maria Santos",
   },
+
   "EX-09-2025-002": {
     reference: "EX-09-2025-002",
     client: {
@@ -79,6 +99,25 @@ export const mockShipments: Record<string, ShipmentResource> = {
     },
     person_in_charge: {
       name: "PATRICIA REYES",
+      remarks: "Shipment departed Manila Port on Sept 5. Currently in transit. Last scanned at South China Sea on Sept 12.",
+    },
+    billing_summary: {
+      terms_of_payment: "Advance Payment",
+      description_of_charges: {
+        value: "₱20,000.00",
+        fields: {
+          bureau_of_customs_accreditation_fee: "₱7,000.00",
+          certificate_of_accreditation: "₱13,000.00",
+        },
+      },
+      jltcb_service_charges: {
+        value: "₱12,000.00",
+        fields: {
+          certificate_of_accreditation: "₱4,000.00",
+          royal_fee: "₱8,000.00",
+        },
+      },
+      estimated_total_landed_cost: "₱32,000.00",
     },
     origin: "MANILA",
     destination: "SINGAPORE",
@@ -88,6 +127,7 @@ export const mockShipments: Record<string, ShipmentResource> = {
     container_size: "20ft",
     remarks: "In transit. Last scanned at Port of Manila on Sept 15.",
   },
+
   "IM-09-2025-003": {
     reference: "IM-09-2025-003",
     client: {
@@ -118,6 +158,25 @@ export const mockShipments: Record<string, ShipmentResource> = {
     },
     person_in_charge: {
       name: "FRANCISCO SANTOS",
+      remarks: "Shipment arrived at Manila Port on Aug 28. All items inspected and cleared by customs.",
+    },
+    billing_summary: {
+      terms_of_payment: "Net 15 days",
+      description_of_charges: {
+        value: "₱18,000.00",
+        fields: {
+          bureau_of_customs_accreditation_fee: "₱6,000.00",
+          certificate_of_accreditation: "₱12,000.00",
+        },
+      },
+      jltcb_service_charges: {
+        value: "₱9,000.00",
+        fields: {
+          certificate_of_accreditation: "₱4,000.00",
+          royal_fee: "₱5,000.00",
+        },
+      },
+      estimated_total_landed_cost: "₱27,000.00",
     },
     origin: "HONG KONG",
     destination: "MANILA",
@@ -128,6 +187,7 @@ export const mockShipments: Record<string, ShipmentResource> = {
     remarks: "Successfully delivered. All items inspected and verified.",
   },
 };
+
 
 /**
  * Get mock shipment data by reference ID

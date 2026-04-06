@@ -37,6 +37,7 @@ export function ProfileForm({
       first_name: user.firstName ?? "",
       last_name: user.lastName ?? "",
       position: user.role ?? "",
+      company: user.company ?? "",
       contact_number: user.contactNumber ?? "",
       email: user.email ?? "",
     },
@@ -79,7 +80,6 @@ export function ProfileForm({
       autoComplete="off"
     >
       <Stack gap="md" px={"3.125rem"}>
-        {/* Row 1 */}
         <SimpleGrid cols={2}>
           <TextInputField
             control={control}
@@ -99,7 +99,6 @@ export function ProfileForm({
           />
         </SimpleGrid>
 
-        {/* Row 2 */}
         <SimpleGrid cols={2}>
           {canEditPosition && isEditing ? (
             <NativeSelectField
@@ -121,6 +120,25 @@ export function ProfileForm({
           )}
           <TextInputField
             control={control}
+            name="company"
+            label="COMPANY"
+            autoComplete="organization"
+            readOnly={readOnly}
+            variant={readOnly ? "filled" : "default"}
+          />
+        </SimpleGrid>
+
+        <SimpleGrid cols={2}>
+          <TextInputField
+            control={control}
+            name="email"
+            label="EMAIL"
+            autoComplete="email"
+            readOnly={readOnly}
+            variant={readOnly ? "filled" : "default"}
+          />
+          <TextInputField
+            control={control}
             name="contact_number"
             label="CONTACT NUMBER"
             autoComplete="tel"
@@ -129,18 +147,8 @@ export function ProfileForm({
           />
         </SimpleGrid>
 
-        {/* Row 3 */}
-        <SimpleGrid cols={readOnly ? 2 : 2}>
-          <TextInputField
-            control={control}
-            name="email"
-            label="EMAIL ADDRESS"
-            autoComplete="email"
-            readOnly={readOnly}
-            variant={readOnly ? "filled" : "default"}
-          />
-
-          {readOnly && (
+        {readOnly && (
+          <SimpleGrid cols={2}>
             <Stack gap={4}>
               <Group justify="space-between">
                 <Text size="sm" fw={500}>
@@ -166,8 +174,9 @@ export function ProfileForm({
                 variant="filled"
               />
             </Stack>
-          )}
-        </SimpleGrid>
+            <div /> {}
+          </SimpleGrid>
+        )}
       </Stack>
     </form>
   );

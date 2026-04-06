@@ -37,11 +37,13 @@ export interface ShipmentResource {
     company_name: string;
     contact_number: string;
     email: string;
+    imageUrl?: string;
   } | null;
   status: string;
   created_at: string;
   updated_at: string;
- shipment_details: {
+
+  shipment_details: {
     service_type: string;
     freight_transport_mode: string;
     service: string;
@@ -51,6 +53,7 @@ export interface ShipmentResource {
     destination: string;
     details_remarks: string | null;
   };
+
   consignee_details: {
     company_name: string;
     company_address: string;
@@ -58,9 +61,34 @@ export interface ShipmentResource {
     contact_number: string;
     email: string;
   };
+
   person_in_charge: {
     name: string;
+    remarks: string | null;
   } | null;
+
+  billing_summary: {
+    terms_of_payment: string;
+
+    description_of_charges: {
+      value: string; // overall value
+      fields: {
+        bureau_of_customs_accreditation_fee: string;
+        certificate_of_accreditation: string;
+      };
+    };
+
+    jltcb_service_charges: {
+      value: string; // overall value
+      fields: {
+        certificate_of_accreditation: string;
+        royal_fee: string;
+      };
+    };
+
+    estimated_total_landed_cost: string;
+  } | null;
+
   origin: string;
   destination: string;
   eta: string;

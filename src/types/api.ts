@@ -40,6 +40,7 @@ export interface User {
   fullName: string;
   role: Role;
   email: string;
+  company: string;
   address: string;
   contactNumber: string;
   companyName: string;

@@ -9,7 +9,8 @@ export const profileSchema = z.object({
     .regex(/^09\d{9}$/, "Must be a valid PH number (09XXXXXXXXX)")
     .nullable()
     .optional(),
-  email: z.email("Invalid email address"),
+  email: z.string().email("Invalid email address"),
+  company: z.string().nullable().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
