@@ -26,6 +26,12 @@
   box-shadow: 0 0.125rem 0.75rem rgb(0 0 0 / 12%);
 }
 
+.fileFrame {
+  width: 100%;
+  min-height: 29.7cm;
+  border: 0;
+}
+
 @media print {
   @page {
     size: A4;
@@ -70,5 +76,10 @@
     min-height: auto;
     page-break-inside: auto;
     box-shadow: none;
+  }
+
+  .fileFrame {
+    min-height: auto;
+    height: auto;
   }
 }

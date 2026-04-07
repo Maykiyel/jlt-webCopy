@@ -1,5 +1,4 @@
 import { Group, Select, Text } from "@mantine/core";
-import { PLACEHOLDER_MESSAGE_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
 import { useComposeMessageTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
 
 interface MessageTemplateSelectProps {
@@ -11,8 +10,7 @@ export function MessageTemplateSelect({
   value,
   onChange,
 }: MessageTemplateSelectProps) {
-  const { data: messageTemplates = PLACEHOLDER_MESSAGE_TEMPLATES } =
-    useComposeMessageTemplates();
+  const { data: messageTemplates = [] } = useComposeMessageTemplates();
   return (
     <Group justify="space-between" mb="xs">
       <Text size="sm" fw={500}>

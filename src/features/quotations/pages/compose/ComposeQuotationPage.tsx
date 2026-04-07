@@ -1,18 +1,28 @@
 import { Button, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { notifications } from "@mantine/notifications";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createElement, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
+import jltLogoUrl from "@/assets/logos/word-dark.png";
 import { PageCard } from "@/components/PageCard";
 import { useAuthStore } from "@/stores/authStore";
 import { AuthorizedSignatoryModal } from "@/features/quotations/components/AuthorizedSignatoryModal";
 import { StepperBar } from "@/features/quotations/components/StepperBar";
-import { PLACEHOLDER_QUOTATION_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
 import { ComposeSendModals } from "@/features/quotations/pages/compose/components/ComposeSendModals";
+import { ComposeStepLoader } from "@/features/quotations/pages/compose/components/ComposeStepLoader";
 import { ComposeStepActions } from "@/features/quotations/pages/compose/components/ComposeStepActions";
 import { ComposeStepContent } from "@/features/quotations/pages/compose/components/ComposeStepContent";
-import { useComposeQuotationTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
-import { fetchQuotation } from "@/features/quotations/services/quotations.service";
+import {
+  useComposeQuotationClientInputs,
+  useComposeQuotationTemplate,
+} from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
+import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
+import { buildIssuedQuotationFormData } from "@/features/quotations/pages/compose/utils/issuedQuotationPayload";
+import {
+  createIssuedQuotation,
+  fetchQuotation,
+} from "@/features/quotations/services/quotations.service";
 import type {
   BillingDetailsValues,
   QuotationDetailsValues,
@@ -20,10 +30,10 @@ import type {
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
 import type {
-  ClientInformationField,
+  ClientInformationValue,
   QuotationTemplate,
-  QuotationViewerState,
 } from "@/features/quotations/types/compose.types";
+import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 
 const QUOTATION_DETAILS_FORM_ID = "quotation-details-form";
 const BILLING_DETAILS_FORM_ID = "billing-details-form";
@@ -36,53 +46,86 @@ interface ComposeLocationState {
   signatory?: SignatoryValues;
 }
 
-function mergeClientInformationFields(
-  template: QuotationTemplate,
-  placeholderTemplate: QuotationTemplate | null,
-): ClientInformationField[] {
-  const baseFields = template.client_information_fields ?? [];
-
-  if (!placeholderTemplate) {
-    return baseFields;
+function toErrorMessage(error: unknown): string {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: unknown }).response === "object" &&
+    (error as { response?: { data?: unknown } }).response?.data &&
+    typeof (error as { response?: { data?: { message?: unknown } } }).response
+      ?.data?.message === "string"
+  ) {
+    return (error as { response: { data: { message: string } } }).response.data
+      .message;
   }
 
-  const placeholderById = new Map(
-    (placeholderTemplate.client_information_fields ?? []).map((field) => [
-      field.id,
-      field,
-    ]),
-  );
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
 
-  return baseFields.map((field) => {
-    const fallback = placeholderById.get(field.id);
-
-    return {
-      ...field,
-      label: field.label || fallback?.label || field.id,
-      value: field.value ?? fallback?.value,
-    };
-  });
+  return "Please review the compose data and try again.";
 }
 
-function withPlaceholderTemplateFallback(
-  template: QuotationTemplate,
-): QuotationTemplate {
-  const placeholderTemplate =
-    PLACEHOLDER_QUOTATION_TEMPLATES.find((item) => item.id === template.id) ??
-    null;
+async function generateIssuedQuotationPdfFile({
+  quotation,
+  template,
+  clientInformationFields,
+  quotationDetails,
+  billingDetails,
+  terms,
+  signatory,
+}: {
+  quotation: QuotationResource;
+  template: QuotationTemplate;
+  clientInformationFields: ClientInformationValue[];
+  quotationDetails: QuotationDetailsValues;
+  billingDetails: BillingDetailsValues;
+  terms: TermsValues;
+  signatory: SignatoryValues;
+}): Promise<File> {
+  const [{ pdf }, { QuotationPDF }] = await Promise.all([
+    import("@react-pdf/renderer"),
+    import("@/features/quotations/pdf/QuotationPDF"),
+  ]);
 
-  return {
-    ...template,
-    client_information_fields: mergeClientInformationFields(
+  const signatorySignatureSrc = signatory.signature_file
+    ? URL.createObjectURL(signatory.signature_file)
+    : null;
+
+  try {
+    const doc = createElement(QuotationPDF, {
+      quotation,
       template,
-      placeholderTemplate,
-    ),
-  };
+      clientInformationFields,
+      quotationDetails,
+      billingDetails,
+      terms,
+      signatory,
+      logoSrc: jltLogoUrl,
+      signatorySignatureSrc,
+    });
+
+    const blob = await pdf(doc as never).toBlob();
+    const pdfBlob =
+      blob.type === "application/pdf"
+        ? blob
+        : new Blob([blob], { type: "application/pdf" });
+
+    return new File([pdfBlob], `${quotation.reference_number}-proposal.pdf`, {
+      type: "application/pdf",
+    });
+  } finally {
+    if (signatorySignatureSrc) {
+      URL.revokeObjectURL(signatorySignatureSrc);
+    }
+  }
 }
 
 export function ComposeQuotationPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const composeLocationState = location.state as ComposeLocationState | null;
   const editMode = composeLocationState?.editMode ?? false;
   const initialQuotationDetails =
@@ -91,8 +134,6 @@ export function ComposeQuotationPage() {
   const initialTerms = composeLocationState?.terms ?? null;
   const initialSignatory = composeLocationState?.signatory ?? null;
   const userResource = useAuthStore((state) => state.user);
-  const { data: quotationTemplates = PLACEHOLDER_QUOTATION_TEMPLATES } =
-    useComposeQuotationTemplates();
   const currentUserName = userResource
     ? `${userResource.first_name} ${userResource.last_name}`
     : undefined;
@@ -109,12 +150,11 @@ export function ComposeQuotationPage() {
     enabled: Boolean(quotationId),
   });
 
-  const selectedTemplate =
-    quotationTemplates.find((item) => item.id === templateId) ?? null;
-  const quotationTemplate = selectedTemplate
-    ? withPlaceholderTemplateFallback(selectedTemplate)
-    : null;
-  // TODO: replace with useQuery({ queryKey: ["quotation-template", templateId], queryFn: ... })
+  const { data: quotationTemplate, isLoading: isTemplateLoading } =
+    useComposeQuotationTemplate(templateId);
+
+  const { data: clientInformationFields = [] } =
+    useComposeQuotationClientInputs(quotationId, quotationTemplate?.id);
 
   const [step, setStep] = useState(0);
   const [isStep0Valid, setIsStep0Valid] = useState(false);
@@ -148,8 +188,88 @@ export function ComposeQuotationPage() {
   const canRenderTermsStep =
     quotationDetailsData !== null && billingDetailsData !== null;
 
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      if (!quotationId || !quotationTemplate || !quotation) {
+        throw new Error("Missing quotation context.");
+      }
+      if (
+        !quotationDetailsData ||
+        !billingDetailsData ||
+        !termsData ||
+        !signatoryData
+      ) {
+        throw new Error("Complete all compose steps before sending.");
+      }
+      if (
+        !quotationDetailsData.subject?.trim() ||
+        !quotationDetailsData.message?.trim()
+      ) {
+        throw new Error("Subject and message are required before sending.");
+      }
+      if (!signatoryData.signature_file) {
+        throw new Error(
+          "Upload an authorized signatory signature before sending.",
+        );
+      }
+
+      const issuedQuotationFile = await generateIssuedQuotationPdfFile({
+        quotation,
+        template: quotationTemplate,
+        clientInformationFields,
+        quotationDetails: quotationDetailsData,
+        billingDetails: billingDetailsData,
+        terms: termsData,
+        signatory: signatoryData,
+      });
+
+      const payload = buildIssuedQuotationFormData({
+        template: quotationTemplate,
+        quotationDetails: quotationDetailsData,
+        billingDetails: billingDetailsData,
+        terms: termsData,
+        signatory: signatoryData,
+        issuedQuotationFile,
+      });
+
+      return createIssuedQuotation(quotationId, payload);
+    },
+    onSuccess: async () => {
+      closeSendConfirm();
+      openSendSuccess();
+
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: quotationQueryKeys.quotationDetails(quotationId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: quotationQueryKeys.quotationFiles(quotationId, "PROPOSAL"),
+        }),
+      ]);
+    },
+    onError: (error) => {
+      notifications.show({
+        title: "Unable to send quotation",
+        message: toErrorMessage(error),
+        color: "red",
+      });
+    },
+  });
+
+  if (isTemplateLoading) {
+    return (
+      <PageCard title="Compose Quotation" fullHeight>
+        <ComposeStepLoader label="Loading quotation template..." />
+      </PageCard>
+    );
+  }
+
   if (!quotationTemplate) {
-    return <div>Template not found</div>;
+    return (
+      <PageCard title="Compose Quotation" fullHeight>
+        <Box p="md">Template not found.</Box>
+      </PageCard>
+    );
   }
 
   function handleStepClick(index: number) {
@@ -158,24 +278,20 @@ export function ComposeQuotationPage() {
 
   function handleStep0Submit(values: QuotationDetailsValues) {
     setQuotationDetailsData(values);
-    setPreviewReady(false);
     setStep(1);
   }
 
   function handleStep1Submit(values: BillingDetailsValues) {
     setBillingDetailsData(values);
-    setPreviewReady(false);
     setStep(2);
   }
 
   function handleTermsChange(values: TermsValues) {
     setTermsData(values);
-    setPreviewReady(false);
   }
 
   function handleTermsNext(values: TermsValues) {
     setTermsData(values);
-    setPreviewReady(false);
     openSignatory();
   }
 
@@ -186,45 +302,34 @@ export function ComposeQuotationPage() {
   }
 
   function handleCancel() {
+    if (!tab || !clientId || !quotationId) {
+      navigate(-1);
+      return;
+    }
+
     navigate(`/quotations/${tab}/client/${clientId}/${quotationId}`);
   }
 
   async function handleSend() {
-    // TODO: implement when POST /quotations/{id}/send endpoint is available
-    // Will send: quotationDetailsData, billingDetailsData, termsData, signatoryData + generated PDF
-    closeSendConfirm();
-    openSendSuccess();
+    try {
+      await sendMutation.mutateAsync();
+    } catch {
+      return;
+    }
   }
 
   function handleSendSuccess() {
     closeSendSuccess();
-    if (
-      !quotation ||
-      !quotationTemplate ||
-      !clientId ||
-      !quotationId ||
-      !quotationDetailsData ||
-      !billingDetailsData ||
-      !termsData ||
-      !signatoryData
-    ) {
+    if (!quotationId || !tab) {
       navigate("/quotations/responded");
       return;
     }
 
-    const viewerState: QuotationViewerState = {
-      quotation,
-      template: quotationTemplate,
-      quotationDetails: quotationDetailsData,
-      billingDetails: billingDetailsData,
-      terms: termsData,
-      signatory: signatoryData,
-      // TODO: attach generated PDF blob here when react-pdf/renderer is implemented.
-    };
+    const viewerPath = clientId
+      ? `/quotations/${tab}/client/${clientId}/${quotationId}/view`
+      : `/quotations/${tab}/${quotationId}/view`;
 
-    navigate(`/quotations/${tab}/client/${clientId}/${quotationId}/view`, {
-      state: viewerState,
-    });
+    navigate(viewerPath);
   }
 
   return (
@@ -262,6 +367,7 @@ export function ComposeQuotationPage() {
             step={step}
             quotationTemplate={quotationTemplate}
             quotation={quotation}
+            clientInformationFields={clientInformationFields}
             quotationDetailsData={quotationDetailsData}
             billingDetailsData={billingDetailsData}
             termsData={termsData}
@@ -281,6 +387,7 @@ export function ComposeQuotationPage() {
             step={step}
             isStep0Valid={isStep0Valid}
             previewReady={previewReady}
+            isSending={sendMutation.isPending}
             quotationDetailsFormId={QUOTATION_DETAILS_FORM_ID}
             billingDetailsFormId={BILLING_DETAILS_FORM_ID}
             onOpenSendConfirm={openSendConfirm}
@@ -299,6 +406,7 @@ export function ComposeQuotationPage() {
       <ComposeSendModals
         sendConfirmOpened={sendConfirmOpened}
         sendSuccessOpened={sendSuccessOpened}
+        isSending={sendMutation.isPending}
         onCloseSendConfirm={closeSendConfirm}
         onSend={handleSend}
         onCloseSendSuccess={handleSendSuccess}

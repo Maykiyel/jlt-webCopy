@@ -70,6 +70,14 @@ export const router = createBrowserRouter([
             Component: Quotations,
           },
           {
+            path: "quotations/:tab/:quotationId/compose/:template",
+            Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/:quotationId/compose",
+            Component: Quotations,
+          },
+          {
             path: "quotations/:tab/client/:clientId/:quotationId",
             Component: Quotations,
           },

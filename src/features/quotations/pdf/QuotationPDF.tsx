@@ -7,7 +7,10 @@ import type {
   SignatoryValues,
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
-import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
+import type {
+  ClientInformationValue,
+  QuotationTemplate,
+} from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 import {
   getBillingGrandTotal,
@@ -20,6 +23,7 @@ import { resolveClientInformationFields } from "@/features/quotations/utils/clie
 interface QuotationPDFProps {
   quotation: QuotationResource;
   template: QuotationTemplate;
+  clientInformationFields?: ClientInformationValue[];
   quotationDetails: QuotationDetailsValues;
   billingDetails: BillingDetailsValues;
   terms: TermsValues;
@@ -43,6 +47,7 @@ function formatDate(iso: string): string {
 export function QuotationPDF({
   quotation,
   template,
+  clientInformationFields,
   quotationDetails,
   billingDetails,
   terms,
@@ -55,9 +60,10 @@ export function QuotationPDF({
     billingDetails,
   );
   const grand = getBillingGrandTotal(billingSectionsToRender);
-  const clientInformationFields = resolveClientInformationFields(
+  const resolvedClientInformationFields = resolveClientInformationFields(
     quotation,
     template.client_information_fields,
+    clientInformationFields,
   );
 
   return (
@@ -118,11 +124,11 @@ export function QuotationPDF({
           {quotationDetails.message}
         </Text>
 
-        {clientInformationFields.length > 0 && (
+        {resolvedClientInformationFields.length > 0 && (
           <View
             style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}
           >
-            {clientInformationFields.map((field) => (
+            {resolvedClientInformationFields.map((field) => (
               <View
                 key={field.id}
                 style={{ width: "50%", flexDirection: "row", marginBottom: 4 }}

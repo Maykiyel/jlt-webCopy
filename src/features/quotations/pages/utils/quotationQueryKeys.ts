@@ -17,6 +17,8 @@ export const quotationQueryKeys = {
     ] as const,
   quotationDetails: (quotationId?: string) =>
     ["quotation", quotationId] as const,
-  quotationFiles: (quotationId?: string) =>
-    ["quotation-files", quotationId] as const,
+  quotationFiles: (
+    quotationId?: string,
+    type: "REQUESTED" | "PROPOSAL" = "REQUESTED",
+  ) => ["quotation-files", quotationId, type] as const,
 };

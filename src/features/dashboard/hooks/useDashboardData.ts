@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchDashboard } from "@/features/dashboard/service/dashboard.service";
+import { fetchDashboard } from "@/features/dashboard/services/dashboard.service";
 import { useAuthStore } from "@/stores/authStore";
 
 export function useDashboardData() {

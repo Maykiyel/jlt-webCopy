@@ -19,12 +19,17 @@ export default function QuotationsPage() {
   const composeRootMatch = useMatch(
     "/quotations/:tab/client/:clientId/:quotationId/compose",
   );
+  const composeFlatRootMatch = useMatch(
+    "/quotations/:tab/:quotationId/compose",
+  );
 
   if (quotationId && (documentsNestedMatch || documentsFlatMatch)) {
     return <QuotationDocuments />;
   }
   if (quotationId && template) return <ComposeQuotationPage />;
-  if (quotationId && composeRootMatch) return <TemplateSelection />;
+  if (quotationId && (composeRootMatch || composeFlatRootMatch)) {
+    return <TemplateSelection />;
+  }
   if (quotationId) return <QuotationDetailsPage />;
   if (clientId) return <QuotationsClient />;
 

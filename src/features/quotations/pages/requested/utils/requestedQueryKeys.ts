@@ -32,7 +32,9 @@ export const requestedQueryKeys = {
     ] as const,
   quotationDetails: (quotationId?: string) =>
     quotationQueryKeys.quotationDetails(quotationId),
-  quotationFiles: (quotationId?: string) =>
-    quotationQueryKeys.quotationFiles(quotationId),
+  quotationFiles: (
+    quotationId?: string,
+    type: "REQUESTED" | "PROPOSAL" = "REQUESTED",
+  ) => quotationQueryKeys.quotationFiles(quotationId, type),
   accountSpecialists: () => ["users", "account-specialists"] as const,
 };

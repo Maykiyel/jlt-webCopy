@@ -6,7 +6,7 @@ interface QuotationRouteParams {
 
 interface QuotationComposeRouteParams {
   tab: string;
-  clientId: string;
+  clientId?: string;
   quotationId: string;
   templateId: string;
 }
@@ -33,16 +33,21 @@ export const quotationRoutes = {
     quotationId,
   }: {
     tab: string;
-    clientId: string;
+    clientId?: string;
     quotationId: string;
-  }) => `/quotations/${tab}/client/${clientId}/${quotationId}/compose`,
+  }) =>
+    clientId
+      ? `/quotations/${tab}/client/${clientId}/${quotationId}/compose`
+      : `/quotations/${tab}/${quotationId}/compose`,
   composeTemplate: ({
     tab,
     clientId,
     quotationId,
     templateId,
   }: QuotationComposeRouteParams) =>
-    `/quotations/${tab}/client/${clientId}/${quotationId}/compose/${templateId}`,
+    clientId
+      ? `/quotations/${tab}/client/${clientId}/${quotationId}/compose/${templateId}`
+      : `/quotations/${tab}/${quotationId}/compose/${templateId}`,
   viewer: ({ tab, clientId, quotationId }: QuotationRouteParams) =>
     `${quotationPath({ tab, clientId, quotationId })}/view`,
 };

@@ -48,7 +48,7 @@ Use these references as the source of truth while executing this skill.
 
 - Keep dependency flow Shared -> Features -> App.
 - Avoid cross-feature imports unless explicitly approved.
-- Keep feature-specific API logic in src/features/<feature>/api.
+- Keep feature-specific API logic in src/features/<feature>/services.
 - Keep preview/PDF derivations aligned in quotations.
 - Do not perform broad rewrites when a scoped extraction solves the issue.
 

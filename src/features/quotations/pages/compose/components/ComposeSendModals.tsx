@@ -15,6 +15,7 @@ import {
 interface ComposeSendModalsProps {
   sendConfirmOpened: boolean;
   sendSuccessOpened: boolean;
+  isSending: boolean;
   onCloseSendConfirm: () => void;
   onSend: () => void | Promise<void>;
   onCloseSendSuccess: () => void;
@@ -23,6 +24,7 @@ interface ComposeSendModalsProps {
 export function ComposeSendModals({
   sendConfirmOpened,
   sendSuccessOpened,
+  isSending,
   onCloseSendConfirm,
   onSend,
   onCloseSendSuccess,
@@ -54,19 +56,22 @@ export function ComposeSendModals({
           <Divider w="100%" />
           <UnstyledButton
             onClick={onSend}
+            disabled={isSending}
             style={{
               flex: 1,
               textAlign: "center",
               padding: "0.75rem",
               borderRight: "0.5px solid var(--mantine-color-gray-3)",
+              opacity: isSending ? 0.5 : 1,
             }}
           >
             <Text size="sm" fw={500} c="red">
-              YES
+              {isSending ? "SENDING..." : "YES"}
             </Text>
           </UnstyledButton>
           <UnstyledButton
             onClick={onCloseSendConfirm}
+            disabled={isSending}
             style={{ flex: 1, textAlign: "center", padding: "0.75rem" }}
           >
             <Text size="sm" fw={500} c="dimmed">

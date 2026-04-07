@@ -12,7 +12,6 @@ import {
 import * as z from "zod";
 import { SelectField } from "@/components/form/selectFields";
 import { NumberInputField } from "@/components/form/valueFields";
-import { PLACEHOLDER_GLOBAL_BILLING_SETTINGS } from "@/features/quotations/data/composePlaceholders";
 import { useComposeBillingSettings } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
 import { billingDetailsSchema } from "@/features/quotations/schemas/compose.schema";
 import type { BillingSection } from "@/features/quotations/types/compose.types";
@@ -40,10 +39,10 @@ export function BillingSectionRows({
   const hasRows = fieldArray.fields.length > 0;
   const rows = useWatch({ control, name: sectionName }) ?? [];
   const total = rows.reduce((sum, row) => sum + (row?.amount ?? 0), 0);
-  const { data: billingSettings = PLACEHOLDER_GLOBAL_BILLING_SETTINGS } =
-    useComposeBillingSettings();
+  const { data: billingSettings } = useComposeBillingSettings();
 
-  const { currencies, uoms } = billingSettings;
+  const currencies = billingSettings?.currencies ?? [];
+  const uoms = billingSettings?.uoms ?? [];
 
   return (
     <div className={classes.section}>

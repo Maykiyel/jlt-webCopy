@@ -10,7 +10,7 @@ import type { QuotationResource } from "@/features/quotations/types/quotations.t
 export interface CustomField {
   id: string;
   label: string;
-  type: "text" | "select";
+  type: "text" | "select" | "date";
   options?: string[];
 }
 
@@ -18,6 +18,11 @@ export interface ClientInformationField {
   id: string;
   label: string;
   value?: string | number | boolean | null;
+}
+
+export interface ClientInformationValue {
+  label: string;
+  value: string | number | boolean | null;
 }
 
 // Billing
@@ -31,7 +36,7 @@ export interface BillingSection {
 export interface QuotationTemplate {
   id: string;
   name: string;
-  client_information_fields: ClientInformationField[];
+  client_information_fields?: ClientInformationField[];
   custom_fields: CustomField[];
   billing_sections: BillingSection[];
 }
@@ -51,9 +56,12 @@ export interface MessageTemplate {
 }
 
 // Standard Quotation Template (T&C)
-export interface StandardTemplate {
+export interface StandardTemplateSummary {
   id: string;
   name: string;
+}
+
+export interface StandardTemplate extends StandardTemplateSummary {
   policies: string;
   terms_and_condition: string;
   banking_details: string;
@@ -63,6 +71,7 @@ export interface StandardTemplate {
 export interface QuotationViewerState {
   quotation: QuotationResource;
   template: QuotationTemplate;
+  clientInformationFields?: ClientInformationValue[];
   quotationDetails: QuotationDetailsValues;
   billingDetails: BillingDetailsValues;
   terms: TermsValues;

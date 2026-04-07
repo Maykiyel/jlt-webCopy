@@ -13,7 +13,7 @@ function withFallback(value: string | null | undefined) {
 }
 
 function getVolumeDimension(quotation: QuotationResource) {
-  return [quotation.commodity.cargo_type, quotation.commodity.container_size]
+  return [quotation.commodity?.cargo_type, quotation.commodity?.container_size]
     .filter(Boolean)
     .join(" ");
 }
@@ -62,24 +62,24 @@ export function buildQuotationDetailsRows(
       },
     ],
     shipment: [
-      { label: "Service Type", value: withFallback(quotation.service.type) },
+      { label: "Service Type", value: withFallback(quotation.service?.type) },
       {
         label: "Freight Transport Mode",
-        value: withFallback(quotation.service.transport_mode),
+        value: withFallback(quotation.service?.transport_mode),
       },
       {
         label: "Service",
-        value: withFallback(quotation.service.options.join(", ")),
+        value: withFallback(quotation.service?.options?.join(", ")),
       },
       {
         label: "Commodity",
-        value: withFallback(quotation.commodity.commodity),
+        value: withFallback(quotation.commodity?.commodity),
       },
       { label: "Volume (Dimension)", value: withFallback(volumeDimension) },
-      { label: "Origin", value: withFallback(quotation.shipment.origin) },
+      { label: "Origin", value: withFallback(quotation.shipment?.origin) },
       {
         label: "Destination",
-        value: withFallback(quotation.shipment.destination),
+        value: withFallback(quotation.shipment?.destination),
       },
       ...(quotation.remarks
         ? [{ label: "Details", value: withFallback(quotation.remarks) }]

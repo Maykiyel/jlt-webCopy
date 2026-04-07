@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Stack, Group, Text } from "@mantine/core";
 import {
@@ -16,12 +16,15 @@ import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRout
 export function QuotationDetailsPage() {
   const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
   const params = useParams<{ clientId?: string }>();
+  const location = useLocation();
   const clientId = params.clientId;
   const navigate = useNavigate();
   const quotationId = routeParams?.quotationId;
   const canMakeQuotation =
     routeParams?.tab === "requested" && Boolean(clientId);
   const canMakeJobOrder = routeParams?.tab === "accepted";
+  const viewerContextState =
+    (location.state as { issuedQuotationId?: string } | null) ?? null;
 
   const { data: quotation, isLoading } = useQuery({
     queryKey: quotationQueryKeys.quotationDetails(quotationId),
@@ -60,6 +63,11 @@ export function QuotationDetailsPage() {
                 clientId,
                 quotationId: routeParams.quotationId,
               }),
+              {
+                state: viewerContextState?.issuedQuotationId
+                  ? { issuedQuotationId: viewerContextState.issuedQuotationId }
+                  : undefined,
+              },
             )
           }
         >

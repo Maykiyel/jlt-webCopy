@@ -41,7 +41,7 @@ Each feature should contain only what it needs. Typical shape:
 ```sh
 src/features/<feature-name>
 |
-+-- api
++-- services
 +-- assets
 +-- components
 +-- hooks
@@ -78,11 +78,11 @@ If reuse is needed across features, move that logic to a shared module instead o
 
 Default:
 
-1. Keep feature-specific API functions/hooks in src/features/<feature>/api.
+1. Keep feature-specific API functions/hooks in src/features/<feature>/services.
 
 Exception:
 
-1. If API contracts are heavily shared across many features, a dedicated global API module can be used.
+1. If API contracts are heavily shared across many features, a dedicated global API module can be used (for example under src/lib/api).
 
 ## Refactor Standards for Monolithic Files
 
@@ -206,7 +206,7 @@ Use the following state model consistently in this codebase.
 
 1. Use TanStack React Query for all server data fetching/caching.
 2. Keep query keys stable and domain-based.
-3. Co-locate query functions and query hooks under feature api/ when feature-specific.
+3. Co-locate query functions and query hooks under feature services/ when feature-specific.
 4. Use staleTime, gcTime, and invalidation intentionally.
 5. Mutations should invalidate or update relevant queries explicitly.
 6. Use prefetching for high-confidence navigation paths.

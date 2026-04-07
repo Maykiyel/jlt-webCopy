@@ -10,7 +10,10 @@ interface TermsViewerProps {
   onChange: (values: TermsValues) => void;
 }
 
-type TermsTextFieldKey = Exclude<keyof TermsValues, "template_id">;
+type TermsTextFieldKey = Exclude<
+  keyof TermsValues,
+  "template_id" | "template_name"
+>;
 
 const TERMS_TEXT_FIELDS: Array<{ key: TermsTextFieldKey; label: string }> = [
   { key: "policies", label: "Policies" },
@@ -23,7 +26,10 @@ function buildInitialTermsValues(
   template: StandardTemplate,
   initialValues?: TermsValues | null,
 ): TermsValues {
-  const values: TermsValues = { template_id: template.id };
+  const values: TermsValues = {
+    template_id: template.id,
+    template_name: template.name,
+  };
 
   TERMS_TEXT_FIELDS.forEach(({ key }) => {
     values[key] = initialValues?.[key] ?? template[key];

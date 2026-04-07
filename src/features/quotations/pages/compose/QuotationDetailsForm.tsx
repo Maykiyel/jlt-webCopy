@@ -3,7 +3,6 @@ import { Stack } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { TextInputField, TextareaField } from "@/components/form/textFields";
-import { PLACEHOLDER_MESSAGE_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
 import { MessageTemplateSelect } from "@/features/quotations/pages/compose/components/MessageTemplateSelect";
 import { QuotationCustomFieldsGrid } from "@/features/quotations/pages/compose/components/QuotationCustomFieldsGrid";
 import { useComposeMessageTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
@@ -28,8 +27,7 @@ export function QuotationDetailsForm({
   onSubmit,
   onValidityChange,
 }: QuotationDetailsFormProps) {
-  const { data: messageTemplates = PLACEHOLDER_MESSAGE_TEMPLATES } =
-    useComposeMessageTemplates();
+  const { data: messageTemplates = [] } = useComposeMessageTemplates();
   const [selectedMessageTemplateId, setSelectedMessageTemplateId] = useState<
     string | null
   >(null);

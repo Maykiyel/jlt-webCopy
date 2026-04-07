@@ -1,6 +1,7 @@
 import { Box } from "@mantine/core";
 import { QuotationPreview } from "@/features/quotations/components/QuotationPreview";
 import { BillingDetailsForm } from "@/features/quotations/pages/compose/BillingDetailsForm";
+import { ComposeStepLoader } from "@/features/quotations/pages/compose/components/ComposeStepLoader";
 import { QuotationDetailsForm } from "@/features/quotations/pages/compose/QuotationDetailsForm";
 import { TermsStep } from "@/features/quotations/pages/compose/TermsStep";
 import type {
@@ -9,13 +10,17 @@ import type {
   SignatoryValues,
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
-import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
+import type {
+  ClientInformationValue,
+  QuotationTemplate,
+} from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 
 interface ComposeStepContentProps {
   step: number;
   quotationTemplate: QuotationTemplate;
   quotation?: QuotationResource;
+  clientInformationFields?: ClientInformationValue[];
   quotationDetailsData: QuotationDetailsValues | null;
   billingDetailsData: BillingDetailsValues | null;
   termsData: TermsValues | null;
@@ -35,6 +40,7 @@ export function ComposeStepContent({
   step,
   quotationTemplate,
   quotation,
+  clientInformationFields,
   quotationDetailsData,
   billingDetailsData,
   termsData,
@@ -98,13 +104,17 @@ export function ComposeStepContent({
             <QuotationPreview
               quotation={previewProps.quotation}
               template={quotationTemplate}
+              clientInformationFields={clientInformationFields}
               quotationDetails={previewProps.quotationDetails}
               billingDetails={previewProps.billingDetails}
               terms={previewProps.terms}
               signatory={previewProps.signatory}
             />
           ) : isWaitingForQuotation ? (
-            <div>Loading quotation preview...</div>
+            <ComposeStepLoader
+              label="Loading quotation preview..."
+              minHeight="14rem"
+            />
           ) : (
             <TermsStep
               onNext={onTermsNext}

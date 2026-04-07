@@ -18,7 +18,10 @@ import type {
   SignatoryValues,
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
-import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
+import type {
+  ClientInformationValue,
+  QuotationTemplate,
+} from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 import {
   getBillingGrandTotal,
@@ -32,6 +35,7 @@ import classes from "./QuotationPreview.module.css";
 interface QuotationPreviewProps {
   quotation: QuotationResource;
   template: QuotationTemplate;
+  clientInformationFields?: ClientInformationValue[];
   quotationDetails: QuotationDetailsValues;
   billingDetails: BillingDetailsValues;
   terms: TermsValues;
@@ -55,6 +59,7 @@ function formatAmount(amount: number | null | undefined): string {
 export function QuotationPreview({
   quotation,
   template,
+  clientInformationFields,
   quotationDetails,
   billingDetails,
   terms,
@@ -83,9 +88,10 @@ export function QuotationPreview({
     billingDetails,
   );
   const grandTotal = getBillingGrandTotal(billingSectionsToRender);
-  const clientInformationFields = resolveClientInformationFields(
+  const resolvedClientInformationFields = resolveClientInformationFields(
     quotation,
     template.client_information_fields,
+    clientInformationFields,
   );
 
   return (
@@ -162,13 +168,13 @@ export function QuotationPreview({
           {quotationDetails.message}
         </Text>
 
-        {clientInformationFields.length > 0 && (
+        {resolvedClientInformationFields.length > 0 && (
           <SimpleGrid
             cols={2}
             mb={template.custom_fields.length > 0 ? "xs" : "lg"}
             spacing="xs"
           >
-            {clientInformationFields.map((field) => (
+            {resolvedClientInformationFields.map((field) => (
               <Group key={field.id} gap="xs" align="flex-start">
                 <Text size="xs" c="dimmed" w="9rem" style={{ flexShrink: 0 }}>
                   {field.label}:

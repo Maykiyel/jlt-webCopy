@@ -1,6 +1,11 @@
 import type { ClientInformationField } from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 
+interface ClientInformationValueInput {
+  label: string;
+  value: string | number | boolean | null;
+}
+
 export interface ResolvedClientInformationField {
   id: string;
   label: string;
@@ -66,8 +71,17 @@ function findValueByKey(
 
 export function resolveClientInformationFields(
   quotation: QuotationResource,
-  fields: ClientInformationField[],
+  fields: ClientInformationField[] = [],
+  providedValues?: ClientInformationValueInput[],
 ): ResolvedClientInformationField[] {
+  if (providedValues && providedValues.length > 0) {
+    return providedValues.map((field, index) => ({
+      id: `client-input-${index + 1}`,
+      label: field.label,
+      value: toDisplayValue(field.value) ?? "—",
+    }));
+  }
+
   const quotationRecord = quotation as unknown as UnknownRecord;
 
   return fields.map((field) => {

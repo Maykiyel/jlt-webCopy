@@ -1,11 +1,13 @@
 import { Box, Group } from "@mantine/core";
 import { useState } from "react";
 import { AppButton } from "@/components/ui/AppButton";
-import { PLACEHOLDER_STANDARD_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
-import { useComposeStandardTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
+import {
+  useComposeStandardTemplate,
+  useComposeStandardTemplates,
+} from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
+import { ComposeStepLoader } from "@/features/quotations/pages/compose/components/ComposeStepLoader";
 import { TermsTemplateSelector } from "@/features/quotations/pages/compose/components/TermsTemplateSelector";
 import type { TermsValues } from "@/features/quotations/schemas/compose.schema";
-import type { StandardTemplate } from "@/features/quotations/types/compose.types";
 import classes from "@/features/quotations/pages/compose/TermsStep.module.css";
 import { TermsViewer } from "@/features/quotations/pages/compose/TermsViewer";
 
@@ -16,28 +18,17 @@ interface TermsStepProps {
 }
 
 export function TermsStep({ onNext, onChange, savedData }: TermsStepProps) {
-  const { data: standardTemplates = PLACEHOLDER_STANDARD_TEMPLATES } =
+  const { data: standardTemplates = [], isLoading: isTemplatesLoading } =
     useComposeStandardTemplates();
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<StandardTemplate | null>(() => {
-      if (!savedData?.template_id) {
-        return null;
-      }
-
-      return (
-        standardTemplates.find((item) => item.id === savedData.template_id) ??
-        null
-      );
-    });
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    () => savedData?.template_id ?? null,
+  );
+  const { data: selectedTemplate, isLoading: isTemplateLoading } =
+    useComposeStandardTemplate(selectedTemplateId ?? undefined);
   const [currentValues, setCurrentValues] = useState<TermsValues | null>(null);
 
   function handleSelect(templateId: string) {
-    const template =
-      standardTemplates.find((item) => item.id === templateId) ?? null;
-    if (!template) {
-      return;
-    }
-    setSelectedTemplate(template);
+    setSelectedTemplateId(templateId);
   }
 
   function handleValuesChange(values: TermsValues) {
@@ -45,12 +36,27 @@ export function TermsStep({ onNext, onChange, savedData }: TermsStepProps) {
     onChange(values);
   }
 
-  if (!selectedTemplate) {
+  if (!selectedTemplateId) {
     return (
-      <TermsTemplateSelector
-        templates={standardTemplates}
-        onSelect={handleSelect}
-      />
+      <>
+        {isTemplatesLoading ? (
+          <ComposeStepLoader
+            label="Loading terms templates..."
+            minHeight="14rem"
+          />
+        ) : (
+          <TermsTemplateSelector
+            templates={standardTemplates}
+            onSelect={handleSelect}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (isTemplateLoading || !selectedTemplate) {
+    return (
+      <ComposeStepLoader label="Loading terms template..." minHeight="14rem" />
     );
   }
 

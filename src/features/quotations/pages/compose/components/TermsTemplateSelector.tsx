@@ -1,9 +1,9 @@
 import { Box, Text } from "@mantine/core";
-import type { StandardTemplate } from "@/features/quotations/types/compose.types";
+import type { StandardTemplateSummary } from "@/features/quotations/types/compose.types";
 import classes from "@/features/quotations/pages/compose/TermsStep.module.css";
 
 interface TermsTemplateSelectorProps {
-  templates: StandardTemplate[];
+  templates: StandardTemplateSummary[];
   onSelect: (templateId: string) => void;
 }
 

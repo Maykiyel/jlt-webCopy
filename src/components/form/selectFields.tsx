@@ -26,7 +26,11 @@ export function SelectField<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <Select
           {...rest}
-          value={field.value ?? null}
+          value={
+            typeof field.value === "string" && field.value.trim() === ""
+              ? null
+              : (field.value ?? null)
+          }
           onChange={(value) => field.onChange(value ?? "")}
           onBlur={field.onBlur}
           error={fieldState.error?.message}

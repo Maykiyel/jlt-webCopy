@@ -17,6 +17,7 @@ export function usePDFActions(
   const props = {
     quotation: viewerState.quotation,
     template: viewerState.template,
+    clientInformationFields: viewerState.clientInformationFields,
     quotationDetails: viewerState.quotationDetails,
     billingDetails: viewerState.billingDetails,
     terms: viewerState.terms,

@@ -120,6 +120,11 @@ export function QuotationsResponded() {
               tab: "responded",
               quotationId: row.id,
             }),
+            {
+              state: row.issued_quotation_id
+                ? { issuedQuotationId: String(row.issued_quotation_id) }
+                : undefined,
+            },
           )
         }
         actions={actions}

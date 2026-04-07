@@ -43,6 +43,7 @@ export type BillingDetailsValues = z.infer<typeof billingDetailsSchema>;
 
 export const termsSchema = z.object({
   template_id: z.string(),
+  template_name: z.string(),
   policies: z.string().optional(),
   terms_and_condition: z.string().optional(),
   banking_details: z.string().optional(),

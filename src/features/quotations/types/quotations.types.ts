@@ -47,6 +47,7 @@ export interface RespondedQuotationsResponse {
 // ─── Full quotation resource (GET /quotations/{id}) ───────────────────────────
 
 export interface QuotationResource {
+  id: string;
   reference_number: string;
   client: {
     full_name: string;
@@ -70,16 +71,21 @@ export interface QuotationResource {
     type: string;
     transport_mode: string;
     options: string[];
-  };
+  } | null;
   commodity: {
     commodity: string;
     cargo_type: string;
     container_size: string | null;
-  };
+  } | null;
   shipment: {
     origin: string;
     destination: string;
-  };
+  } | null;
+  regulatory_service: {
+    type_of_regulatory_assistance: string[];
+    service_level: string | null;
+    message: string | null;
+  } | null;
   quotation_file:
     | { id: number; file_name: string; file_url: string }[]
     | "No file available.";

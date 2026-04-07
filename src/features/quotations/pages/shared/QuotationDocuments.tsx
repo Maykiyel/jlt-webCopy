@@ -21,13 +21,13 @@ export function QuotationDocuments() {
     routeParams?.tab === "responded" || routeParams?.tab === "accepted";
 
   const { data: files = [], isLoading } = useQuery({
-    queryKey: quotationQueryKeys.quotationFiles(quotationId),
+    queryKey: quotationQueryKeys.quotationFiles(quotationId, "REQUESTED"),
     queryFn: () => {
       if (!routeParams) {
         throw new Error("Missing required route parameters.");
       }
 
-      return fetchQuotationFiles(routeParams.quotationId);
+      return fetchQuotationFiles(routeParams.quotationId, "REQUESTED");
     },
     enabled: hasValidRouteParams,
   });

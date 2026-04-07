@@ -5,6 +5,7 @@ interface ComposeStepActionsProps {
   step: number;
   isStep0Valid: boolean;
   previewReady: boolean;
+  isSending: boolean;
   quotationDetailsFormId: string;
   billingDetailsFormId: string;
   onOpenSendConfirm: () => void;
@@ -14,6 +15,7 @@ export function ComposeStepActions({
   step,
   isStep0Valid,
   previewReady,
+  isSending,
   quotationDetailsFormId,
   billingDetailsFormId,
   onOpenSendConfirm,
@@ -47,7 +49,11 @@ export function ComposeStepActions({
 
       {step === 2 && previewReady && (
         <Group justify="flex-end" mt="lg" style={{ marginTop: "auto" }}>
-          <AppButton variant="primary" onClick={onOpenSendConfirm}>
+          <AppButton
+            variant="primary"
+            onClick={onOpenSendConfirm}
+            disabled={isSending}
+          >
             Send
           </AppButton>
         </Group>

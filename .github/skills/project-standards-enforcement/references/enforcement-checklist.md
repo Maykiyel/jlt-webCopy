@@ -15,7 +15,7 @@ Use this checklist for every implementation, refactor, bugfix, or review task.
 2. Shared code is placed only in src/components, src/hooks, src/lib, src/stores, src/types, or src/utils.
 3. App composition concerns stay in src/app.
 4. Page/container files orchestrate flow; reusable logic is extracted to hooks/utils/components.
-5. New feature-specific APIs are located in src/features/<feature>/api unless explicitly shared.
+5. New feature-specific APIs are located in src/features/<feature>/services unless explicitly shared.
 
 ## Import Boundaries
 
