@@ -1,4 +1,4 @@
-import { QuotationFileViewer } from "@/features/quotations/pages/responded/QuotationFileViewer";
+import { QuotationFileViewer } from "@/features/quotations/pages/shared/QuotationFileViewer";
 
 export default function QuotationViewerPage() {
   return <QuotationFileViewer />;

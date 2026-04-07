@@ -1,6 +1,8 @@
 import { apiClient } from "@/lib/api/client";
 import type {
   QuotationsIndexResponse,
+  RespondedQuotationsResponse,
+  RespondedQuotationListItem,
   QuotationResource,
   QuotationFileResource,
   QuotationStatus,
@@ -28,9 +30,17 @@ export async function fetchQuotations(
         },
       },
     );
-    return response.data.data || { quotations: [], pagination: { count: 0, per_page: params.perPage || 10, total: 0 } };
+    return (
+      response.data.data || {
+        quotations: [],
+        pagination: { count: 0, per_page: params.perPage || 10, total: 0 },
+      }
+    );
   } catch (error) {
-    return { quotations: [], pagination: { count: 0, per_page: params.perPage || 10, total: 0 } };
+    return {
+      quotations: [],
+      pagination: { count: 0, per_page: params.perPage || 10, total: 0 },
+    };
   }
 }
 
@@ -62,5 +72,64 @@ export async function fetchQuotationFiles(
     data: QuotationFileResource[] | string;
   }>(`/quotations/${id}/files`, { params: { type } });
   if (typeof response.data.data === "string") return [];
+  return response.data.data;
+}
+
+interface FetchRespondedQuotationsParams {
+  search?: string;
+  perPage?: number;
+}
+
+export async function fetchRespondedQuotations(
+  params: FetchRespondedQuotationsParams,
+): Promise<RespondedQuotationsResponse> {
+  const response = await apiClient.get<{
+    data: RespondedQuotationsResponse | [];
+  }>("/quotations", {
+    params: {
+      "filter[status]": "RESPONDED",
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.perPage ? { perPage: params.perPage } : {}),
+    },
+  });
+
+  if (Array.isArray(response.data.data)) {
+    return {
+      quotations: [] as RespondedQuotationListItem[],
+      pagination: {
+        count: 0,
+        per_page: params.perPage ?? 10,
+        total: 0,
+      },
+    };
+  }
+
+  return response.data.data;
+}
+
+export async function fetchAcceptedQuotations(
+  params: FetchRespondedQuotationsParams,
+): Promise<RespondedQuotationsResponse> {
+  const response = await apiClient.get<{
+    data: RespondedQuotationsResponse | [];
+  }>("/quotations", {
+    params: {
+      "filter[status]": "ACCEPTED",
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.perPage ? { perPage: params.perPage } : {}),
+    },
+  });
+
+  if (Array.isArray(response.data.data)) {
+    return {
+      quotations: [] as RespondedQuotationListItem[],
+      pagination: {
+        count: 0,
+        per_page: params.perPage ?? 10,
+        total: 0,
+      },
+    };
+  }
+
   return response.data.data;
 }

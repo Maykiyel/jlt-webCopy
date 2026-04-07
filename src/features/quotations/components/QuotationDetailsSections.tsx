@@ -7,7 +7,7 @@ import {
   AccountBox,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
-import { buildQuotationDetailsRows } from "../utils/quotationDetailsRows";
+import { buildQuotationDetailsRows } from "@/features/quotations/utils/quotationDetailsRows";
 
 interface QuotationDetailsSectionsProps {
   quotation: QuotationResource;

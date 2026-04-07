@@ -11,15 +11,15 @@ import { userService } from "@/services/user.service";
 import { QUOTATION_STATUS } from "../../types/quotations.types";
 import { useQuotationClientColumns } from "./hooks/useQuotationClientColumns";
 import { useQuotationClientActions } from "./hooks/useQuotationClientActions";
-import { useRequestedRouteParams } from "./hooks/useRequestedRouteParams";
-import { useRequestedTableSearch } from "./hooks/useRequestedTableSearch";
+import { useQuotationRouteParams } from "@/features/quotations/pages/hooks/useQuotationRouteParams";
+import { useQuotationTableSearch } from "@/features/quotations/pages/hooks/useQuotationTableSearch";
 import { requestedQueryKeys } from "./utils/requestedQueryKeys";
-import { requestedRoutes } from "./utils/requestedRoutes";
+import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
 import { useAuthStore } from "@/stores/authStore";
 import { isLeadAccountSpecialist } from "@/lib/mappers/user.mapper";
 
 export function QuotationsClient() {
-  const routeParams = useRequestedRouteParams(["tab", "clientId"] as const);
+  const routeParams = useQuotationRouteParams(["tab", "clientId"] as const);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
@@ -31,7 +31,7 @@ export function QuotationsClient() {
     setPerPage,
     handleSearch,
     handleSearchChange,
-  } = useRequestedTableSearch();
+  } = useQuotationTableSearch();
 
   const { data, isLoading } = useQuery({
     queryKey: requestedQueryKeys.requestedClientList({
@@ -108,7 +108,7 @@ export function QuotationsClient() {
     onMakeQuotation: (row) => {
       if (!routeParams) return;
       navigate(
-        requestedRoutes.details({
+        quotationRoutes.details({
           tab: routeParams.tab,
           clientId: routeParams.clientId,
           quotationId: row.id,
@@ -138,7 +138,7 @@ export function QuotationsClient() {
         rowKey={(row) => row.id}
         onRowClick={(row) => {
           navigate(
-            requestedRoutes.details({
+            quotationRoutes.details({
               tab: routeParams.tab,
               clientId: routeParams.clientId,
               quotationId: row.id,

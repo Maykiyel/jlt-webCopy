@@ -1,4 +1,5 @@
 import { QUOTATION_STATUS } from "@/features/quotations/types/quotations.types";
+import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
 
 interface RequestedListKeyParams {
   searchQuery: string;
@@ -10,14 +11,14 @@ interface RequestedClientListKeyParams extends RequestedListKeyParams {
 }
 
 export const requestedQueryKeys = {
-  quotationsRoot: () => ["quotations"] as const,
+  quotationsRoot: quotationQueryKeys.quotationsRoot,
   requestedRoot: () =>
-    [
-      ...requestedQueryKeys.quotationsRoot(),
-      QUOTATION_STATUS.REQUESTED,
-    ] as const,
+    quotationQueryKeys.byStatusRoot(QUOTATION_STATUS.REQUESTED),
   requestedList: ({ searchQuery, perPage }: RequestedListKeyParams) =>
-    [...requestedQueryKeys.requestedRoot(), searchQuery, perPage] as const,
+    quotationQueryKeys.byStatusList(QUOTATION_STATUS.REQUESTED, {
+      searchQuery,
+      perPage,
+    }),
   requestedClientList: ({
     clientId,
     searchQuery,
@@ -30,8 +31,8 @@ export const requestedQueryKeys = {
       perPage,
     ] as const,
   quotationDetails: (quotationId?: string) =>
-    ["quotation", quotationId] as const,
+    quotationQueryKeys.quotationDetails(quotationId),
   quotationFiles: (quotationId?: string) =>
-    ["quotation-files", quotationId] as const,
+    quotationQueryKeys.quotationFiles(quotationId),
   accountSpecialists: () => ["users", "account-specialists"] as const,
 };

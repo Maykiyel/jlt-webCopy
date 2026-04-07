@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 
-interface UseRequestedTableSearchOptions {
+interface UseQuotationTableSearchOptions {
   debounceMs?: number;
   initialPerPage?: number;
 }
 
-export function useRequestedTableSearch(
-  options: UseRequestedTableSearchOptions = {},
+export function useQuotationTableSearch(
+  options: UseQuotationTableSearchOptions = {},
 ) {
   const { debounceMs = 400, initialPerPage = 10 } = options;
 

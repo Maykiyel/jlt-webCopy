@@ -27,6 +27,23 @@ export interface QuotationsIndexResponse {
   pagination: QuotationsPagination;
 }
 
+export interface RespondedQuotationListItem {
+  id: string;
+  client_name: string;
+  reference_number: string;
+  commodity: string | null;
+  service_type: string | null;
+  date: string;
+  status: string;
+  conversation_id: string | null;
+  prepared_by: string | null;
+}
+
+export interface RespondedQuotationsResponse {
+  quotations: RespondedQuotationListItem[];
+  pagination: QuotationsPagination;
+}
+
 // ─── Full quotation resource (GET /quotations/{id}) ───────────────────────────
 
 export interface QuotationResource {

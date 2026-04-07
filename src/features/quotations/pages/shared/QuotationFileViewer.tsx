@@ -9,6 +9,8 @@ import { useLocation, useNavigate, useParams } from "react-router";
 import { useRef } from "react";
 import jltLogoUrl from "@/assets/logos/word-dark.png";
 import { QuotationPreview } from "@/features/quotations/components/QuotationPreview";
+import { useQuotationRouteParams } from "@/features/quotations/pages/hooks/useQuotationRouteParams";
+import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
 import { usePDFActions } from "@/features/quotations/pdf/usePDFActions";
 import type { QuotationViewerState } from "@/features/quotations/types/compose.types";
 import classes from "./QuotationFileViewer.module.css";
@@ -16,7 +18,10 @@ import classes from "./QuotationFileViewer.module.css";
 export function QuotationFileViewer() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { tab, clientId, quotationId } = useParams();
+  const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
+  const params = useParams<{ clientId?: string }>();
+  const clientId = params.clientId;
+  const canEdit = routeParams?.tab === "requested" && Boolean(clientId);
   const printRef = useRef<HTMLDivElement | null>(null);
   const state = location.state as QuotationViewerState | null;
   const { handleDownload, handlePrint } = usePDFActions(state, jltLogoUrl);
@@ -32,13 +37,18 @@ export function QuotationFileViewer() {
   const viewerState = state;
 
   function handleEdit() {
-    if (!tab || !clientId || !quotationId) {
+    if (!routeParams || !clientId || !canEdit) {
       navigate(-1);
       return;
     }
 
     navigate(
-      `/quotations/${tab}/client/${clientId}/${quotationId}/compose/${viewerState.template.id}`,
+      quotationRoutes.composeTemplate({
+        tab: routeParams.tab,
+        clientId,
+        quotationId: routeParams.quotationId,
+        templateId: viewerState.template.id,
+      }),
       {
         state: {
           editMode: true,
@@ -69,9 +79,11 @@ export function QuotationFileViewer() {
           <ActionIcon variant="subtle" onClick={handlePrint} aria-label="Print">
             <Print width="1.25rem" height="1.25rem" />
           </ActionIcon>
-          <ActionIcon variant="subtle" onClick={handleEdit} aria-label="Edit">
-            <EditNote width="1.25rem" height="1.25rem" />
-          </ActionIcon>
+          {canEdit ? (
+            <ActionIcon variant="subtle" onClick={handleEdit} aria-label="Edit">
+              <EditNote width="1.25rem" height="1.25rem" />
+            </ActionIcon>
+          ) : null}
         </Group>
       </Box>
 

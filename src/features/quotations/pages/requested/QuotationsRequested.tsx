@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { fetchQuotations } from "../../services/quotations.service";
-import { useRequestedTableSearch } from "./hooks/useRequestedTableSearch";
+import { useQuotationTableSearch } from "@/features/quotations/pages/hooks/useQuotationTableSearch";
 import { requestedQueryKeys } from "./utils/requestedQueryKeys";
-import { requestedRoutes } from "./utils/requestedRoutes";
+import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
 import {
   QUOTATION_STATUS,
   type QuotationClientGroup,
@@ -48,7 +48,7 @@ export function QuotationsRequested() {
     setPerPage,
     handleSearch,
     handleSearchChange,
-  } = useRequestedTableSearch();
+  } = useQuotationTableSearch();
 
   const { data, isLoading } = useQuery({
     queryKey: requestedQueryKeys.requestedList({ searchQuery, perPage }),
@@ -79,7 +79,9 @@ export function QuotationsRequested() {
         searchValue={search}
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}
-        onRowClick={(row) => navigate(requestedRoutes.client(row.client_id))}
+        onRowClick={(row) =>
+          navigate(quotationRoutes.client("requested", row.client_id))
+        }
       />
     </PageCard>
   );

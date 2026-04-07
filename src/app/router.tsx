@@ -50,7 +50,15 @@ export const router = createBrowserRouter([
             Component: Quotations,
           },
           {
+            path: "quotations/:tab/:quotationId/documents",
+            Component: Quotations,
+          },
+          {
             path: "quotations/:tab/client/:clientId/:quotationId/view",
+            Component: QuotationViewerPage,
+          },
+          {
+            path: "quotations/:tab/:quotationId/view",
             Component: QuotationViewerPage,
           },
           {
@@ -65,6 +73,7 @@ export const router = createBrowserRouter([
             path: "quotations/:tab/client/:clientId/:quotationId",
             Component: Quotations,
           },
+          { path: "quotations/:tab/:quotationId", Component: Quotations },
           { path: "quotations/:tab/client/:clientId", Component: Quotations },
           { path: "quotations/:tab", Component: Quotations },
 
