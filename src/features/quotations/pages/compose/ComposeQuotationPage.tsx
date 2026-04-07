@@ -16,13 +16,15 @@ import { ComposeStepContent } from "@/features/quotations/pages/compose/componen
 import {
   useComposeQuotationClientInputs,
   useComposeQuotationTemplate,
-} from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
-import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
+} from "@/features/quotations/hooks/useComposeReferenceData";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { buildIssuedQuotationFormData } from "@/features/quotations/pages/compose/utils/issuedQuotationPayload";
 import {
   createIssuedQuotation,
   fetchQuotation,
-} from "@/features/quotations/services/quotations.service";
+  updateIssuedQuotation,
+} from "@/features/quotations/api/quotations.api";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import type {
   BillingDetailsValues,
   QuotationDetailsValues,
@@ -32,6 +34,9 @@ import type {
 import type {
   ClientInformationValue,
   QuotationTemplate,
+  QuotationViewerRouteState,
+  QuotationViewerState,
+  ViewerSignatoryValues,
 } from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 
@@ -40,10 +45,11 @@ const BILLING_DETAILS_FORM_ID = "billing-details-form";
 
 interface ComposeLocationState {
   editMode?: boolean;
+  issuedQuotationId?: string;
   quotationDetails?: QuotationDetailsValues;
   billingDetails?: BillingDetailsValues;
   terms?: TermsValues;
-  signatory?: SignatoryValues;
+  signatory?: ViewerSignatoryValues;
 }
 
 function toErrorMessage(error: unknown): string {
@@ -133,6 +139,8 @@ export function ComposeQuotationPage() {
   const initialBillingDetails = composeLocationState?.billingDetails ?? null;
   const initialTerms = composeLocationState?.terms ?? null;
   const initialSignatory = composeLocationState?.signatory ?? null;
+  const initialIssuedQuotationId =
+    composeLocationState?.issuedQuotationId ?? null;
   const userResource = useAuthStore((state) => state.user);
   const currentUserName = userResource
     ? `${userResource.first_name} ${userResource.last_name}`
@@ -163,8 +171,10 @@ export function ComposeQuotationPage() {
   const [billingDetailsData, setBillingDetailsData] =
     useState<BillingDetailsValues | null>(initialBillingDetails);
   const [termsData, setTermsData] = useState<TermsValues | null>(initialTerms);
-  const [signatoryData, setSignatoryData] = useState<SignatoryValues | null>(
-    initialSignatory,
+  const [signatoryData, setSignatoryData] =
+    useState<ViewerSignatoryValues | null>(initialSignatory);
+  const [issuedQuotationId, setIssuedQuotationId] = useState<string | null>(
+    null,
   );
   const [previewReady, setPreviewReady] = useState(
     Boolean(
@@ -187,6 +197,12 @@ export function ComposeQuotationPage() {
   const canOpenSignatoryModal = termsData !== null || signatoryData !== null;
   const canRenderTermsStep =
     quotationDetailsData !== null && billingDetailsData !== null;
+  const fallbackIssuedQuotationId =
+    quotation?.issued_quotation_id == null
+      ? null
+      : String(quotation.issued_quotation_id);
+  const issuedQuotationIdForEdit =
+    initialIssuedQuotationId ?? fallbackIssuedQuotationId;
 
   const sendMutation = useMutation({
     mutationFn: async () => {
@@ -207,7 +223,12 @@ export function ComposeQuotationPage() {
       ) {
         throw new Error("Subject and message are required before sending.");
       }
-      if (!signatoryData.signature_file) {
+
+      const hasSignature = Boolean(
+        signatoryData.signature_file || signatoryData.signature_file_url,
+      );
+
+      if (!hasSignature) {
         throw new Error(
           "Upload an authorized signatory signature before sending.",
         );
@@ -232,9 +253,22 @@ export function ComposeQuotationPage() {
         issuedQuotationFile,
       });
 
+      if (editMode) {
+        if (!issuedQuotationIdForEdit) {
+          throw new Error("Missing issued quotation id for update.");
+        }
+
+        return updateIssuedQuotation(
+          quotationId,
+          issuedQuotationIdForEdit,
+          payload,
+        );
+      }
+
       return createIssuedQuotation(quotationId, payload);
     },
-    onSuccess: async () => {
+    onSuccess: async (createdIssuedQuotation) => {
+      setIssuedQuotationId(String(createdIssuedQuotation.id));
       closeSendConfirm();
       openSendSuccess();
 
@@ -325,11 +359,38 @@ export function ComposeQuotationPage() {
       return;
     }
 
-    const viewerPath = clientId
-      ? `/quotations/${tab}/client/${clientId}/${quotationId}/view`
-      : `/quotations/${tab}/${quotationId}/view`;
+    const viewerPath = quotationRoutes.viewer({
+      tab,
+      clientId,
+      quotationId,
+      issuedQuotationId: issuedQuotationId ?? undefined,
+    });
 
-    navigate(viewerPath);
+    const viewerNavigationState:
+      | (QuotationViewerRouteState & Partial<QuotationViewerState>)
+      | null =
+      quotation &&
+      quotationDetailsData &&
+      billingDetailsData &&
+      termsData &&
+      signatoryData
+        ? {
+            issuedQuotationId: issuedQuotationId ?? undefined,
+            quotation,
+            template: quotationTemplate,
+            clientInformationFields,
+            quotationDetails: quotationDetailsData,
+            billingDetails: billingDetailsData,
+            terms: termsData,
+            signatory: signatoryData,
+          }
+        : issuedQuotationId
+          ? { issuedQuotationId }
+          : null;
+
+    navigate(viewerPath, {
+      state: viewerNavigationState ?? undefined,
+    });
   }
 
   return (

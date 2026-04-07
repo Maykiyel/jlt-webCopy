@@ -1,23 +1,18 @@
 # Validation Command Matrix
 
-Use this matrix to choose required validation gates based on change scope.
+Use this matrix to choose required validation gates based on structure-change scope.
 
 ## Baseline Command
 
-1. Always run: pnpm lint
+1. Always run for code/config changes: pnpm lint
 
 ## Command Selection by Scope
 
 1. Documentation-only skill/instructions changes: lint optional, no tests required.
-2. Local UI text/style changes with no behavior changes: pnpm lint required.
-3. Component logic or feature behavior changes: pnpm lint and targeted tests required.
-4. Shared utilities, stores, schemas, or cross-feature code changes: pnpm lint and pnpm test required.
-5. Routing, app composition, build pipeline, or broad refactor changes: pnpm lint, pnpm test, and pnpm build required.
-
-## Quotations-Specific
-
-1. If billing derivation or quotations output logic changes: run targeted quotations tests first, then pnpm test.
-2. If preview/PDF path changed: include explicit parity verification notes.
+2. ESLint rule updates (for example import/no-restricted-paths zones): pnpm lint required.
+3. File moves/refactors that alter imports: pnpm lint and targeted tests required.
+4. Shared-layer changes affecting multiple features: pnpm lint and pnpm test required.
+5. App-layer routing/composition or broad architecture refactors: pnpm lint, pnpm test, and pnpm build required.
 
 ## Evidence Logging
 

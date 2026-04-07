@@ -1,5 +1,5 @@
 import { QUOTATION_STATUS } from "@/features/quotations/types/quotations.types";
-import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 
 interface RequestedListKeyParams {
   searchQuery: string;

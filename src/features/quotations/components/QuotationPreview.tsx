@@ -15,12 +15,12 @@ import { QuotationPreviewTermsBlocks } from "@/features/quotations/components/pr
 import type {
   BillingDetailsValues,
   QuotationDetailsValues,
-  SignatoryValues,
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
 import type {
   ClientInformationValue,
   QuotationTemplate,
+  ViewerSignatoryValues,
 } from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
 import {
@@ -39,7 +39,7 @@ interface QuotationPreviewProps {
   quotationDetails: QuotationDetailsValues;
   billingDetails: BillingDetailsValues;
   terms: TermsValues;
-  signatory: SignatoryValues;
+  signatory: ViewerSignatoryValues;
   dateGenerated?: string;
   mode?: "default" | "viewer";
 }
@@ -67,31 +67,46 @@ export function QuotationPreview({
   dateGenerated,
   mode = "default",
 }: QuotationPreviewProps) {
-  const signaturePreviewUrl = useMemo(
-    () =>
-      signatory.signature_file
-        ? URL.createObjectURL(signatory.signature_file)
-        : null,
-    [signatory.signature_file],
-  );
+  const hasSignatureFile = Boolean(signatory.signature_file);
+  const signaturePreviewUrl = useMemo(() => {
+    if (signatory.signature_file) {
+      return URL.createObjectURL(signatory.signature_file);
+    }
+
+    return signatory.signature_file_url ?? null;
+  }, [signatory.signature_file, signatory.signature_file_url]);
 
   useEffect(() => {
     return () => {
-      if (signaturePreviewUrl) {
+      if (hasSignatureFile && signaturePreviewUrl) {
         URL.revokeObjectURL(signaturePreviewUrl);
       }
     };
-  }, [signaturePreviewUrl]);
+  }, [hasSignatureFile, signaturePreviewUrl]);
 
-  const billingSectionsToRender = getBillingSectionsWithCharges(
-    template,
-    billingDetails,
+  const generatedDateLabel = useMemo(
+    () => formatDate(dateGenerated ?? new Date().toISOString()),
+    [dateGenerated],
   );
-  const grandTotal = getBillingGrandTotal(billingSectionsToRender);
-  const resolvedClientInformationFields = resolveClientInformationFields(
-    quotation,
-    template.client_information_fields,
-    clientInformationFields,
+
+  const billingSectionsToRender = useMemo(
+    () => getBillingSectionsWithCharges(template, billingDetails),
+    [billingDetails, template],
+  );
+
+  const grandTotal = useMemo(
+    () => getBillingGrandTotal(billingSectionsToRender),
+    [billingSectionsToRender],
+  );
+
+  const resolvedClientInformationFields = useMemo(
+    () =>
+      resolveClientInformationFields(
+        quotation,
+        template.client_information_fields,
+        clientInformationFields,
+      ),
+    [clientInformationFields, quotation, template.client_information_fields],
   );
 
   return (
@@ -121,7 +136,7 @@ export function QuotationPreview({
         </Group>
 
         <Text size="xs" mb="md">
-          {formatDate(dateGenerated ?? new Date().toISOString())}
+          {generatedDateLabel}
         </Text>
 
         <Stack gap={0} mb="md">

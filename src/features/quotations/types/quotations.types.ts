@@ -29,6 +29,7 @@ export interface QuotationsIndexResponse {
 
 export interface RespondedQuotationListItem {
   id: string;
+  issued_quotation_id?: number | string | null;
   client_name: string;
   reference_number: string;
   commodity: string | null;
@@ -48,6 +49,7 @@ export interface RespondedQuotationsResponse {
 
 export interface QuotationResource {
   id: string;
+  issued_quotation_id?: number | string | null;
   reference_number: string;
   client: {
     full_name: string;
@@ -107,6 +109,61 @@ export interface QuotationFileResource {
   file_name: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface IssuedQuotationDetailValueResource {
+  label: string;
+  value: string;
+}
+
+export interface IssuedQuotationChargeItemResource {
+  receipt_charge_label: string;
+  currency_label: string;
+  uom_label: string;
+  amount: number | string | null;
+}
+
+export interface IssuedQuotationChargeResource {
+  name: string;
+  subtotal: number | string | null;
+  items: IssuedQuotationChargeItemResource[] | null;
+}
+
+export interface IssuedQuotationStandardConfigResource {
+  name: string;
+  policies: string;
+  terms_and_conditions: string;
+  banking_details: string;
+  footer: string;
+}
+
+export interface IssuedQuotationSignatoryResource {
+  closing_statement: string;
+  is_authorized_signatory: boolean;
+  authorized_signatory_name: string;
+  position: string;
+  signature_file_path: string | null;
+}
+
+export interface IssuedQuotationResource {
+  id: number | string;
+  quotation_id: number | string;
+  template_id: number | string;
+  issued_by: string | null;
+  subject: string;
+  message: string;
+  quotation_details: IssuedQuotationDetailValueResource[];
+  billing_details: {
+    charges: IssuedQuotationChargeResource[];
+    total: number | string | null;
+  };
+  standard_config: IssuedQuotationStandardConfigResource | null;
+  signatory: IssuedQuotationSignatoryResource | null;
+  client_inputs: {
+    label: string;
+    value: string | number | boolean | null;
+  }[];
+  quotation_file?: QuotationFileResource | null;
 }
 
 // ─── Status filter ─────────────────────────────────────────────────────────────

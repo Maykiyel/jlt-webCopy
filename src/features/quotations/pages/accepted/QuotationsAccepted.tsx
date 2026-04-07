@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import {
   Article,
@@ -12,10 +12,14 @@ import {
   type AppTableColumn,
 } from "@/components/AppTable";
 import { PageCard } from "@/components/PageCard";
-import { useQuotationTableSearch } from "@/features/quotations/pages/hooks/useQuotationTableSearch";
-import { fetchAcceptedQuotations } from "@/features/quotations/services/quotations.service";
+import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
+import {
+  fetchAcceptedQuotations,
+  fetchQuotation,
+} from "@/features/quotations/api/quotations.api";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import type { RespondedQuotationListItem } from "@/features/quotations/types/quotations.types";
-import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { acceptedQueryKeys } from "@/features/quotations/pages/accepted/utils/acceptedQueryKeys";
 
 const COLUMNS: AppTableColumn<RespondedQuotationListItem>[] = [
@@ -59,6 +63,7 @@ const COLUMNS: AppTableColumn<RespondedQuotationListItem>[] = [
 
 export function QuotationsAccepted() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     search,
     searchQuery,
@@ -108,20 +113,35 @@ export function QuotationsAccepted() {
     [],
   );
 
+  const prefetchQuotationDetails = (quotationId: string) => {
+    void queryClient.prefetchQuery({
+      queryKey: quotationQueryKeys.quotationDetails(quotationId),
+      queryFn: () => fetchQuotation(quotationId),
+      staleTime: 30_000,
+    });
+  };
+
   return (
     <PageCard title="LIST OF ACCEPTED QUOTATION">
       <AppTable
         columns={COLUMNS}
         data={isLoading ? [] : rows}
         rowKey={(row) => row.id}
-        onRowClick={(row) =>
+        onRowHover={(row) => prefetchQuotationDetails(row.id)}
+        onRowClick={(row) => {
+          prefetchQuotationDetails(row.id);
           navigate(
             quotationRoutes.details({
               tab: "accepted",
               quotationId: row.id,
             }),
-          )
-        }
+            {
+              state: row.issued_quotation_id
+                ? { issuedQuotationId: String(row.issued_quotation_id) }
+                : undefined,
+            },
+          );
+        }}
         actions={actions}
         withEntryControls
         perPage={perPage}

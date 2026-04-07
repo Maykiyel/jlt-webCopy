@@ -31,9 +31,10 @@ export function usePDFActions(
       import("@/features/quotations/pdf/QuotationPDF"),
     ]);
 
-    const signatorySignatureSrc = viewerState.signatory.signature_file
-      ? URL.createObjectURL(viewerState.signatory.signature_file)
-      : null;
+    const hasSignatureFile = Boolean(viewerState.signatory.signature_file);
+    const signatorySignatureSrc = hasSignatureFile
+      ? URL.createObjectURL(viewerState.signatory.signature_file as File)
+      : (viewerState.signatory.signature_file_url ?? null);
 
     try {
       const doc = createElement(QuotationPDF, {
@@ -42,7 +43,7 @@ export function usePDFActions(
       });
       return await pdf(doc as never).toBlob();
     } finally {
-      if (signatorySignatureSrc) {
+      if (hasSignatureFile && signatorySignatureSrc) {
         URL.revokeObjectURL(signatorySignatureSrc);
       }
     }

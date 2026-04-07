@@ -18,8 +18,10 @@ const QuotationViewerPage = lazy(
   () => import("./routes/app/quotations/QuotationViewerPage"),
 );
 const Shipments = lazy(() => import("./routes/app/shipments/ShipmentsPage"));
-const ShipmentDetailsPage = lazy(
-  () => import("@/features/shipments/pages/ShipmentDetails").then(m => ({ default: m.ShipmentDetailsPage })),
+const ShipmentDetailsPage = lazy(() =>
+  import("@/features/shipments/pages/ShipmentDetails").then((m) => ({
+    default: m.ShipmentDetailsPage,
+  })),
 );
 
 export const router = createBrowserRouter([
@@ -52,6 +54,14 @@ export const router = createBrowserRouter([
           {
             path: "quotations/:tab/:quotationId/documents",
             Component: Quotations,
+          },
+          {
+            path: "quotations/:tab/client/:clientId/:quotationId/view/:issuedQuotationId",
+            Component: QuotationViewerPage,
+          },
+          {
+            path: "quotations/:tab/:quotationId/view/:issuedQuotationId",
+            Component: QuotationViewerPage,
           },
           {
             path: "quotations/:tab/client/:clientId/:quotationId/view",

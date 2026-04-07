@@ -12,7 +12,7 @@ import {
 import * as z from "zod";
 import { SelectField } from "@/components/form/selectFields";
 import { NumberInputField } from "@/components/form/valueFields";
-import { useComposeBillingSettings } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
+import { useComposeBillingSettings } from "@/features/quotations/hooks/useComposeReferenceData";
 import { billingDetailsSchema } from "@/features/quotations/schemas/compose.schema";
 import type { BillingSection } from "@/features/quotations/types/compose.types";
 import { tableSelectStyles } from "./billingSelectStyles";

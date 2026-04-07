@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import type {
+  IssuedQuotationResource,
   QuotationsIndexResponse,
   RespondedQuotationsResponse,
   RespondedQuotationListItem,
@@ -281,8 +282,8 @@ export async function fetchQuotationClientInputs(
 export async function createIssuedQuotation(
   quotationId: string,
   payload: FormData,
-): Promise<unknown> {
-  const response = await apiClient.post<{ data: unknown }>(
+): Promise<IssuedQuotationResource> {
+  const response = await apiClient.post<{ data: IssuedQuotationResource }>(
     `/quotations/${quotationId}/issued-quotations`,
     payload,
     {
@@ -290,6 +291,35 @@ export async function createIssuedQuotation(
         "Content-Type": "multipart/form-data",
       },
     },
+  );
+
+  return response.data.data;
+}
+
+export async function updateIssuedQuotation(
+  quotationId: string,
+  issuedQuotationId: string,
+  payload: FormData,
+): Promise<IssuedQuotationResource> {
+  const response = await apiClient.post<{ data: IssuedQuotationResource }>(
+    `/quotations/${quotationId}/issued-quotations/${issuedQuotationId}`,
+    payload,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data.data;
+}
+
+export async function fetchIssuedQuotation(
+  quotationId: string,
+  issuedQuotationId: string,
+): Promise<IssuedQuotationResource> {
+  const response = await apiClient.get<{ data: IssuedQuotationResource }>(
+    `/quotations/${quotationId}/issued-quotations/${issuedQuotationId}`,
   );
 
   return response.data.data;

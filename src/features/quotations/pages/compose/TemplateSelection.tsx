@@ -4,12 +4,12 @@ import { useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { TemplateSelector } from "@/features/quotations/components/TemplateSelector";
 import { ComposeStepLoader } from "@/features/quotations/pages/compose/components/ComposeStepLoader";
-import { useComposeQuotationTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
-import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
+import { useComposeQuotationTemplates } from "@/features/quotations/hooks/useComposeReferenceData";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import {
   fetchQuotation,
   type ComposeTemplateType,
-} from "@/features/quotations/services/quotations.service";
+} from "@/features/quotations/api/quotations.api";
 
 function resolveComposeTemplateType(
   serviceType?: string | null,

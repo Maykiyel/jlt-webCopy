@@ -4,7 +4,7 @@ import { AppButton } from "@/components/ui/AppButton";
 import {
   useComposeStandardTemplate,
   useComposeStandardTemplates,
-} from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
+} from "@/features/quotations/hooks/useComposeReferenceData";
 import { ComposeStepLoader } from "@/features/quotations/pages/compose/components/ComposeStepLoader";
 import { TermsTemplateSelector } from "@/features/quotations/pages/compose/components/TermsTemplateSelector";
 import type { TermsValues } from "@/features/quotations/schemas/compose.schema";

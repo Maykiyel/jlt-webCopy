@@ -68,6 +68,10 @@ export interface StandardTemplate extends StandardTemplateSummary {
   footer: string;
 }
 
+export type ViewerSignatoryValues = SignatoryValues & {
+  signature_file_url?: string | null;
+};
+
 export interface QuotationViewerState {
   quotation: QuotationResource;
   template: QuotationTemplate;
@@ -75,5 +79,9 @@ export interface QuotationViewerState {
   quotationDetails: QuotationDetailsValues;
   billingDetails: BillingDetailsValues;
   terms: TermsValues;
-  signatory: SignatoryValues;
+  signatory: ViewerSignatoryValues;
+}
+
+export interface QuotationViewerRouteState {
+  issuedQuotationId?: string;
 }

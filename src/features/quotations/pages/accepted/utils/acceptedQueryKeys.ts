@@ -1,4 +1,4 @@
-import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { QUOTATION_STATUS } from "@/features/quotations/types/quotations.types";
 
 export const acceptedQueryKeys = {

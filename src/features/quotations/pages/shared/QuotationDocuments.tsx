@@ -1,20 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { SimpleGrid, Text } from "@mantine/core";
 import { RequestQuote } from "@nine-thirty-five/material-symbols-react/outlined";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { DocumentCard } from "@/components/DocumentCard";
 import { AppButton } from "@/components/ui/AppButton";
-import { fetchQuotationFiles } from "@/features/quotations/services/quotations.service";
-import { useQuotationRouteParams } from "@/features/quotations/pages/hooks/useQuotationRouteParams";
-import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
-import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
+import { fetchQuotationFiles } from "@/features/quotations/api/quotations.api";
+import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 export function QuotationDocuments() {
   const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
   const params = useParams<{ clientId?: string }>();
+  const location = useLocation();
   const clientId = params.clientId;
   const navigate = useNavigate();
+  const viewerContextState =
+    (location.state as { issuedQuotationId?: string } | null) ?? null;
   const hasValidRouteParams = Boolean(routeParams);
   const quotationId = routeParams?.quotationId;
   const showQuotationButton =
@@ -56,6 +59,8 @@ export function QuotationDocuments() {
                   tab: routeParams.tab,
                   quotationId: routeParams.quotationId,
                   clientId,
+                  issuedQuotationId:
+                    viewerContextState?.issuedQuotationId ?? undefined,
                 }),
               )
             }

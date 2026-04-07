@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { TextInputField, TextareaField } from "@/components/form/textFields";
 import { MessageTemplateSelect } from "@/features/quotations/pages/compose/components/MessageTemplateSelect";
 import { QuotationCustomFieldsGrid } from "@/features/quotations/pages/compose/components/QuotationCustomFieldsGrid";
-import { useComposeMessageTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
+import { useComposeMessageTemplates } from "@/features/quotations/hooks/useComposeReferenceData";
 import {
   quotationDetailsSchema,
   type QuotationDetailsValues,

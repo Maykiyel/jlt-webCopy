@@ -8,8 +8,8 @@ import {
   fetchComposeStandardTemplate,
   fetchComposeStandardTemplates,
   composeReferenceQueryKeys,
-} from "@/features/quotations/pages/compose/utils/composeReferenceData";
-import type { ComposeTemplateType } from "@/features/quotations/services/quotations.service";
+} from "@/features/quotations/api/composeReference.api";
+import type { ComposeTemplateType } from "@/features/quotations/api/quotations.api";
 
 export function useComposeQuotationTemplates(templateType?: ComposeTemplateType) {
   return useQuery({

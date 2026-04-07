@@ -56,6 +56,8 @@ export interface AppTableProps<T> {
   onSearch?: (value: string) => void;
   /** Optional row click handler */
   onRowClick?: (row: T) => void;
+  /** Optional row hover handler for high-confidence prefetching */
+  onRowHover?: (row: T) => void;
 }
 
 const ENTRY_OPTIONS = ["5", "10", "25", "50", "100"];
@@ -77,6 +79,7 @@ export function AppTable<T>({
   onSearch,
   showingCount: showingCountProp,
   onRowClick,
+  onRowHover,
 }: AppTableProps<T>) {
   const hasActions = Array.isArray(actions) && actions.length > 0;
   const showingCount = showingCountProp ?? data.length;
@@ -211,7 +214,10 @@ export function AppTable<T>({
 
         <Table.Tbody>
           {data.map((row, idx) => (
-            <Table.Tr key={rowKey ? rowKey(row) : idx}>
+            <Table.Tr
+              key={rowKey ? rowKey(row) : idx}
+              onMouseEnter={onRowHover ? () => onRowHover(row) : undefined}
+            >
               {columns.map((col) => (
                 <Table.Td
                   key={String(col.key)}

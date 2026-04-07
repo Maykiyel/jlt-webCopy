@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
-import { fetchQuotations } from "../../services/quotations.service";
-import { useQuotationTableSearch } from "@/features/quotations/pages/hooks/useQuotationTableSearch";
+import { fetchQuotations } from "@/features/quotations/api/quotations.api";
+import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
 import { requestedQueryKeys } from "./utils/requestedQueryKeys";
-import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import {
   QUOTATION_STATUS,
   type QuotationClientGroup,
@@ -41,6 +41,7 @@ const COLUMNS: AppTableColumn<QuotationClientGroup>[] = [
 
 export function QuotationsRequested() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     search,
     searchQuery,
@@ -64,12 +65,30 @@ export function QuotationsRequested() {
   const total = data?.pagination.total ?? 0;
   const count = data?.pagination.count ?? 0;
 
+  const prefetchClientQuotations = (clientId: number) => {
+    void queryClient.prefetchQuery({
+      queryKey: requestedQueryKeys.requestedClientList({
+        clientId: String(clientId),
+        searchQuery: "",
+        perPage: 10,
+      }),
+      queryFn: () =>
+        fetchQuotations({
+          status: QUOTATION_STATUS.REQUESTED,
+          clientId,
+          perPage: 10,
+        }),
+      staleTime: 30_000,
+    });
+  };
+
   return (
     <PageCard title="LIST OF NEW REQUEST">
       <AppTable
         columns={COLUMNS}
         data={isLoading ? [] : quotations}
         rowKey={(row) => row.client_id}
+        onRowHover={(row) => prefetchClientQuotations(row.client_id)}
         withEntryControls
         perPage={perPage}
         onPerPageChange={setPerPage}
@@ -79,9 +98,10 @@ export function QuotationsRequested() {
         searchValue={search}
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}
-        onRowClick={(row) =>
-          navigate(quotationRoutes.client("requested", row.client_id))
-        }
+        onRowClick={(row) => {
+          prefetchClientQuotations(row.client_id);
+          navigate(quotationRoutes.client("requested", row.client_id));
+        }}
       />
     </PageCard>
   );

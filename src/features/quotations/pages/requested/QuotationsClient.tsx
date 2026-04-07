@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Text } from "@mantine/core";
@@ -6,15 +7,16 @@ import { AppTable } from "@/components/AppTable";
 import {
   fetchQuotations,
   updateQuotationAssignee,
-} from "../../services/quotations.service";
+  fetchQuotation,
+} from "@/features/quotations/api/quotations.api";
 import { userService } from "@/services/user.service";
 import { QUOTATION_STATUS } from "../../types/quotations.types";
 import { useQuotationClientColumns } from "./hooks/useQuotationClientColumns";
 import { useQuotationClientActions } from "./hooks/useQuotationClientActions";
-import { useQuotationRouteParams } from "@/features/quotations/pages/hooks/useQuotationRouteParams";
-import { useQuotationTableSearch } from "@/features/quotations/pages/hooks/useQuotationTableSearch";
+import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
+import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
 import { requestedQueryKeys } from "./utils/requestedQueryKeys";
-import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { useAuthStore } from "@/stores/authStore";
 import { isLeadAccountSpecialist } from "@/lib/mappers/user.mapper";
 
@@ -60,18 +62,24 @@ export function QuotationsClient() {
     enabled: isLeadAS,
   });
 
-  const specialistOptions = (specialistsResponse?.data ?? []).map(
-    (specialist) => ({
-      value: String(specialist.id),
-      label: specialist.full_name,
-    }),
+  const specialistOptions = useMemo(
+    () =>
+      (specialistsResponse?.data ?? []).map((specialist) => ({
+        value: String(specialist.id),
+        label: specialist.full_name,
+      })),
+    [specialistsResponse?.data],
   );
 
-  const specialistIdByName = new Map(
-    (specialistsResponse?.data ?? []).map((specialist) => [
-      specialist.full_name,
-      String(specialist.id),
-    ]),
+  const specialistIdByName = useMemo(
+    () =>
+      new Map(
+        (specialistsResponse?.data ?? []).map((specialist) => [
+          specialist.full_name,
+          String(specialist.id),
+        ]),
+      ),
+    [specialistsResponse?.data],
   );
 
   const reassignMutation = useMutation({
@@ -88,6 +96,14 @@ export function QuotationsClient() {
       });
     },
   });
+
+  const prefetchQuotationDetails = (quotationId: string) => {
+    void queryClient.prefetchQuery({
+      queryKey: requestedQueryKeys.quotationDetails(quotationId),
+      queryFn: () => fetchQuotation(quotationId),
+      staleTime: 30_000,
+    });
+  };
 
   const clientGroup = data?.quotations[0];
   const quotations = clientGroup?.quotations ?? [];
@@ -107,6 +123,7 @@ export function QuotationsClient() {
   const actions = useQuotationClientActions({
     onMakeQuotation: (row) => {
       if (!routeParams) return;
+      prefetchQuotationDetails(row.id);
       navigate(
         quotationRoutes.details({
           tab: routeParams.tab,
@@ -136,7 +153,9 @@ export function QuotationsClient() {
         columns={columns}
         data={isLoading ? [] : quotations}
         rowKey={(row) => row.id}
+        onRowHover={(row) => prefetchQuotationDetails(row.id)}
         onRowClick={(row) => {
+          prefetchQuotationDetails(row.id);
           navigate(
             quotationRoutes.details({
               tab: routeParams.tab,
@@ -150,7 +169,7 @@ export function QuotationsClient() {
         onPerPageChange={setPerPage}
         total={total}
         showingCount={count}
-        searchPlaceholder="SEARCH SHIPMENT DETAILS"
+        searchPlaceholder="SEARCH QUOTATION"
         searchValue={search}
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}

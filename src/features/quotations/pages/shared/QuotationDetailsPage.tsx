@@ -6,12 +6,12 @@ import {
   Folder,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import { PageCard } from "@/components/PageCard";
-import { fetchQuotation } from "@/features/quotations/services/quotations.service";
+import { fetchQuotation } from "@/features/quotations/api/quotations.api";
 import { AppButton } from "@/components/ui/AppButton";
 import { QuotationDetailsSections } from "@/features/quotations/components/QuotationDetailsSections";
-import { useQuotationRouteParams } from "@/features/quotations/pages/hooks/useQuotationRouteParams";
-import { quotationQueryKeys } from "@/features/quotations/pages/utils/quotationQueryKeys";
-import { quotationRoutes } from "@/features/quotations/pages/utils/quotationRoutes";
+import { useQuotationRouteParams } from "@/features/quotations/hooks/useQuotationRouteParams";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 
 export function QuotationDetailsPage() {
   const routeParams = useQuotationRouteParams(["tab", "quotationId"] as const);
