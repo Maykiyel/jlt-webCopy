@@ -1,16 +1,16 @@
-/* Waiting for confirmation regarding the details of Permits and Licenses, so this is just a placeholder for now.
+//Waiting for confirmation regarding the details of Permits and Licenses, so this is just a placeholder for now.
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
-import { fetchPermits, fetchLicenses } from "../services/shipments.service";
+import { fetchPermits, fetchLicenses } from "../../services/shipments.service";
 import type {
   PermitListItem,
   LicenseListItem,
   PermitClientGroup,
   LicenseClientGroup,
-} from "../types/shipments.types";
+} from "../../types/shipments.types";
 
 type CombinedItem = PermitListItem | LicenseListItem;
 
@@ -119,4 +119,3 @@ export function ShipmentRegulatory() {
     </PageCard>
   );
 }
-*/

@@ -108,7 +108,7 @@ export const SHIPMENT_STATUS = {
 export type ShipmentStatus =
   (typeof SHIPMENT_STATUS)[keyof typeof SHIPMENT_STATUS];
 
-/* Confirmation for details regarding Permits and Licenses is still pending, so these are just placeholders for now. 
+//Confirmation for details regarding Permits and Licenses is still pending, so these are just placeholders for now. 
 // ─── Permits ──────────────────────────────────────────────────────────────────
 
 export interface PermitListItem {
@@ -192,4 +192,3 @@ export interface LicenseResource {
   updated_at: string;
   remarks: string | null;
 }
-*/

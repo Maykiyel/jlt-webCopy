@@ -3,10 +3,10 @@ import type {
   ShipmentsIndexResponse,
   ShipmentResource,
   ShipmentStatus,
-  /*PermitsIndexResponse,
+  PermitsIndexResponse,
   PermitResource,
   LicensesIndexResponse,
-  LicenseResource,*/
+  LicenseResource,
 } from "../types/shipments.types";
 import { getMockShipment } from "../data/mockShipments";
 
@@ -66,7 +66,7 @@ export async function fetchShipment(id: string): Promise<ShipmentResource> {
   }
 }
 
-/*
+
 // ─── Permits API ──────────────────────────────────────────────────────────────
 
 export interface FetchPermitsParams {
@@ -136,4 +136,3 @@ export async function fetchLicense(id: string): Promise<LicenseResource> {
   );
   return response.data.data;
 }
-*/

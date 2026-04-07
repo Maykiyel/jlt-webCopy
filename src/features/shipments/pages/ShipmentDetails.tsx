@@ -4,8 +4,6 @@ import { Stack } from "@mantine/core";
 import { useState } from "react";
 import { PageCard } from "@/components/PageCard";
 import { fetchShipment } from "@/features/shipments/services/shipments.service";
-
-// ✅ Import all modular components from details folder
 import { ReferenceHeader } from "@/features/shipments/components/details/ReferenceHeader";
 import { ShipmentInformation } from "@/features/shipments/components/details/ShipmentInfo";
 import { ConsigneeDetails } from "@/features/shipments/components/details/ConsigneeDetails";

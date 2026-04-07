@@ -1,11 +1,11 @@
-/* Waiting for confirmation regarding the details of Permits and Licenses, so this is just a placeholder for now.
+//Waiting for confirmation regarding the details of Permits and Licenses, so this is just a placeholder for now.
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
-import { fetchLicenses } from "../services/shipments.service";
-import type { LicenseListItem, LicenseClientGroup } from "../types/shipments.types";
+import { fetchLicenses } from "../../services/shipments.service";
+import type { LicenseListItem, LicenseClientGroup } from "../../types/shipments.types";
 
 const COLUMNS: AppTableColumn<LicenseListItem>[] = [
   {
@@ -85,4 +85,3 @@ export function LicensesShipments() {
     </PageCard>
   );
 }
-*/
