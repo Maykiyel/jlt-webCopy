@@ -14,6 +14,12 @@ export interface CustomField {
   options?: string[];
 }
 
+export interface ClientInformationField {
+  id: string;
+  label: string;
+  value?: string | number | boolean | null;
+}
+
 // Billing
 export interface BillingSection {
   id: string;
@@ -25,6 +31,7 @@ export interface BillingSection {
 export interface QuotationTemplate {
   id: string;
   name: string;
+  client_information_fields: ClientInformationField[];
   custom_fields: CustomField[];
   billing_sections: BillingSection[];
 }

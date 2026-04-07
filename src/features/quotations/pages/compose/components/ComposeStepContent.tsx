@@ -49,6 +49,28 @@ export function ComposeStepContent({
   onTermsChange,
   onTermsNext,
 }: ComposeStepContentProps) {
+  const previewProps =
+    quotation &&
+    quotationDetailsData &&
+    billingDetailsData &&
+    termsData &&
+    signatoryData
+      ? {
+          quotation,
+          quotationDetails: quotationDetailsData,
+          billingDetails: billingDetailsData,
+          terms: termsData,
+          signatory: signatoryData,
+        }
+      : null;
+
+  const isWaitingForQuotation =
+    previewReady &&
+    !quotation &&
+    Boolean(
+      quotationDetailsData && billingDetailsData && termsData && signatoryData,
+    );
+
   return (
     <Box mt="md" style={{ flex: 1 }}>
       {step === 0 && (
@@ -72,20 +94,17 @@ export function ComposeStepContent({
 
       {step === 2 &&
         (canRenderTermsStep ? (
-          previewReady &&
-          quotation &&
-          quotationDetailsData &&
-          billingDetailsData &&
-          termsData &&
-          signatoryData ? (
+          previewReady && previewProps ? (
             <QuotationPreview
-              quotation={quotation}
+              quotation={previewProps.quotation}
               template={quotationTemplate}
-              quotationDetails={quotationDetailsData}
-              billingDetails={billingDetailsData}
-              terms={termsData}
-              signatory={signatoryData}
+              quotationDetails={previewProps.quotationDetails}
+              billingDetails={previewProps.billingDetails}
+              terms={previewProps.terms}
+              signatory={previewProps.signatory}
             />
+          ) : isWaitingForQuotation ? (
+            <div>Loading quotation preview...</div>
           ) : (
             <TermsStep
               onNext={onTermsNext}

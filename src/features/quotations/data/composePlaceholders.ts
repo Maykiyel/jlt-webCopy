@@ -12,6 +12,18 @@ export const PLACEHOLDER_QUOTATION_TEMPLATES: QuotationTemplate[] = [
   {
     id: "intl-freight-forwarding",
     name: "International Freight Forwarding, Customs Clearance & Delivery",
+    client_information_fields: [
+      {
+        id: "business_type",
+        label: "Business Type",
+        value: "Trading",
+      },
+      {
+        id: "application_type",
+        label: "Application Type",
+        value: "Import Permit",
+      },
+    ],
     custom_fields: [
       // { id: "service_level", label: "Service Level", type: "text" },
       // { id: "rate_validity", label: "Rate Validity", type: "text" },

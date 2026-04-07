@@ -1,12 +1,14 @@
 import { useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { TemplateSelector } from "@/features/quotations/components/TemplateSelector";
-import { getComposeReferenceData } from "@/features/quotations/pages/compose/utils/composeReferenceData";
+import { PLACEHOLDER_QUOTATION_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
+import { useComposeQuotationTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
 
 export function TemplateSelection() {
   const navigate = useNavigate();
   const { tab, clientId, quotationId } = useParams();
-  const { quotationTemplates } = getComposeReferenceData();
+  const { data: quotationTemplates = PLACEHOLDER_QUOTATION_TEMPLATES } =
+    useComposeQuotationTemplates();
 
   // TODO: replace with useQuery when GET /quotation-templates is available
   const templates = quotationTemplates.map((template) => ({

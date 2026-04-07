@@ -7,10 +7,11 @@ import { PageCard } from "@/components/PageCard";
 import { useAuthStore } from "@/stores/authStore";
 import { AuthorizedSignatoryModal } from "@/features/quotations/components/AuthorizedSignatoryModal";
 import { StepperBar } from "@/features/quotations/components/StepperBar";
+import { PLACEHOLDER_QUOTATION_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
 import { ComposeSendModals } from "@/features/quotations/pages/compose/components/ComposeSendModals";
 import { ComposeStepActions } from "@/features/quotations/pages/compose/components/ComposeStepActions";
 import { ComposeStepContent } from "@/features/quotations/pages/compose/components/ComposeStepContent";
-import { getComposeReferenceData } from "@/features/quotations/pages/compose/utils/composeReferenceData";
+import { useComposeQuotationTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
 import { fetchQuotation } from "@/features/quotations/services/quotations.service";
 import type {
   BillingDetailsValues,
@@ -18,7 +19,11 @@ import type {
   SignatoryValues,
   TermsValues,
 } from "@/features/quotations/schemas/compose.schema";
-import type { QuotationViewerState } from "@/features/quotations/types/compose.types";
+import type {
+  ClientInformationField,
+  QuotationTemplate,
+  QuotationViewerState,
+} from "@/features/quotations/types/compose.types";
 
 const QUOTATION_DETAILS_FORM_ID = "quotation-details-form";
 const BILLING_DETAILS_FORM_ID = "billing-details-form";
@@ -29,6 +34,50 @@ interface ComposeLocationState {
   billingDetails?: BillingDetailsValues;
   terms?: TermsValues;
   signatory?: SignatoryValues;
+}
+
+function mergeClientInformationFields(
+  template: QuotationTemplate,
+  placeholderTemplate: QuotationTemplate | null,
+): ClientInformationField[] {
+  const baseFields = template.client_information_fields ?? [];
+
+  if (!placeholderTemplate) {
+    return baseFields;
+  }
+
+  const placeholderById = new Map(
+    (placeholderTemplate.client_information_fields ?? []).map((field) => [
+      field.id,
+      field,
+    ]),
+  );
+
+  return baseFields.map((field) => {
+    const fallback = placeholderById.get(field.id);
+
+    return {
+      ...field,
+      label: field.label || fallback?.label || field.id,
+      value: field.value ?? fallback?.value,
+    };
+  });
+}
+
+function withPlaceholderTemplateFallback(
+  template: QuotationTemplate,
+): QuotationTemplate {
+  const placeholderTemplate =
+    PLACEHOLDER_QUOTATION_TEMPLATES.find((item) => item.id === template.id) ??
+    null;
+
+  return {
+    ...template,
+    client_information_fields: mergeClientInformationFields(
+      template,
+      placeholderTemplate,
+    ),
+  };
 }
 
 export function ComposeQuotationPage() {
@@ -42,7 +91,8 @@ export function ComposeQuotationPage() {
   const initialTerms = composeLocationState?.terms ?? null;
   const initialSignatory = composeLocationState?.signatory ?? null;
   const userResource = useAuthStore((state) => state.user);
-  const { quotationTemplates } = getComposeReferenceData();
+  const { data: quotationTemplates = PLACEHOLDER_QUOTATION_TEMPLATES } =
+    useComposeQuotationTemplates();
   const currentUserName = userResource
     ? `${userResource.first_name} ${userResource.last_name}`
     : undefined;
@@ -59,8 +109,11 @@ export function ComposeQuotationPage() {
     enabled: Boolean(quotationId),
   });
 
-  const quotationTemplate =
+  const selectedTemplate =
     quotationTemplates.find((item) => item.id === templateId) ?? null;
+  const quotationTemplate = selectedTemplate
+    ? withPlaceholderTemplateFallback(selectedTemplate)
+    : null;
   // TODO: replace with useQuery({ queryKey: ["quotation-template", templateId], queryFn: ... })
 
   const [step, setStep] = useState(0);
@@ -105,20 +158,24 @@ export function ComposeQuotationPage() {
 
   function handleStep0Submit(values: QuotationDetailsValues) {
     setQuotationDetailsData(values);
+    setPreviewReady(false);
     setStep(1);
   }
 
   function handleStep1Submit(values: BillingDetailsValues) {
     setBillingDetailsData(values);
+    setPreviewReady(false);
     setStep(2);
   }
 
   function handleTermsChange(values: TermsValues) {
     setTermsData(values);
+    setPreviewReady(false);
   }
 
   function handleTermsNext(values: TermsValues) {
     setTermsData(values);
+    setPreviewReady(false);
     openSignatory();
   }
 

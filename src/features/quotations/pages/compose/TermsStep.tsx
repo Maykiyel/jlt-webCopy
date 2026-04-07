@@ -1,8 +1,9 @@
 import { Box, Group } from "@mantine/core";
 import { useState } from "react";
 import { AppButton } from "@/components/ui/AppButton";
+import { PLACEHOLDER_STANDARD_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
+import { useComposeStandardTemplates } from "@/features/quotations/pages/compose/hooks/useComposeReferenceData";
 import { TermsTemplateSelector } from "@/features/quotations/pages/compose/components/TermsTemplateSelector";
-import { getComposeReferenceData } from "@/features/quotations/pages/compose/utils/composeReferenceData";
 import type { TermsValues } from "@/features/quotations/schemas/compose.schema";
 import type { StandardTemplate } from "@/features/quotations/types/compose.types";
 import classes from "@/features/quotations/pages/compose/TermsStep.module.css";
@@ -15,8 +16,8 @@ interface TermsStepProps {
 }
 
 export function TermsStep({ onNext, onChange, savedData }: TermsStepProps) {
-  const { standardTemplates } = getComposeReferenceData();
-  // TODO: replace with useQuery when GET /standard-templates is available
+  const { data: standardTemplates = PLACEHOLDER_STANDARD_TEMPLATES } =
+    useComposeStandardTemplates();
   const [selectedTemplate, setSelectedTemplate] =
     useState<StandardTemplate | null>(() => {
       if (!savedData?.template_id) {
