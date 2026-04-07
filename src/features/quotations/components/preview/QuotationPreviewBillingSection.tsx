@@ -1,5 +1,6 @@
 import { Box, Table, Text } from "@mantine/core";
 import type { ChargeRow } from "@/features/quotations/schemas/compose.schema";
+import { getBillingPresentationRows } from "@/features/quotations/utils/billingPresentation";
 
 interface QuotationPreviewBillingSectionProps {
   sectionId: string;
@@ -16,6 +17,8 @@ export function QuotationPreviewBillingSection({
   sectionTotal,
   formatAmount,
 }: QuotationPreviewBillingSectionProps) {
+  const displayRows = getBillingPresentationRows(rows, formatAmount);
+
   return (
     <Box mb="lg">
       <Text size="xs" fw={700} tt="uppercase" mb="xs">
@@ -42,13 +45,13 @@ export function QuotationPreviewBillingSection({
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {rows.map((row, index) => (
+          {displayRows.map((row, index) => (
             <Table.Tr key={`${sectionId}-${index}`}>
               <Table.Td>{row.description}</Table.Td>
               <Table.Td>{row.currency}</Table.Td>
               <Table.Td>{row.uom}</Table.Td>
-              <Table.Td ta="right">{formatAmount(row.amount)}</Table.Td>
-              <Table.Td ta="right">{formatAmount(row.amount)}</Table.Td>
+              <Table.Td ta="right">{row.amountText}</Table.Td>
+              <Table.Td ta="right">{row.totalText}</Table.Td>
             </Table.Tr>
           ))}
           <Table.Tr>

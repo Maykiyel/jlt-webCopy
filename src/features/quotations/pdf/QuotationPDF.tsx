@@ -14,6 +14,8 @@ import {
   getBillingSectionsWithCharges,
   getRowsTotal,
 } from "@/features/quotations/utils/billing";
+import { formatQuotationAmount } from "@/features/quotations/utils/billingPresentation";
+import { resolveClientInformationFields } from "@/features/quotations/utils/clientInformationFields";
 
 interface QuotationPDFProps {
   quotation: QuotationResource;
@@ -27,12 +29,7 @@ interface QuotationPDFProps {
 }
 
 function formatAmount(amount?: number | null): string {
-  return amount != null
-    ? amount.toLocaleString("en-PH", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    : "—";
+  return formatQuotationAmount(amount);
 }
 
 function formatDate(iso: string): string {
@@ -58,6 +55,10 @@ export function QuotationPDF({
     billingDetails,
   );
   const grand = getBillingGrandTotal(billingSectionsToRender);
+  const clientInformationFields = resolveClientInformationFields(
+    quotation,
+    template.client_information_fields,
+  );
 
   return (
     <Document>
@@ -116,6 +117,24 @@ export function QuotationPDF({
         <Text style={{ marginBottom: 14, marginTop: 6 }}>
           {quotationDetails.message}
         </Text>
+
+        {clientInformationFields.length > 0 && (
+          <View
+            style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}
+          >
+            {clientInformationFields.map((field) => (
+              <View
+                key={field.id}
+                style={{ width: "50%", flexDirection: "row", marginBottom: 4 }}
+              >
+                <Text style={[styles.label, { width: 100 }]}>
+                  {field.label}:
+                </Text>
+                <Text style={styles.bold}>{field.value}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {template.custom_fields.length > 0 && (
           <View

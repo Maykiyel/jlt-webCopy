@@ -1,6 +1,4 @@
-import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
-import { QuotationPDF } from "@/features/quotations/pdf/QuotationPDF";
 import type { QuotationViewerState } from "@/features/quotations/types/compose.types";
 
 export function usePDFActions(
@@ -27,6 +25,11 @@ export function usePDFActions(
   };
 
   async function generateBlob(): Promise<Blob> {
+    const [{ pdf }, { QuotationPDF }] = await Promise.all([
+      import("@react-pdf/renderer"),
+      import("@/features/quotations/pdf/QuotationPDF"),
+    ]);
+
     const signatorySignatureSrc = viewerState.signatory.signature_file
       ? URL.createObjectURL(viewerState.signatory.signature_file)
       : null;

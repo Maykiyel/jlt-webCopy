@@ -25,6 +25,8 @@ import {
   getBillingSectionsWithCharges,
   getRowsTotal,
 } from "@/features/quotations/utils/billing";
+import { formatQuotationAmount } from "@/features/quotations/utils/billingPresentation";
+import { resolveClientInformationFields } from "@/features/quotations/utils/clientInformationFields";
 import classes from "./QuotationPreview.module.css";
 
 interface QuotationPreviewProps {
@@ -47,11 +49,7 @@ function formatDate(date: string): string {
 }
 
 function formatAmount(amount: number | null | undefined): string {
-  if (!amount) return "—";
-  return amount.toLocaleString("en-PH", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return formatQuotationAmount(amount);
 }
 
 export function QuotationPreview({
@@ -85,6 +83,10 @@ export function QuotationPreview({
     billingDetails,
   );
   const grandTotal = getBillingGrandTotal(billingSectionsToRender);
+  const clientInformationFields = resolveClientInformationFields(
+    quotation,
+    template.client_information_fields,
+  );
 
   return (
     <Box
@@ -159,6 +161,25 @@ export function QuotationPreview({
         <Text size="xs" mb="lg" style={{ whiteSpace: "pre-wrap" }}>
           {quotationDetails.message}
         </Text>
+
+        {clientInformationFields.length > 0 && (
+          <SimpleGrid
+            cols={2}
+            mb={template.custom_fields.length > 0 ? "xs" : "lg"}
+            spacing="xs"
+          >
+            {clientInformationFields.map((field) => (
+              <Group key={field.id} gap="xs" align="flex-start">
+                <Text size="xs" c="dimmed" w="9rem" style={{ flexShrink: 0 }}>
+                  {field.label}:
+                </Text>
+                <Text size="xs" fw={500}>
+                  {field.value}
+                </Text>
+              </Group>
+            ))}
+          </SimpleGrid>
+        )}
 
         {template.custom_fields.length > 0 && (
           <SimpleGrid cols={2} mb="lg" spacing="xs">
