@@ -1,4 +1,4 @@
-import { Navigate, useParams, useLocation } from "react-router";
+import { Navigate, useMatch, useParams } from "react-router";
 import { QuotationsRequested } from "@/features/quotations/pages/requested/QuotationsRequested";
 import { QuotationsClient } from "@/features/quotations/pages/requested/QuotationsClient";
 import { QuotationDetailsPage } from "@/features/quotations/pages/requested/QuotationDetailsPage";
@@ -7,14 +7,17 @@ import { TemplateSelection } from "@/features/quotations/pages/compose/TemplateS
 import { ComposeQuotationPage } from "@/features/quotations/pages/compose/ComposeQuotationPage";
 
 export default function QuotationsPage() {
-  const { pathname } = useLocation();
   const { tab, clientId, quotationId, template } = useParams();
+  const documentsMatch = useMatch(
+    "/quotations/:tab/client/:clientId/:quotationId/documents",
+  );
+  const composeRootMatch = useMatch(
+    "/quotations/:tab/client/:clientId/:quotationId/compose",
+  );
 
-  if (quotationId && pathname.endsWith("/documents"))
-    return <QuotationDocuments />;
+  if (quotationId && documentsMatch) return <QuotationDocuments />;
   if (quotationId && template) return <ComposeQuotationPage />;
-  if (quotationId && pathname.includes("/compose"))
-    return <TemplateSelection />;
+  if (quotationId && composeRootMatch) return <TemplateSelection />;
   if (quotationId) return <QuotationDetailsPage />;
   if (clientId) return <QuotationsClient />;
 

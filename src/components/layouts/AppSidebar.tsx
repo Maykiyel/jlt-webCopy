@@ -1,116 +1,23 @@
 import { Flex, Box, Stack, Text, UnstyledButton, Tooltip } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router";
-import {
-  Dashboard,
-  DiversityTwo,
-  Box as BoxIcon,
-  RequestQuote,
-  ManageAccounts,
-  FolderManaged,
-} from "@nine-thirty-five/material-symbols-react/rounded";
 import classes from "./AppSidebar.module.css";
-
-// Types
-interface SubItem {
-  label: string;
-  path: string;
-}
-
-interface NavItem {
-  id: string;
-  icon: React.ReactNode;
-  label: string;
-  path?: string;
-  subItems?: SubItem[];
-}
-
-// Nav Config
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    id: "dashboard",
-    icon: <Dashboard width="2rem" height="2rem" />,
-    label: "Dashboard",
-    path: "/",
-  },
-  {
-    id: "leads",
-    icon: <DiversityTwo width="2rem" height="2rem" />,
-    label: "Leads",
-    subItems: [
-      { label: "Queries", path: "/leads/queries" },
-      { label: "New", path: "/leads/new" },
-      { label: "Replied", path: "/leads/replied" },
-    ],
-  },
-  {
-    id: "shipments",
-    icon: <BoxIcon width="2rem" height="2rem" />,
-    label: "Shipments",
-    subItems: [
-      { label: "Ongoing", path: "/shipments/logistics/ongoing"},
-      { label: "Delivered", path: "/shipments/logistics/delivered"},
-    ],
-  },
-  {
-    id: "quotations",
-    icon: <RequestQuote width="2rem" height="2rem" />,
-    label: "Quotations",
-    subItems: [
-      { label: "Requests", path: "/quotations/requested" },
-      { label: "Responded", path: "/quotations/responded" },
-      { label: "Accepted", path: "/quotations/accepted" },
-      { label: "Discarded", path: "/quotations/discarded" },
-    ],
-  },
-  {
-    id: "accounts",
-    icon: <ManageAccounts width="2rem" height="2rem" />,
-    label: "Accounts",
-    subItems: [
-      { label: "Clients", path: "/accounts/clients" },
-      { label: "Employees", path: "/accounts/employees" },
-    ],
-  },
-  {
-    id: "tools",
-    icon: <FolderManaged width="2rem" height="2rem" />,
-    label: "Tools",
-    subItems: [
-      { label: "Services", path: "/tools/services" },
-      { label: "Templates", path: "/tools/templates" },
-      { label: "Messages", path: "/tools/messages" },
-    ],
-  },
-];
-
-const BTN_HEIGHT_REM = 5;
-const PILL_HEIGHT_REM = 3.5;
-const RAIL_PADDING_TOP_REM = 1.125;
-
-// Helpers
-
-function isPathActive(path: string, currentPath: string): boolean {
-  if (path === "/") return currentPath === "/";
-  return currentPath.startsWith(path);
-}
-
-function isItemActive(item: NavItem, currentPath: string): boolean {
-  if (item.path) return isPathActive(item.path, currentPath);
-  if (item.subItems?.some((sub) => isPathActive(sub.path, currentPath)))
-    return true;
-  const sectionPrefix = item.subItems?.[0]?.path.split("/")[1];
-  if (sectionPrefix && currentPath.startsWith(`/${sectionPrefix}`)) return true;
-  return false;
-}
-
-function getActiveIndex(currentPath: string): number {
-  return NAV_ITEMS.findIndex((item) => isItemActive(item, currentPath));
-}
-
-function getActiveItem(currentPath: string): NavItem | null {
-  return NAV_ITEMS.find((item) => isItemActive(item, currentPath)) ?? null;
-}
+import {
+  BTN_HEIGHT_REM,
+  NAV_ITEMS,
+  PANEL_BASE_PADDING_REM,
+  PANEL_INDENT_STEP_REM,
+  PILL_HEIGHT_REM,
+  RAIL_PADDING_TOP_REM,
+} from "./AppSidebar.config";
+import {
+  getActiveIndex,
+  getActiveItem,
+  getFirstNavigablePath,
+  isItemActive,
+  isSubItemActive,
+  type MenuNode,
+  type NavItem,
+} from "./AppSidebarUtils";
 
 // Component
 
@@ -119,8 +26,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const currentPath = location.pathname;
 
-  const activeIndex = getActiveIndex(currentPath);
-  const activeItem = getActiveItem(currentPath);
+  const activeIndex = getActiveIndex(NAV_ITEMS, currentPath);
+  const activeItem = getActiveItem(NAV_ITEMS, currentPath);
   const panelOpen = !!activeItem?.subItems?.length;
 
   const pillTop =
@@ -132,8 +39,63 @@ export function AppSidebar() {
     if (item.path) {
       navigate(item.path);
     } else if (item.subItems?.length) {
-      navigate(item.subItems[0].path);
+      const fallbackPath = getFirstNavigablePath(item);
+      if (fallbackPath) {
+        navigate(fallbackPath);
+      }
     }
+  }
+
+  function getMenuItemPaddingLeft(depth: number): string {
+    return `${PANEL_BASE_PADDING_REM + depth * PANEL_INDENT_STEP_REM}rem`;
+  }
+
+  function renderNestedItems(items: MenuNode[], depth = 0): React.ReactNode {
+    return items.map((item) => {
+      const itemPath = getFirstNavigablePath(item);
+      if (!itemPath) return null;
+
+      const itemActive = isSubItemActive(item, currentPath);
+      const showNested = !!item.subItems?.length && itemActive;
+      const topLevelSubItem = depth === 0;
+
+      return (
+        <Box key={itemPath}>
+          <UnstyledButton
+            onClick={() => navigate(itemPath)}
+            data-active={itemActive || undefined}
+            data-expanded={topLevelSubItem && showNested ? true : undefined}
+            className={topLevelSubItem ? classes.subItem : classes.subSubItem}
+            style={{
+              paddingLeft: getMenuItemPaddingLeft(depth),
+              paddingTop: "0.375rem",
+              paddingBottom: "0.375rem",
+            }}
+          >
+            <Text
+              size="xs"
+              fw={itemActive ? 700 : 400}
+              tt="uppercase"
+              lts="0.08em"
+              className={
+                topLevelSubItem ? classes.subParentText : classes.subSubText
+              }
+            >
+              {item.label}
+            </Text>
+          </UnstyledButton>
+
+          {showNested && (
+            <Stack
+              gap={0}
+              className={depth === 0 ? classes.subSubList : undefined}
+            >
+              {renderNestedItems(item.subItems!, depth + 1)}
+            </Stack>
+          )}
+        </Box>
+      );
+    });
   }
 
   return (
@@ -164,42 +126,7 @@ export function AppSidebar() {
       >
         {activeItem?.subItems && (
           <Box className={classes.subPanelInner} data-active py="xl" pt="2rem">
-            <Stack gap="xs">
-              {activeItem.subItems.map((sub) => {
-                const active = isPathActive(sub.path, currentPath);
-                return (
-                  <UnstyledButton
-                    key={sub.path}
-                    onClick={() => navigate(sub.path)}
-                    data-active={active || undefined}
-                    style={
-                      active
-                        ? {
-                            background:
-                              "linear-gradient(to right, #ffffff, #d9d9d9)",
-                          }
-                        : undefined
-                    }
-                    pl={"lg"}
-                    py={"0.375rem"}
-                    className={classes.subItem}
-                  >
-                    <Text
-                      size="xs"
-                      fw={active ? 700 : 400}
-                      tt="uppercase"
-                      lts="0.08em"
-                      style={{
-                        whiteSpace: "nowrap",
-                        transition: "color 120ms ease",
-                      }}
-                    >
-                      {sub.label}
-                    </Text>
-                  </UnstyledButton>
-                );
-              })}
-            </Stack>
+            <Stack gap="xs">{renderNestedItems(activeItem.subItems)}</Stack>
           </Box>
         )}
       </Box>

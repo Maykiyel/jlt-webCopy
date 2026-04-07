@@ -1,9 +1,11 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { fetchQuotations } from "../../services/quotations.service";
+import { useRequestedTableSearch } from "./hooks/useRequestedTableSearch";
+import { requestedQueryKeys } from "./utils/requestedQueryKeys";
+import { requestedRoutes } from "./utils/requestedRoutes";
 import {
   QUOTATION_STATUS,
   type QuotationClientGroup,
@@ -39,12 +41,17 @@ const COLUMNS: AppTableColumn<QuotationClientGroup>[] = [
 
 export function QuotationsRequested() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [perPage, setPerPage] = useState(10);
+  const {
+    search,
+    searchQuery,
+    perPage,
+    setPerPage,
+    handleSearch,
+    handleSearchChange,
+  } = useRequestedTableSearch();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["quotations", QUOTATION_STATUS.REQUESTED, searchQuery, perPage],
+    queryKey: requestedQueryKeys.requestedList({ searchQuery, perPage }),
     queryFn: () =>
       fetchQuotations({
         status: QUOTATION_STATUS.REQUESTED,
@@ -70,11 +77,9 @@ export function QuotationsRequested() {
         showingCount={count}
         searchPlaceholder="SEARCH CLIENT NAME"
         searchValue={search}
-        onSearchChange={setSearch}
-        onSearch={setSearchQuery}
-        onRowClick={(row) =>
-          navigate(`/quotations/requested/client/${row.client_id}`)
-        }
+        onSearchChange={handleSearchChange}
+        onSearch={handleSearch}
+        onRowClick={(row) => navigate(requestedRoutes.client(row.client_id))}
       />
     </PageCard>
   );

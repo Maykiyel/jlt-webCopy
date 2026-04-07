@@ -1,0 +1,117 @@
+# Copilot Workspace Instructions
+
+Follow these project rules for all changes in this workspace.
+
+## Structure
+
+- Keep most code under `src/features` by feature domain.
+- Keep shared/common code in:
+  - `src/components`
+  - `src/hooks`
+  - `src/lib`
+  - `src/stores`
+  - `src/types`
+  - `src/utils`
+
+## Feature Shape
+
+- Organize most domain logic inside `src/features/<feature-name>`.
+- Typical feature folders (only when needed):
+  - `api`
+  - `assets`
+  - `components`
+  - `hooks`
+  - `stores`
+  - `types`
+  - `utils`
+
+## Modularity
+
+- Prefer composable units over monolithic files.
+- Extract reusable logic into feature `utils` or `hooks`.
+- Extract reusable UI into feature `components`.
+- Keep page-level files focused on flow/state orchestration.
+
+## Imports
+
+- Prefer direct imports over barrel files.
+- Avoid cross-feature imports.
+- Compose features at `src/app` level when combining concerns.
+- Maintain unidirectional flow: shared -> features -> app.
+
+## API Placement
+
+- Keep feature-specific API logic under `src/features/<feature>/api`.
+- Use a shared/global API module only when contracts are truly cross-feature.
+
+## Quotations Feature
+
+- Keep preview/PDF derivations consistent by sharing utility logic.
+- Filter out empty charge rows and empty billing sections for document outputs.
+- Keep billing validation aligned with output rendering rules.
+
+## Performance
+
+### Code Splitting
+
+- Prefer route-level lazy loading for non-critical screens/components.
+- Avoid over-splitting into many tiny chunks.
+- Balance startup speed and request count.
+
+### State and Rendering
+
+- Keep state close to usage.
+- Avoid one large state object for unrelated concerns.
+- Use lazy state initializers for expensive computation:
+
+```ts
+const [state, setState] = React.useState(() => expensiveInit());
+```
+
+- Prefer `children` composition to isolate unaffected subtrees.
+- Use selector-based access for frequently updated shared state.
+
+### Assets and Data
+
+- Lazy-load non-critical images.
+- Prefer modern image formats where feasible.
+- Use React Query prefetching (`queryClient.prefetchQuery`) for high-confidence navigations.
+- Monitor Lighthouse/Core Web Vitals when touching rendering/loading paths.
+
+## State Management (Stack-Specific)
+
+### Component State (React)
+
+- Use `useState` for simple local state.
+- Use `useReducer` for complex local transitions.
+
+### Application State (Zustand)
+
+- Use Zustand for shared client-side app state.
+- Split stores by domain and use selectors to reduce rerenders.
+- Do not mirror server cache state in Zustand.
+
+### Server Cache (React Query)
+
+- Use React Query for all remote data fetching/caching.
+- Keep query keys stable and feature/domain-based.
+- Co-locate feature query logic in feature `api/` folders.
+- Handle invalidation/update paths explicitly after mutations.
+
+### Form State (React Hook Form + Zod)
+
+- Use RHF for form handling and Zod as the validation source of truth.
+- Use `zodResolver` where schema validation applies.
+- Keep schemas in feature `schemas/` and reuse in form + preview + submission paths.
+- Prefer shared form wrappers from `src/components/form`.
+
+### URL State (React Router)
+
+- Use route params/query params for shareable navigational state.
+- Keep temporary UI-only state out of URL unless deep-linking is needed.
+
+## Safety
+
+- Preserve behavior/UI unless explicitly asked to change.
+- Make smallest change set possible.
+- Verify touched files for TypeScript/lint problems.

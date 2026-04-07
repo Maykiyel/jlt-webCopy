@@ -19,6 +19,7 @@ export function QuotationFileViewer() {
   const { tab, clientId, quotationId } = useParams();
   const printRef = useRef<HTMLDivElement | null>(null);
   const state = location.state as QuotationViewerState | null;
+  const { handleDownload, handlePrint } = usePDFActions(state, jltLogoUrl);
 
   if (!state) {
     return (
@@ -29,10 +30,6 @@ export function QuotationFileViewer() {
   }
 
   const viewerState = state;
-  const { handleDownload, handlePrint } = usePDFActions(
-    viewerState,
-    jltLogoUrl,
-  );
 
   function handleEdit() {
     if (!tab || !clientId || !quotationId) {

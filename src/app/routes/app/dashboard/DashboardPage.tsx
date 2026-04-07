@@ -2,6 +2,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { toUser, getUserRole } from "@/lib/mappers/user.mapper";
 import { ROLES } from "@/types/roles";
 import AccountSpecialistDashboard from "@/features/dashboard/pages/AccountSpecialistDashboard";
+import { Navigate } from "react-router";
 // import { ClientDashboard } from "@/features/dashboard/pages/ClientDashboard";
 // import { MarketingDashboard } from "@/features/dashboard/pages/MarketingDashboard";
 // import { HRDashboard } from "@/features/dashboard/pages/HRDashboard";
@@ -30,7 +31,7 @@ export default function DashboardPage() {
   // Route to appropriate dashboard based on role
   switch (role) {
     case ROLES.CLIENT:
-      return <h1>Cient Dashboard</h1>;
+      return <Navigate to="/login" replace />;
 
     case ROLES.ACCOUNT_SPECIALIST:
       return <AccountSpecialistDashboard />;

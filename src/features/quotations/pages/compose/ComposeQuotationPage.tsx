@@ -1,31 +1,16 @@
-import {
-  Button,
-  Box,
-  Divider,
-  Group,
-  Modal,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-import {
-  Warning,
-  AssignmentTurnedIn,
-} from "@nine-thirty-five/material-symbols-react/outlined";
+import { Button, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
-import { AppButton } from "@/components/ui/AppButton";
 import { useAuthStore } from "@/stores/authStore";
 import { AuthorizedSignatoryModal } from "@/features/quotations/components/AuthorizedSignatoryModal";
-import { QuotationPreview } from "@/features/quotations/components/QuotationPreview";
 import { StepperBar } from "@/features/quotations/components/StepperBar";
-import { PLACEHOLDER_QUOTATION_TEMPLATES } from "@/features/quotations/data/composePlaceholders";
-import { QuotationDetailsForm } from "@/features/quotations/pages/compose/QuotationDetailsForm";
-import { BillingDetailsForm } from "@/features/quotations/pages/compose/BillingDetailsForm";
-import { TermsStep } from "@/features/quotations/pages/compose/TermsStep";
+import { ComposeSendModals } from "@/features/quotations/pages/compose/components/ComposeSendModals";
+import { ComposeStepActions } from "@/features/quotations/pages/compose/components/ComposeStepActions";
+import { ComposeStepContent } from "@/features/quotations/pages/compose/components/ComposeStepContent";
+import { getComposeReferenceData } from "@/features/quotations/pages/compose/utils/composeReferenceData";
 import { fetchQuotation } from "@/features/quotations/services/quotations.service";
 import type {
   BillingDetailsValues,
@@ -57,6 +42,7 @@ export function ComposeQuotationPage() {
   const initialTerms = composeLocationState?.terms ?? null;
   const initialSignatory = composeLocationState?.signatory ?? null;
   const userResource = useAuthStore((state) => state.user);
+  const { quotationTemplates } = getComposeReferenceData();
   const currentUserName = userResource
     ? `${userResource.first_name} ${userResource.last_name}`
     : undefined;
@@ -64,18 +50,18 @@ export function ComposeQuotationPage() {
 
   const { data: quotation } = useQuery({
     queryKey: ["quotation", quotationId],
-    queryFn: () => fetchQuotation(quotationId ?? ""),
+    queryFn: () => {
+      if (!quotationId) {
+        throw new Error("Missing quotationId route parameter.");
+      }
+      return fetchQuotation(quotationId);
+    },
     enabled: Boolean(quotationId),
   });
 
   const quotationTemplate =
-    PLACEHOLDER_QUOTATION_TEMPLATES.find((item) => item.id === templateId) ??
-    null;
+    quotationTemplates.find((item) => item.id === templateId) ?? null;
   // TODO: replace with useQuery({ queryKey: ["quotation-template", templateId], queryFn: ... })
-
-  if (!quotationTemplate) {
-    return <div>Template not found</div>;
-  }
 
   const [step, setStep] = useState(0);
   const [isStep0Valid, setIsStep0Valid] = useState(false);
@@ -108,6 +94,10 @@ export function ComposeQuotationPage() {
   const canOpenSignatoryModal = termsData !== null || signatoryData !== null;
   const canRenderTermsStep =
     quotationDetailsData !== null && billingDetailsData !== null;
+
+  if (!quotationTemplate) {
+    return <div>Template not found</div>;
+  }
 
   function handleStepClick(index: number) {
     if (index < step) setStep(index);
@@ -184,6 +174,9 @@ export function ComposeQuotationPage() {
     <PageCard
       title={quotationTemplate.name}
       fullHeight
+      hideDivider
+      bodyPx={0}
+      bodyPy={0}
       action={
         editMode ? (
           <Button
@@ -203,84 +196,39 @@ export function ComposeQuotationPage() {
       >
         <StepperBar step={step} onStepClick={handleStepClick} />
 
-        <Box mt="md" style={{ flex: 1 }}>
-          {step === 0 && (
-            <QuotationDetailsForm
-              id={QUOTATION_DETAILS_FORM_ID}
-              template={quotationTemplate}
-              defaultValues={quotationDetailsData ?? undefined}
-              onSubmit={handleStep0Submit}
-              onValidityChange={setIsStep0Valid}
-            />
-          )}
+        <Box
+          px="xl"
+          py="lg"
+          style={{ flex: 1, display: "flex", flexDirection: "column" }}
+        >
+          <ComposeStepContent
+            step={step}
+            quotationTemplate={quotationTemplate}
+            quotation={quotation}
+            quotationDetailsData={quotationDetailsData}
+            billingDetailsData={billingDetailsData}
+            termsData={termsData}
+            signatoryData={signatoryData}
+            previewReady={previewReady}
+            canRenderTermsStep={canRenderTermsStep}
+            quotationDetailsFormId={QUOTATION_DETAILS_FORM_ID}
+            billingDetailsFormId={BILLING_DETAILS_FORM_ID}
+            onStep0Submit={handleStep0Submit}
+            onStep1Submit={handleStep1Submit}
+            onStep0ValidityChange={setIsStep0Valid}
+            onTermsChange={handleTermsChange}
+            onTermsNext={handleTermsNext}
+          />
 
-          {step === 1 && (
-            <BillingDetailsForm
-              id={BILLING_DETAILS_FORM_ID}
-              template={quotationTemplate}
-              defaultValues={billingDetailsData ?? undefined}
-              onSubmit={handleStep1Submit}
-            />
-          )}
-          {step === 2 &&
-            (canRenderTermsStep ? (
-              previewReady &&
-              quotation &&
-              quotationDetailsData &&
-              billingDetailsData &&
-              termsData &&
-              signatoryData ? (
-                <QuotationPreview
-                  quotation={quotation}
-                  template={quotationTemplate}
-                  quotationDetails={quotationDetailsData}
-                  billingDetails={billingDetailsData}
-                  terms={termsData}
-                  signatory={signatoryData}
-                />
-              ) : (
-                <TermsStep
-                  onNext={handleTermsNext}
-                  onChange={handleTermsChange}
-                  savedData={termsData}
-                />
-              )
-            ) : (
-              <div>Terms and Conditions - coming soon</div>
-            ))}
+          <ComposeStepActions
+            step={step}
+            isStep0Valid={isStep0Valid}
+            previewReady={previewReady}
+            quotationDetailsFormId={QUOTATION_DETAILS_FORM_ID}
+            billingDetailsFormId={BILLING_DETAILS_FORM_ID}
+            onOpenSendConfirm={openSendConfirm}
+          />
         </Box>
-
-        {step < 2 && (
-          <Group justify="flex-end" mt="lg" style={{ marginTop: "auto" }}>
-            {step === 0 ? (
-              <AppButton
-                variant="primary"
-                type="submit"
-                form={QUOTATION_DETAILS_FORM_ID}
-                disabled={!isStep0Valid}
-                w="10rem"
-              >
-                Next
-              </AppButton>
-            ) : (
-              <AppButton
-                variant="primary"
-                type="submit"
-                form={BILLING_DETAILS_FORM_ID}
-                w="10rem"
-              >
-                Next
-              </AppButton>
-            )}
-          </Group>
-        )}
-        {step === 2 && previewReady && (
-          <Group justify="flex-end" mt="lg" style={{ marginTop: "auto" }}>
-            <AppButton variant="primary" onClick={openSendConfirm}>
-              Send
-            </AppButton>
-          </Group>
-        )}
       </Box>
 
       <AuthorizedSignatoryModal
@@ -291,88 +239,13 @@ export function ComposeQuotationPage() {
         initialValues={signatoryData}
       />
 
-      <Modal
-        opened={sendConfirmOpened}
-        onClose={closeSendConfirm}
-        centered
-        withCloseButton={false}
-        size="sm"
-        padding={0}
-      >
-        <Stack align="center" gap="md" p="xl">
-          <Warning width={160} height={160} color="red" />
-          <Box>
-            <Text fw={500} ta="center">
-              Send Quotation?
-            </Text>
-            <Text size="xs" c="dimmed" ta="center">
-              You're about to send this quotation to the client. Please review
-              all details carefully. Changes after sending will require a
-              revised quotation.
-            </Text>
-          </Box>
-        </Stack>
-        <Group w="100%" gap={0}>
-          <Divider w="100%" />
-          <UnstyledButton
-            onClick={handleSend}
-            style={{
-              flex: 1,
-              textAlign: "center",
-              padding: "0.75rem",
-              borderRight: "0.5px solid var(--mantine-color-gray-3)",
-            }}
-          >
-            <Text size="sm" fw={500} c="red">
-              YES
-            </Text>
-          </UnstyledButton>
-          <UnstyledButton
-            onClick={closeSendConfirm}
-            style={{ flex: 1, textAlign: "center", padding: "0.75rem" }}
-          >
-            <Text size="sm" fw={500} c="dimmed">
-              CANCEL
-            </Text>
-          </UnstyledButton>
-        </Group>
-      </Modal>
-
-      <Modal
-        opened={sendSuccessOpened}
-        onClose={handleSendSuccess}
-        centered
-        withCloseButton={false}
-        size="sm"
-        padding={0}
-      >
-        <Stack align="center" gap="md" p="xl">
-          <AssignmentTurnedIn width={160} height={160} color="green" />
-
-          <Box>
-            <Text fw={600} tt="uppercase" ta="center">
-              Successfully Submitted!
-            </Text>
-            <Text size="sm" c="dimmed" ta="center">
-              We'll notify you as soon as the client accepted the quotation!
-            </Text>
-          </Box>
-        </Stack>
-        <Divider w="100%" />
-
-        <UnstyledButton
-          onClick={handleSendSuccess}
-          style={{
-            width: "100%",
-            textAlign: "center",
-            padding: "1rem 2rem",
-          }}
-        >
-          <Text size="sm" c="dimmed">
-            OK
-          </Text>
-        </UnstyledButton>
-      </Modal>
+      <ComposeSendModals
+        sendConfirmOpened={sendConfirmOpened}
+        sendSuccessOpened={sendSuccessOpened}
+        onCloseSendConfirm={closeSendConfirm}
+        onSend={handleSend}
+        onCloseSendSuccess={handleSendSuccess}
+      />
     </PageCard>
   );
 }

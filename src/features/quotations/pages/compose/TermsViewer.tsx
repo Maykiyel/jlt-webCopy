@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, Text, Textarea } from "@mantine/core";
+import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import type { TermsValues } from "@/features/quotations/schemas/compose.schema";
 import type { StandardTemplate } from "@/features/quotations/types/compose.types";
@@ -9,25 +10,58 @@ interface TermsViewerProps {
   onChange: (values: TermsValues) => void;
 }
 
+type TermsTextFieldKey = Exclude<keyof TermsValues, "template_id">;
+
+const TERMS_TEXT_FIELDS: Array<{ key: TermsTextFieldKey; label: string }> = [
+  { key: "policies", label: "Policies" },
+  { key: "terms_and_condition", label: "Terms and Condition" },
+  { key: "banking_details", label: "Banking Details" },
+  { key: "footer", label: "Footer" },
+];
+
+function buildInitialTermsValues(
+  template: StandardTemplate,
+  initialValues?: TermsValues | null,
+): TermsValues {
+  const values: TermsValues = { template_id: template.id };
+
+  TERMS_TEXT_FIELDS.forEach(({ key }) => {
+    values[key] = initialValues?.[key] ?? template[key];
+  });
+
+  return values;
+}
+
 export function TermsViewer({
   template,
   initialValues,
   onChange,
 }: TermsViewerProps) {
-  const [values, setValues] = useState<TermsValues>({
-    template_id: template.id,
-    policies: initialValues?.policies ?? template.policies,
-    terms_and_condition:
-      initialValues?.terms_and_condition ?? template.terms_and_condition,
-    banking_details: initialValues?.banking_details ?? template.banking_details,
-    footer: initialValues?.footer ?? template.footer,
-  });
+  const fixedTextareaHeight = "8rem";
+  const textareaInputStyles: CSSProperties = {
+    border: 0,
+    boxShadow: "none",
+    background: "transparent",
+    height: fixedTextareaHeight,
+    minHeight: fixedTextareaHeight,
+    maxHeight: fixedTextareaHeight,
+    overflowY: "auto",
+    resize: "none",
+  };
+
+  const textareaStyles = {
+    input: textareaInputStyles,
+  };
+
+  const [values, setValues] = useState<TermsValues>(() =>
+    buildInitialTermsValues(template, initialValues),
+  );
 
   useEffect(() => {
     onChange(values);
   }, [values, onChange]);
 
-  function updateValue(field: keyof TermsValues, value: string) {
+  function updateValue(field: TermsTextFieldKey, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -44,77 +78,22 @@ export function TermsViewer({
         </Box>
       </Paper>
 
-      <Paper withBorder radius="sm" mb="sm">
-        <Box px="md" py="xs" bg="gray.1">
-          <Text size="sm" fw={600} tt="uppercase">
-            Policies
-          </Text>
-        </Box>
-        <Box px="md" py="sm">
-          <Textarea
-            value={values.policies ?? ""}
-            onChange={(event) =>
-              updateValue("policies", event.currentTarget.value)
-            }
-            autosize
-            minRows={3}
-          />
-        </Box>
-      </Paper>
-
-      <Paper withBorder radius="sm" mb="sm">
-        <Box px="md" py="xs" bg="gray.1">
-          <Text size="sm" fw={600} tt="uppercase">
-            Terms and Condition
-          </Text>
-        </Box>
-        <Box px="md" py="sm">
-          <Textarea
-            value={values.terms_and_condition ?? ""}
-            onChange={(event) =>
-              updateValue("terms_and_condition", event.currentTarget.value)
-            }
-            autosize
-            minRows={3}
-          />
-        </Box>
-      </Paper>
-
-      <Paper withBorder radius="sm" mb="sm">
-        <Box px="md" py="xs" bg="gray.1">
-          <Text size="sm" fw={600} tt="uppercase">
-            Banking Details
-          </Text>
-        </Box>
-        <Box px="md" py="sm">
-          <Textarea
-            value={values.banking_details ?? ""}
-            onChange={(event) =>
-              updateValue("banking_details", event.currentTarget.value)
-            }
-            autosize
-            minRows={3}
-          />
-        </Box>
-      </Paper>
-
-      <Paper withBorder radius="sm" mb="sm">
-        <Box px="md" py="xs" bg="gray.1">
-          <Text size="sm" fw={600} tt="uppercase">
-            Footer
-          </Text>
-        </Box>
-        <Box px="md" py="sm">
-          <Textarea
-            value={values.footer ?? ""}
-            onChange={(event) =>
-              updateValue("footer", event.currentTarget.value)
-            }
-            autosize
-            minRows={3}
-          />
-        </Box>
-      </Paper>
+      {TERMS_TEXT_FIELDS.map(({ key, label }) => (
+        <Paper key={key} withBorder radius="sm" mb="sm">
+          <Box px="md" py="xs" bg="gray.1">
+            <Text size="sm" fw={600} tt="uppercase">
+              {label}
+            </Text>
+          </Box>
+          <Box px="md" py="sm">
+            <Textarea
+              value={values[key] ?? ""}
+              onChange={(event) => updateValue(key, event.currentTarget.value)}
+              styles={textareaStyles}
+            />
+          </Box>
+        </Paper>
+      ))}
     </Stack>
   );
 }

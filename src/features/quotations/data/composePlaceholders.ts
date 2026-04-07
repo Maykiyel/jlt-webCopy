@@ -56,6 +56,16 @@ export const PLACEHOLDER_QUOTATION_TEMPLATES: QuotationTemplate[] = [
           "Trucking Fee",
         ],
       },
+      {
+        id: "debit-note-charges",
+        title: "Debit Note Charges",
+        available_charges: [
+          "Late Processing Surcharge",
+          "Rebooking Fee",
+          "Storage Extension Fee",
+          "Documentation Amendment Fee",
+        ],
+      },
     ],
   },
 ];

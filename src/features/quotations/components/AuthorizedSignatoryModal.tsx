@@ -3,9 +3,9 @@ import { Checkbox, Divider, Group, Modal, Stack, Text } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { CloudUpload } from "@nine-thirty-five/material-symbols-react/outlined";
 import { useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { TextInputField } from "@/components/form";
+import { TextInputField } from "@/components/form/textFields";
 import { AppButton } from "@/components/ui/AppButton";
 import {
   signatorySchema,
@@ -29,7 +29,7 @@ export function AuthorizedSignatoryModal({
   currentUserName,
   initialValues,
 }: AuthorizedSignatoryModalProps) {
-  const { control, handleSubmit, setValue, watch, reset, formState } = useForm<
+  const { control, handleSubmit, setValue, reset, formState } = useForm<
     SignatoryFormInput,
     unknown,
     SignatoryValues
@@ -44,7 +44,7 @@ export function AuthorizedSignatoryModal({
     },
   });
 
-  const signatureFile = watch("signature_file") ?? null;
+  const signatureFile = useWatch({ control, name: "signature_file" }) ?? null;
 
   const previewUrl = useMemo(
     () => (signatureFile ? URL.createObjectURL(signatureFile) : null),

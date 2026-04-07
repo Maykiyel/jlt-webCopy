@@ -3,20 +3,32 @@ import { createElement } from "react";
 import { QuotationPDF } from "@/features/quotations/pdf/QuotationPDF";
 import type { QuotationViewerState } from "@/features/quotations/types/compose.types";
 
-export function usePDFActions(state: QuotationViewerState, logoSrc: string) {
+export function usePDFActions(
+  state: QuotationViewerState | null,
+  logoSrc: string,
+) {
+  if (!state) {
+    return {
+      handleDownload: async () => undefined,
+      handlePrint: async () => undefined,
+    };
+  }
+
+  const viewerState = state;
+
   const props = {
-    quotation: state.quotation,
-    template: state.template,
-    quotationDetails: state.quotationDetails,
-    billingDetails: state.billingDetails,
-    terms: state.terms,
-    signatory: state.signatory,
+    quotation: viewerState.quotation,
+    template: viewerState.template,
+    quotationDetails: viewerState.quotationDetails,
+    billingDetails: viewerState.billingDetails,
+    terms: viewerState.terms,
+    signatory: viewerState.signatory,
     logoSrc,
   };
 
   async function generateBlob(): Promise<Blob> {
-    const signatorySignatureSrc = state.signatory.signature_file
-      ? URL.createObjectURL(state.signatory.signature_file)
+    const signatorySignatureSrc = viewerState.signatory.signature_file
+      ? URL.createObjectURL(viewerState.signatory.signature_file)
       : null;
 
     try {
@@ -41,7 +53,7 @@ export function usePDFActions(state: QuotationViewerState, logoSrc: string) {
     const url = URL.createObjectURL(pdfBlob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${state.quotation.reference_number ?? "quotation"}.pdf`;
+    link.download = `${viewerState.quotation.reference_number ?? "quotation"}.pdf`;
     document.body.appendChild(link);
     link.click();
     setTimeout(() => {

@@ -144,3 +144,47 @@
 .subItem {
   width: 100%;
 }
+
+.subItem[data-active]:not([data-expanded]) {
+  background: linear-gradient(to right, #ffffff, #d9d9d9);
+}
+
+.subItem[data-expanded] {
+  position: relative;
+}
+
+.subItem[data-expanded]::after {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  right: 0.875rem;
+  bottom: 0;
+  height: 0.125rem;
+  background: linear-gradient(
+    90deg,
+    var(--mantine-color-jltOrange-5) 0%,
+    #ffffff 100%
+  );
+}
+
+.subParentText {
+  white-space: nowrap;
+  transition: color 120ms ease;
+}
+
+.subSubList {
+  margin-top: 0.125rem;
+}
+
+.subSubItem {
+  width: 100%;
+}
+
+.subSubItem[data-active] {
+  background: linear-gradient(to right, #ffffff, #d9d9d9);
+}
+
+.subSubText {
+  white-space: nowrap;
+  transition: color 120ms ease;
+}

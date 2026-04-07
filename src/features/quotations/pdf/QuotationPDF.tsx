@@ -1,11 +1,6 @@
-import {
-  Document,
-  Image,
-  Page,
-  StyleSheet,
-  Text,
-  View,
-} from "@react-pdf/renderer";
+import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
+import { QuotationPDFBillingSection } from "@/features/quotations/pdf/components/QuotationPDFBillingSection";
+import { quotationPdfStyles as styles } from "@/features/quotations/pdf/quotationPdf.styles";
 import type {
   BillingDetailsValues,
   QuotationDetailsValues,
@@ -14,6 +9,11 @@ import type {
 } from "@/features/quotations/schemas/compose.schema";
 import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
+import {
+  getBillingGrandTotal,
+  getBillingSectionsWithCharges,
+  getRowsTotal,
+} from "@/features/quotations/utils/billing";
 
 interface QuotationPDFProps {
   quotation: QuotationResource;
@@ -25,65 +25,6 @@ interface QuotationPDFProps {
   logoSrc: string;
   signatorySignatureSrc?: string | null;
 }
-
-const styles = StyleSheet.create({
-  page: {
-    paddingTop: 34,
-    paddingBottom: 34,
-    paddingHorizontal: 30,
-    fontSize: 10,
-    fontFamily: "Helvetica",
-    color: "#111111",
-    lineHeight: 1.45,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 18,
-  },
-  logo: { width: 86 },
-  companyInfo: { textAlign: "right", fontSize: 9, width: "66%" },
-  companyName: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 10,
-    textTransform: "uppercase",
-  },
-  divider: { borderBottom: "0.5pt solid #cccccc", marginVertical: 8 },
-  label: { color: "#555555" },
-  bold: { fontFamily: "Helvetica-Bold" },
-  sectionTitle: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 10,
-    textTransform: "uppercase",
-    marginBottom: 4,
-    marginTop: 10,
-  },
-  table: { border: "0.5pt solid #b9b9b9" },
-  tableHeader: { flexDirection: "row", backgroundColor: "#f0f0f0" },
-  tableRow: { flexDirection: "row", borderTop: "0.5pt solid #b9b9b9" },
-  tableCellBase: {
-    padding: "4pt 6pt",
-    borderRight: "0.5pt solid #b9b9b9",
-    fontSize: 9,
-  },
-  colDescription: { flex: 2.4 },
-  colCurrency: { flex: 0.9 },
-  colUom: { flex: 1 },
-  colAmount: { flex: 1 },
-  colTotal: { flex: 1.2 },
-  tableCellLast: { padding: "4pt 6pt", fontSize: 9 },
-  tableCellRight: { textAlign: "right" },
-  totalRow: {
-    flexDirection: "row",
-    borderTop: "0.5pt solid #b9b9b9",
-    backgroundColor: "#f0f0f0",
-  },
-  signatoryBlock: { flexDirection: "row", marginTop: 18 },
-  signatoryCol: { flex: 1 },
-  signature: { width: 80, height: 30, objectFit: "contain", marginVertical: 4 },
-  footer: { textAlign: "center", color: "#888888", fontSize: 9, marginTop: 16 },
-});
 
 function formatAmount(amount?: number | null): string {
   return amount != null
@@ -112,10 +53,11 @@ export function QuotationPDF({
   logoSrc,
   signatorySignatureSrc,
 }: QuotationPDFProps) {
-  const grand = template.billing_sections.reduce((sum, section) => {
-    const rows = billingDetails.sections?.[section.id] ?? [];
-    return sum + rows.reduce((rowSum, row) => rowSum + (row.amount ?? 0), 0);
-  }, 0);
+  const billingSectionsToRender = getBillingSectionsWithCharges(
+    template,
+    billingDetails,
+  );
+  const grand = getBillingGrandTotal(billingSectionsToRender);
 
   return (
     <Document>
@@ -195,109 +137,19 @@ export function QuotationPDF({
           </View>
         )}
 
-        {template.billing_sections.map((section) => {
-          const rows = billingDetails.sections?.[section.id] ?? [];
-          const total = rows.reduce((sum, row) => sum + (row.amount ?? 0), 0);
+        {billingSectionsToRender.map(({ section, rows }) => {
+          const total = getRowsTotal(rows);
 
           return (
-            <View key={section.id} style={{ marginBottom: 14 }}>
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              <View style={styles.table}>
-                <View style={styles.tableHeader}>
-                  <Text
-                    style={[
-                      styles.tableCellBase,
-                      styles.colDescription,
-                      styles.bold,
-                    ]}
-                  >
-                    Description of Charges
-                  </Text>
-                  <Text
-                    style={[
-                      styles.tableCellBase,
-                      styles.colCurrency,
-                      styles.bold,
-                    ]}
-                  >
-                    Currency
-                  </Text>
-                  <Text
-                    style={[styles.tableCellBase, styles.colUom, styles.bold]}
-                  >
-                    UOM
-                  </Text>
-                  <Text
-                    style={[
-                      styles.tableCellBase,
-                      styles.colAmount,
-                      styles.bold,
-                      styles.tableCellRight,
-                    ]}
-                  >
-                    Amount
-                  </Text>
-                  <Text
-                    style={[
-                      styles.tableCellLast,
-                      styles.colTotal,
-                      styles.bold,
-                      styles.tableCellRight,
-                    ]}
-                  >
-                    Total Amount
-                  </Text>
-                </View>
-                {rows.map((row, index) => (
-                  <View key={`${section.id}-${index}`} style={styles.tableRow}>
-                    <Text style={[styles.tableCellBase, styles.colDescription]}>
-                      {row.description || "—"}
-                    </Text>
-                    <Text style={[styles.tableCellBase, styles.colCurrency]}>
-                      {row.currency || "—"}
-                    </Text>
-                    <Text style={[styles.tableCellBase, styles.colUom]}>
-                      {row.uom || "—"}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.tableCellBase,
-                        styles.colAmount,
-                        styles.tableCellRight,
-                      ]}
-                    >
-                      {formatAmount(row.amount)}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.tableCellLast,
-                        styles.colTotal,
-                        styles.tableCellRight,
-                      ]}
-                    >
-                      {formatAmount(row.amount)}
-                    </Text>
-                  </View>
-                ))}
-                <View style={styles.totalRow}>
-                  <Text
-                    style={[styles.tableCellBase, styles.bold, { flex: 5.3 }]}
-                  >
-                    {`Total ${section.title}`}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.tableCellLast,
-                      styles.colTotal,
-                      styles.bold,
-                      styles.tableCellRight,
-                    ]}
-                  >
-                    {formatAmount(total)}
-                  </Text>
-                </View>
-              </View>
-            </View>
+            <QuotationPDFBillingSection
+              key={section.id}
+              sectionId={section.id}
+              sectionTitle={section.title}
+              rows={rows}
+              total={total}
+              styles={styles}
+              formatAmount={formatAmount}
+            />
           );
         })}
 

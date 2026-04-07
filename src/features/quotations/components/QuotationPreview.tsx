@@ -5,11 +5,13 @@ import {
   Image,
   SimpleGrid,
   Stack,
-  Table,
   Text,
 } from "@mantine/core";
 import { useEffect, useMemo } from "react";
 import jltLogo from "@/assets/logos/word-dark.png";
+import { QuotationPreviewBillingSection } from "@/features/quotations/components/preview/QuotationPreviewBillingSection";
+import { QuotationPreviewSignatory } from "@/features/quotations/components/preview/QuotationPreviewSignatory";
+import { QuotationPreviewTermsBlocks } from "@/features/quotations/components/preview/QuotationPreviewTermsBlocks";
 import type {
   BillingDetailsValues,
   QuotationDetailsValues,
@@ -18,6 +20,11 @@ import type {
 } from "@/features/quotations/schemas/compose.schema";
 import type { QuotationTemplate } from "@/features/quotations/types/compose.types";
 import type { QuotationResource } from "@/features/quotations/types/quotations.types";
+import {
+  getBillingGrandTotal,
+  getBillingSectionsWithCharges,
+  getRowsTotal,
+} from "@/features/quotations/utils/billing";
 import classes from "./QuotationPreview.module.css";
 
 interface QuotationPreviewProps {
@@ -73,14 +80,11 @@ export function QuotationPreview({
     };
   }, [signaturePreviewUrl]);
 
-  const grandTotal = template.billing_sections.reduce((sum, section) => {
-    const rows = billingDetails.sections?.[section.id] ?? [];
-    const sectionTotal = rows.reduce(
-      (rowSum, row) => rowSum + (row.amount ?? 0),
-      0,
-    );
-    return sum + sectionTotal;
-  }, 0);
+  const billingSectionsToRender = getBillingSectionsWithCharges(
+    template,
+    billingDetails,
+  );
+  const grandTotal = getBillingGrandTotal(billingSectionsToRender);
 
   return (
     <Box
@@ -171,60 +175,18 @@ export function QuotationPreview({
           </SimpleGrid>
         )}
 
-        {template.billing_sections.map((section) => {
-          const rows = billingDetails.sections?.[section.id] ?? [];
-          const sectionTotal = rows.reduce(
-            (sum, row) => sum + (row.amount ?? 0),
-            0,
-          );
+        {billingSectionsToRender.map(({ section, rows }) => {
+          const sectionTotal = getRowsTotal(rows);
 
           return (
-            <Box key={section.id} mb="lg">
-              <Text size="xs" fw={700} tt="uppercase" mb="xs">
-                {section.title}
-              </Text>
-              <Table
-                withTableBorder
-                withColumnBorders
-                fz="xs"
-                styles={{
-                  thead: { backgroundColor: "#f0f0f0" },
-                  table: { borderColor: "#b9b9b9" },
-                  th: { borderColor: "#b9b9b9" },
-                  td: { borderColor: "#b9b9b9" },
-                }}
-              >
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Description of Charges</Table.Th>
-                    <Table.Th>Currency</Table.Th>
-                    <Table.Th>UOM</Table.Th>
-                    <Table.Th ta="right">Amount</Table.Th>
-                    <Table.Th ta="right">Total Amount</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {rows.map((row, index) => (
-                    <Table.Tr key={`${section.id}-${index}`}>
-                      <Table.Td>{row.description}</Table.Td>
-                      <Table.Td>{row.currency}</Table.Td>
-                      <Table.Td>{row.uom}</Table.Td>
-                      <Table.Td ta="right">{formatAmount(row.amount)}</Table.Td>
-                      <Table.Td ta="right">{formatAmount(row.amount)}</Table.Td>
-                    </Table.Tr>
-                  ))}
-                  <Table.Tr>
-                    <Table.Td
-                      colSpan={4}
-                      fw={700}
-                    >{`Total ${section.title}`}</Table.Td>
-                    <Table.Td ta="right" fw={700}>
-                      {formatAmount(sectionTotal)}
-                    </Table.Td>
-                  </Table.Tr>
-                </Table.Tbody>
-              </Table>
-            </Box>
+            <QuotationPreviewBillingSection
+              key={section.id}
+              sectionId={section.id}
+              sectionTitle={section.title}
+              rows={rows}
+              sectionTotal={sectionTotal}
+              formatAmount={formatAmount}
+            />
           );
         })}
 
@@ -237,64 +199,13 @@ export function QuotationPreview({
           </Text>
         </Group>
 
-        <Stack gap="md" mb="xl">
-          {terms.policies && (
-            <Box>
-              <Text size="xs" fw={700} tt="uppercase" mb={4}>
-                Policies
-              </Text>
-              <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
-                {terms.policies}
-              </Text>
-            </Box>
-          )}
-          {terms.terms_and_condition && (
-            <Box>
-              <Text size="xs" fw={700} tt="uppercase" mb={4}>
-                Terms and Conditions
-              </Text>
-              <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
-                {terms.terms_and_condition}
-              </Text>
-            </Box>
-          )}
-          {terms.banking_details && (
-            <Box>
-              <Text size="xs" fw={700} tt="uppercase" mb={4}>
-                Banking Details
-              </Text>
-              <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
-                {terms.banking_details}
-              </Text>
-            </Box>
-          )}
-        </Stack>
+        <QuotationPreviewTermsBlocks terms={terms} />
 
-        <SimpleGrid cols={2} mb="xl">
-          <Stack gap="xs">
-            <Text size="xs">{signatory.complementary_close}</Text>
-            {signaturePreviewUrl && (
-              <Image
-                src={signaturePreviewUrl}
-                w="8rem"
-                h="3rem"
-                fit="contain"
-              />
-            )}
-            <Text size="xs" fw={700} tt="uppercase">
-              {signatory.authorized_signatory_name}
-            </Text>
-            <Text size="xs">{signatory.position_title}</Text>
-            <Text size="xs">Jill L. Tolentino Customs Brokerage</Text>
-          </Stack>
-          <Stack gap="xs">
-            <Text size="xs">CONFORME:</Text>
-            <Text size="xs" mt="xl" fw={700} tt="uppercase">
-              {quotation.client?.full_name ?? ""}
-            </Text>
-            <Text size="xs">Client</Text>
-          </Stack>
-        </SimpleGrid>
+        <QuotationPreviewSignatory
+          signatory={signatory}
+          clientName={quotation.client?.full_name}
+          signaturePreviewUrl={signaturePreviewUrl}
+        />
 
         {terms.footer && (
           <Text size="xs" ta="center" c="dimmed" mt="xl">

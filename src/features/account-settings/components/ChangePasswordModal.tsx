@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Modal, Stack, Divider, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
-import { PasswordInputField } from "@/components/form";
+import { PasswordInputField } from "@/components/form/textFields";
 import {
   changePasswordSchema,
   type ChangePasswordFormValues,

@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { hasAnyCharge } from "@/features/quotations/utils/billing";
 
 export const quotationDetailsFixedSchema = z.object({
   subject: z.string().optional(),
@@ -22,9 +23,21 @@ export const chargeRowSchema = z.object({
 
 export type ChargeRow = z.infer<typeof chargeRowSchema>;
 
-export const billingDetailsSchema = z.object({
-  sections: z.record(z.string(), z.array(chargeRowSchema)).default({}),
-});
+export const billingDetailsSchema = z
+  .object({
+    sections: z.record(z.string(), z.array(chargeRowSchema)).default({}),
+  })
+  .superRefine((values, context) => {
+    const hasAtLeastOneCharge = hasAnyCharge(values.sections);
+
+    if (!hasAtLeastOneCharge) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["sections"],
+        message: "Add at least one charge before continuing.",
+      });
+    }
+  });
 
 export type BillingDetailsValues = z.infer<typeof billingDetailsSchema>;
 
