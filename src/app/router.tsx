@@ -6,23 +6,35 @@ import { lazy } from "react";
 import NotFound from "./routes/NotFound";
 import { Loader } from "@mantine/core";
 
+//auth import
 const LoginPage = lazy(() => import("./routes/auth/LoginPage"));
+
+//dashboard import
 const DashboardPage = lazy(
   () => import("./routes/app/dashboard/DashboardPage"),
 );
+
+//account settings import
 const AccountSettings = lazy(
   () => import("./routes/app/account-settings/AccountSettingsPage"),
 );
+
+//Quotation imports
 const Quotations = lazy(() => import("./routes/app/quotations/QuotationsPage"));
 const QuotationViewerPage = lazy(
   () => import("./routes/app/quotations/QuotationViewerPage"),
 );
+
+//Shipment Imports
 const Shipments = lazy(() => import("./routes/app/shipments/ShipmentsPage"));
 const ShipmentDetailsPage = lazy(() =>
   import("@/features/shipments/pages/ShipmentDetails").then((m) => ({
     default: m.ShipmentDetailsPage,
   })),
 );
+
+//Tool imports
+const Tools = lazy(() => import("./routes/app/tools/ToolsPage"));
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -44,6 +56,8 @@ export const router = createBrowserRouter([
         Component: AppLayout,
         children: [
           { index: true, Component: DashboardPage },
+
+          //Account Settings routes
           { path: "account-settings", Component: AccountSettings },
 
           // Quotation routes — most specific first
@@ -111,6 +125,12 @@ export const router = createBrowserRouter([
           { path: "shipments/:category/:subCategory", Component: Shipments },
           { path: "shipments/:category", Component: Shipments },
           { path: "shipments", Component: Shipments },
+
+          // ── Tools routes ──
+          { path: "tools/services", Component: Tools },
+          { path: "tools/messages", Component: Tools },
+          { path: "tools/templates", Component: Tools },
+          { path: "tools", Component: Tools },
 
           { path: "*", Component: NotFound },
         ],
