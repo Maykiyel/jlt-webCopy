@@ -1,21 +1,12 @@
-import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  Group,
-  Modal,
-  Stack,
-  Divider,
-  Text,
-  ActionIcon,
-  Button,
-  UnstyledButton,
-} from "@mantine/core";
+import { Group, ActionIcon, Button } from "@mantine/core";
 import {
   Add,
   Settings,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
-import classes from "./TemplatesPage.module.css";
+import { ToolModal } from "../components/ToolModal";
+import { NumberedOptionButton } from "@/components/NumberedOptionButton";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,11 +15,27 @@ interface TemplateType {
   label: string;
 }
 
+interface Settings {
+  id: string;
+  label: string;
+  path: string;
+}
+
 // ─── Template Types ───────────────────────────────────────────────────────────
 
 const TEMPLATE_TYPES: TemplateType[] = [
   { id: "regulatory", label: "Regulatory Services" },
   { id: "logistics", label: "Logistics Services" },
+];
+
+const SETTINGS: Settings[] = [
+  { id: "details", label: "Details", path: "" },
+  { id: "billing", label: "Billing", path: "" },
+  {
+    id: "standard_quotation_templates",
+    label: "Standard Quotation Templates",
+    path: "",
+  },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -40,20 +47,6 @@ export function TemplatesPage() {
     settingsModalOpened,
     { open: openSettingsModal, close: closeSettingsModal },
   ] = useDisclosure(false);
-
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-
-  const handleSelectType = (typeId: string) => {
-    setSelectedType(typeId);
-    closeAddModal();
-    // TODO: Navigate to template creation page for this type
-    console.log("Selected template type:", typeId);
-  };
-
-  const handleOpenSettings = () => {
-    openSettingsModal();
-    // TODO: Implement settings functionality
-  };
 
   return (
     <>
@@ -100,83 +93,49 @@ export function TemplatesPage() {
         <p>Quotation template management interface will be implemented here.</p>
       </PageCard>
 
-      {/* Add Template Modal */}
-      <Modal
+      {/* Add Template Modal (Reusable) */}
+      <ToolModal
         opened={addModalOpened}
         onClose={closeAddModal}
-        centered
+        title="Choose Type of Template"
         size="md"
         withCloseButton={false}
         padding={0}
         radius="md"
       >
-        <Stack gap={0}>
-          {/* Title */}
-          <Text
-            ta="center"
-            fw={600}
-            size="sm"
-            py="lg"
-            c="dimmed"
-            tt="uppercase"
-            lts="0.08em"
-          >
-            Choose Type of Template
-          </Text>
+        <Group>
+          {TEMPLATE_TYPES.map((type, index) => (
+            <NumberedOptionButton
+              key={type.id}
+              number={index + 1}
+              label={type.label}
+              // onClick={}
+            />
+          ))}
+        </Group>
+      </ToolModal>
 
-          <Divider />
-
-          {/* Template Type Options */}
-          <Stack gap={0} p="lg">
-            {TEMPLATE_TYPES.map((type) => (
-              <UnstyledButton
-                key={type.id}
-                onClick={() => handleSelectType(type.id)}
-                className={classes.templateOption}
-              >
-                <Text size="sm" fw={600} tt="uppercase" lts="0.04em">
-                  {type.label}
-                </Text>
-              </UnstyledButton>
-            ))}
-          </Stack>
-        </Stack>
-      </Modal>
-
-      {/* Settings Modal */}
-      <Modal
+      {/* Configuration Modal */}
+      <ToolModal
         opened={settingsModalOpened}
         onClose={closeSettingsModal}
-        centered
+        title="Configuration"
         size="md"
         withCloseButton={false}
         padding={0}
         radius="md"
       >
-        <Stack gap={0}>
-          {/* Title */}
-          <Text
-            ta="center"
-            fw={600}
-            size="sm"
-            py="lg"
-            c="dimmed"
-            tt="uppercase"
-            lts="0.08em"
-          >
-            Template Settings
-          </Text>
-
-          <Divider />
-
-          {/* Settings Content */}
-          <Stack gap={0} p="lg">
-            <Text size="sm" c="dimmed" ta="center">
-              Settings functionality coming soon.
-            </Text>
-          </Stack>
-        </Stack>
-      </Modal>
+        <Group>
+          {SETTINGS.map((setting, index) => (
+            <NumberedOptionButton
+              key={setting.id}
+              number={index + 1}
+              label={setting.label}
+              // onClick={() => {}}
+            />
+          ))}
+        </Group>
+      </ToolModal>
     </>
   );
 }

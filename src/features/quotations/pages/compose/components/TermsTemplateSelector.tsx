@@ -1,5 +1,6 @@
-import { Box, Text } from "@mantine/core";
+import { Box } from "@mantine/core";
 import type { StandardTemplateSummary } from "@/features/quotations/types/compose.types";
+import { NumberedOptionButton } from "@/components/NumberedOptionButton";
 import classes from "@/features/quotations/pages/compose/TermsStep.module.css";
 
 interface TermsTemplateSelectorProps {
@@ -14,16 +15,13 @@ export function TermsTemplateSelector({
   return (
     <Box className={classes.selector} px="5.438rem">
       {templates.map((template, index) => (
-        <Box
+        <NumberedOptionButton
           key={template.id}
-          className={`${classes.option} ${classes.optionEnabled}`}
+          number={index + 1}
+          label={template.name}
           onClick={() => onSelect(template.id)}
-        >
-          <Text className={classes.number}>
-            {String(index + 1).padStart(2, "0")}
-          </Text>
-          <Text className={classes.label}>{template.name}</Text>
-        </Box>
+          className={classes.option}
+        />
       ))}
     </Box>
   );
