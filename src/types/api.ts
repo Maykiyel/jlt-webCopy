@@ -22,6 +22,8 @@ export interface UserResource {
   image_path: string | null;
   created_at: string; // ISO 8601 datetime string
   updated_at: string; // ISO 8601 datetime string
+  tabs: UserTabs;
+  permissions: string[];
 }
 
 // ============================================
@@ -47,6 +49,18 @@ export interface User {
   imageUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
+  tabs: UserTabs;
+  permissions: string[];
+}
+
+export interface UserTabs {
+  dashboard: boolean;
+  leads: boolean;
+  quotations: boolean;
+  shipments: boolean;
+  accounts: boolean;
+  job_orders: boolean;
+  templates: boolean;
 }
 
 // ============================================
