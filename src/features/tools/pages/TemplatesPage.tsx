@@ -1,10 +1,12 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Group, ActionIcon, Button } from "@mantine/core";
+import { useCallback, useMemo, useState } from "react";
 import {
   Add,
   Settings,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
+import { AppTable } from "@/components/AppTable";
 import { ToolModal } from "../components/ToolModal";
 import { NumberedOptionButton } from "@/components/NumberedOptionButton";
 
@@ -19,6 +21,12 @@ interface Settings {
   id: string;
   label: string;
   path: string;
+}
+
+interface TemplateRow {
+  id: string;
+  name: string;
+  isActive: boolean;
 }
 
 // ─── Template Types ───────────────────────────────────────────────────────────
@@ -38,15 +46,42 @@ const SETTINGS: Settings[] = [
   },
 ];
 
+const INITIAL_TEMPLATES: TemplateRow[] = [
+  { id: "tpl-1", name: "Regulatory - Basic", isActive: true },
+  { id: "tpl-2", name: "Logistics - Standard", isActive: false },
+  { id: "tpl-3", name: "Regulatory - Premium", isActive: true },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function TemplatesPage() {
+  const [templates, setTemplates] = useState<TemplateRow[]>(INITIAL_TEMPLATES);
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] =
     useDisclosure(false);
   const [
     settingsModalOpened,
     { open: openSettingsModal, close: closeSettingsModal },
   ] = useDisclosure(false);
+
+  const columns = useMemo(
+    () => [{ key: "name", label: "TEMPLATE NAME", width: "100%" }],
+    [],
+  );
+
+  const handleToggle = useCallback((row: TemplateRow, value: boolean) => {
+    setTemplates((prev) =>
+      prev.map((item) => (item.id === row.id ? { ...item, isActive: value } : item)),
+    );
+  }, []);
+
+  const handleEdit = useCallback((row: TemplateRow) => {
+    // Placeholder until edit flow is wired.
+    console.info("Edit template", row.id);
+  }, []);
+
+  const handleDelete = useCallback((row: TemplateRow) => {
+    setTemplates((prev) => prev.filter((item) => item.id !== row.id));
+  }, []);
 
   return (
     <>
@@ -89,8 +124,29 @@ export function TemplatesPage() {
         }
         fullHeight
       >
-        <h2>List of Quotation Templates</h2>
-        <p>Quotation template management interface will be implemented here.</p>
+        <AppTable
+          columns={columns}
+          data={templates}
+          rowKey={(row) => row.id}
+          withNumbering
+          withToggle={{
+            getValue: (row) => row.isActive,
+            onChange: handleToggle,
+            label: "ACTIVE",
+          }}
+          withEdit={{
+            onClick: handleEdit,
+            tooltip: "Edit template",
+          }}
+          withDelete={{
+            onClick: handleDelete,
+            tooltip: "Delete template",
+            confirmMessage: (row) =>
+              `Are you sure you want to delete "${row.name}"?`,
+          }}
+          withEntryControls
+          searchPlaceholder="SEARCH TEMPLATE"
+        />
       </PageCard>
 
       {/* Add Template Modal (Reusable) */}
