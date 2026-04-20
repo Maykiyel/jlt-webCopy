@@ -1,12 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Checkbox, Divider, Group, Modal, Stack, Text } from "@mantine/core";
+import {
+  Checkbox,
+  Divider,
+  Group,
+  Modal,
+  Stack,
+  Text,
+  Button,
+} from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { CloudUpload } from "@nine-thirty-five/material-symbols-react/outlined";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import { TextInputField } from "@/components/form/textFields";
-import { AppButton } from "@/components/ui/AppButton";
 import {
   signatorySchema,
   type SignatoryValues,
@@ -251,15 +258,15 @@ export function AuthorizedSignatoryModal({
         </Stack>
       </form>
       <Group justify="center">
-        <AppButton
-          variant="secondary"
+        <Button
           type="submit"
+          color="jltAccent.6"
           form="signatory-form"
           mt="md"
           style={{ alignSelf: "center", display: "flex", margin: "0 auto" }}
         >
           SAVE
-        </AppButton>
+        </Button>
       </Group>
     </Modal>
   );
