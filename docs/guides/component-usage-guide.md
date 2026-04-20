@@ -8,7 +8,6 @@ Use `AppButton` for consistent call-to-action and secondary actions.
 
 ### Props you will use most
 
-- `variant`: `"primary" | "secondary"`
 - `type`: `"button" | "submit" | "reset"`
 - `loading`: shows loader and disables click
 - `disabled`: disables interaction
@@ -20,10 +19,6 @@ Use `AppButton` for consistent call-to-action and secondary actions.
 ```tsx
 <AppButton variant="primary" type="submit" loading={isSaving}>
   Save Changes
-</AppButton>
-
-<AppButton variant="secondary" onClick={onCancel}>
-  Cancel
 </AppButton>
 ```
 
