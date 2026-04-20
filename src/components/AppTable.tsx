@@ -6,12 +6,17 @@ import {
   Menu,
   ActionIcon,
   Box,
+  Switch,
+  Tooltip,
 } from "@mantine/core";
 import {
   MoreVert,
   ChevronRight,
+  Edit,
+  Delete,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import { useState } from "react";
+import { modals } from "@mantine/modals";
+import { useMemo, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import type { ReactNode } from "react";
 import type React from "react";
@@ -41,6 +46,38 @@ export interface AppTableProps<T> {
   data: T[];
   rowKey?: (row: T) => string | number;
   actions?: AppTableAction<T>[];
+  withNumbering?:
+    | boolean
+    | {
+        label?: string;
+        width?: string;
+        format?: (index: number) => string;
+      };
+  withToggle?: {
+    getValue: (row: T) => boolean;
+    onChange: (row: T, value: boolean) => void | Promise<void>;
+    label?: string;
+    width?: string;
+    disabled?: (row: T) => boolean;
+    color?: string;
+  };
+  withEdit?: {
+    onClick: (row: T) => void;
+    label?: string;
+    width?: string;
+    disabled?: (row: T) => boolean;
+    icon?: React.ReactNode;
+    tooltip?: string;
+  };
+  withDelete?: {
+    onClick: (row: T) => void | Promise<void>;
+    label?: string;
+    width?: string;
+    disabled?: (row: T) => boolean;
+    icon?: React.ReactNode;
+    tooltip?: string;
+    confirmMessage?: string | ((row: T) => string);
+  };
   /** Enables the top bar (Show N entries + search) and the footer */
   withEntryControls?: boolean;
   perPage?: number;
@@ -69,6 +106,10 @@ export function AppTable<T>({
   data,
   rowKey,
   actions,
+  withNumbering,
+  withToggle,
+  withEdit,
+  withDelete,
   withEntryControls = false,
   perPage = 10,
   onPerPageChange,
@@ -89,6 +130,128 @@ export function AppTable<T>({
   const [internalSearch, setInternalSearch] = useState("");
   const isSearchControlled = searchValue !== undefined;
   const currentSearch = isSearchControlled ? searchValue : internalSearch;
+
+  const finalColumns = useMemo(() => {
+    const builtColumns: AppTableColumn<T>[] = [];
+
+    if (withNumbering) {
+      const numberingConfig =
+        typeof withNumbering === "object" ? withNumbering : {};
+      const formatter =
+        numberingConfig.format ??
+        ((index: number) => String(index + 1).padStart(2, "0"));
+
+      builtColumns.push({
+        key: "_numbering",
+        label: numberingConfig.label ?? "NO",
+        width: numberingConfig.width ?? "5rem",
+        render: (_row, index) => formatter(index),
+      });
+    }
+
+    builtColumns.push(...columns);
+
+    if (withToggle) {
+      builtColumns.push({
+        key: "_toggle",
+        label: withToggle.label ?? "",
+        width: withToggle.width ?? "6rem",
+        render: (row) => (
+          <Switch
+            checked={withToggle.getValue(row)}
+            onChange={(event) =>
+              withToggle.onChange(row, event.currentTarget.checked)
+            }
+            disabled={withToggle.disabled?.(row)}
+            color={withToggle.color ?? "green"}
+            size="md"
+            onClick={(event) => event.stopPropagation()}
+            withThumbIndicator={false}
+          />
+        ),
+      });
+    }
+
+    if (withEdit) {
+      builtColumns.push({
+        key: "_edit",
+        label: withEdit.label ?? "",
+        width: withEdit.width ?? "4rem",
+        render: (row) => {
+          const editButton = (
+            <ActionIcon
+              variant="subtle"
+              color="dark"
+              disabled={withEdit.disabled?.(row)}
+              onClick={(event) => {
+                event.stopPropagation();
+                withEdit.onClick(row);
+              }}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              {withEdit.icon ?? <Edit width={18} height={18} />}
+            </ActionIcon>
+          );
+
+          return withEdit.tooltip ? (
+            <Tooltip label={withEdit.tooltip}>{editButton}</Tooltip>
+          ) : (
+            editButton
+          );
+        },
+      });
+    }
+
+    if (withDelete) {
+      builtColumns.push({
+        key: "_delete",
+        label: withDelete.label ?? "",
+        width: withDelete.width ?? "4rem",
+        render: (row) => {
+          const onDeleteClick = (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation();
+            if (!withDelete.confirmMessage) {
+              withDelete.onClick(row);
+              return;
+            }
+
+            const message =
+              typeof withDelete.confirmMessage === "function"
+                ? withDelete.confirmMessage(row)
+                : withDelete.confirmMessage;
+
+            modals.openConfirmModal({
+              title: "Confirm Delete",
+              children: <Text>{message}</Text>,
+              labels: { confirm: "Delete", cancel: "Cancel" },
+              confirmProps: { color: "red" },
+              onConfirm: () => withDelete.onClick(row),
+            });
+          };
+
+          const deleteButton = (
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              disabled={withDelete.disabled?.(row)}
+              onClick={onDeleteClick}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              {withDelete.icon ?? <Delete width={18} height={18} />}
+            </ActionIcon>
+          );
+
+          return withDelete.tooltip ? (
+            <Tooltip label={withDelete.tooltip}>{deleteButton}</Tooltip>
+          ) : (
+            deleteButton
+          );
+        },
+      });
+    }
+
+    return builtColumns;
+  }, [columns, withDelete, withEdit, withNumbering, withToggle]);
 
   const handleSearchChange = (val: string) => {
     if (!isSearchControlled) setInternalSearch(val);
@@ -200,7 +363,7 @@ export function AppTable<T>({
       >
         <Table.Thead>
           <Table.Tr>
-            {columns.map((col) => (
+            {finalColumns.map((col) => (
               <Table.Th
                 key={String(col.key)}
                 style={col.width ? { width: col.width } : undefined}
@@ -218,7 +381,7 @@ export function AppTable<T>({
               key={rowKey ? rowKey(row) : idx}
               onMouseEnter={onRowHover ? () => onRowHover(row) : undefined}
             >
-              {columns.map((col) => (
+              {finalColumns.map((col) => (
                 <Table.Td
                   key={String(col.key)}
                   onClick={
