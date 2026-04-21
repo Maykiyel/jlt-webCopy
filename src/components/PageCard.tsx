@@ -25,6 +25,7 @@ interface PageCardProps {
   bodyPx?: string | number;
   bodyPy?: string | number;
   hideBackButton?: boolean;
+  cardStyle?: React.CSSProperties;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -41,6 +42,7 @@ export function PageCard({
   bodyPx = "xl",
   bodyPy = "lg",
   hideBackButton = false,
+  cardStyle,
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -63,6 +65,7 @@ export function PageCard({
         height: fullHeight
           ? "calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2)"
           : undefined,
+        ...cardStyle,
       }}
       pos="relative"
     >

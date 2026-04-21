@@ -22,21 +22,10 @@ import {
   type DetailConfigType,
 } from "../api/details-configs.service";
 
-interface ConfigCardMeta {
-  title: string;
-  type: DetailConfigType;
-}
-
 interface OptionDraft {
   id?: number;
   name: string;
 }
-
-const CONFIG_CARDS: ConfigCardMeta[] = [
-  { title: "DROPDOWN", type: "DROPDOWN" },
-  { title: "TEXT FIELD", type: "TEXT" },
-  { title: "DATE PICKER", type: "DATE PICKER" },
-];
 
 export function DetailsConfigurationPage() {
   const queryClient = useQueryClient();
@@ -229,59 +218,69 @@ export function DetailsConfigurationPage() {
 
   return (
     <Box>
-      <Group align="stretch" grow>
-        {CONFIG_CARDS.map((card) => (
+      <Box
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "1rem",
+          minHeight: "calc(100vh - var(--app-shell-header-height) - 10rem)",
+        }}
+      >
+        <PageCard
+          title="DROPDOWN"
+          hideBackButton
+          bodyPx="md"
+          bodyPy="sm"
+          cardStyle={{ height: "100%" }}
+          action={
+            <ActionIcon color="jltBlue.6" onClick={() => openCreateModal("DROPDOWN")}>
+              <Add />
+            </ActionIcon>
+          }
+        >
+          <Divider mb="sm" />
+          {renderRows(groupedRows.DROPDOWN, "DROPDOWN", openEditModal, handleDelete)}
+        </PageCard>
+
+        <Box style={{ display: "grid", gridTemplateRows: "1fr 1fr", gap: "1rem" }}>
           <PageCard
-            key={card.type}
-            title={card.title}
+            title="TEXT FIELD"
             hideBackButton
             bodyPx="md"
             bodyPy="sm"
+            cardStyle={{ height: "100%" }}
             action={
-              <ActionIcon color="jltBlue.6" onClick={() => openCreateModal(card.type)}>
+              <ActionIcon color="jltBlue.6" onClick={() => openCreateModal("TEXT")}>
                 <Add />
               </ActionIcon>
             }
           >
             <Divider mb="sm" />
-
-            <Table withRowBorders>
-              <Table.Tbody>
-                {groupedRows[card.type].map((item, index) => (
-                  <Table.Tr key={item.id}>
-                    <Table.Td w={56}>{String(index + 1).padStart(2, "0")}</Table.Td>
-                    <Table.Td>{item.label}</Table.Td>
-                    <Table.Td w={120} c="dimmed" fs="italic">
-                      {card.type === "DROPDOWN"
-                        ? `(${getDropdownOptions(item).length} Options)`
-                        : ""}
-                    </Table.Td>
-                    <Table.Td w={88}>
-                      <Group gap={8} justify="flex-end" wrap="nowrap">
-                        <ActionIcon variant="subtle" color="jltBlue.7" onClick={() => openEditModal(item)}>
-                          <Edit width={16} height={16} />
-                        </ActionIcon>
-                        <ActionIcon variant="subtle" color="red" onClick={() => handleDelete(item)}>
-                          <Delete width={16} height={16} />
-                        </ActionIcon>
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-                {groupedRows[card.type].length === 0 && (
-                  <Table.Tr>
-                    <Table.Td colSpan={4}>
-                      <Text c="dimmed" size="sm">
-                        No {card.title.toLowerCase()} configs yet.
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
-                )}
-              </Table.Tbody>
-            </Table>
+            {renderRows(groupedRows.TEXT, "TEXT FIELD", openEditModal, handleDelete)}
           </PageCard>
-        ))}
-      </Group>
+
+          <PageCard
+            title="DATE PICKER"
+            hideBackButton
+            bodyPx="md"
+            bodyPy="sm"
+            cardStyle={{ height: "100%" }}
+            action={
+              <ActionIcon color="jltBlue.6" onClick={() => openCreateModal("DATE PICKER")}>
+                <Add />
+              </ActionIcon>
+            }
+          >
+            <Divider mb="sm" />
+            {renderRows(
+              groupedRows["DATE PICKER"],
+              "DATE PICKER",
+              openEditModal,
+              handleDelete,
+            )}
+          </PageCard>
+        </Box>
+      </Box>
 
       <Modal
         opened={Boolean(activeType)}
@@ -344,4 +343,48 @@ export function DetailsConfigurationPage() {
 
 function getDropdownOptions(item: DetailConfigResource): DetailConfigOption[] {
   return item.dropdown_options ?? item.dropdownOptions ?? [];
+}
+
+function renderRows(
+  rows: DetailConfigResource[],
+  emptyLabel: string,
+  onEdit: (item: DetailConfigResource) => void,
+  onDelete: (item: DetailConfigResource) => void,
+) {
+  return (
+    <Table withRowBorders>
+      <Table.Tbody>
+        {rows.map((item, index) => (
+          <Table.Tr key={item.id}>
+            <Table.Td w={56}>{String(index + 1).padStart(2, "0")}</Table.Td>
+            <Table.Td>{item.label}</Table.Td>
+            <Table.Td w={120} c="dimmed" fs="italic">
+              {item.type === "DROPDOWN"
+                ? `(${getDropdownOptions(item).length} Options)`
+                : ""}
+            </Table.Td>
+            <Table.Td w={88}>
+              <Group gap={8} justify="flex-end" wrap="nowrap">
+                <ActionIcon variant="subtle" color="jltBlue.7" onClick={() => onEdit(item)}>
+                  <Edit width={16} height={16} />
+                </ActionIcon>
+                <ActionIcon variant="subtle" color="red" onClick={() => onDelete(item)}>
+                  <Delete width={16} height={16} />
+                </ActionIcon>
+              </Group>
+            </Table.Td>
+          </Table.Tr>
+        ))}
+        {rows.length === 0 && (
+          <Table.Tr>
+            <Table.Td colSpan={4}>
+              <Text c="dimmed" size="sm">
+                No {emptyLabel.toLowerCase()} configs yet.
+              </Text>
+            </Table.Td>
+          </Table.Tr>
+        )}
+      </Table.Tbody>
+    </Table>
+  );
 }
