@@ -1,42 +1,37 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Group, ActionIcon, Button } from "@mantine/core";
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+import { notifications } from "@mantine/notifications";
 import {
   Add,
   Settings,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
-import { AppTable } from "@/components/AppTable";
-import { ToolModal } from "../components/ToolModal";
+import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { NumberedOptionButton } from "@/components/NumberedOptionButton";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import type { QuotationTemplateResource } from "@/types/templates";
+import { templatesService } from "../api/templates.service";
+import { ToolModal } from "../components/ToolModal";
 
 interface TemplateType {
   id: string;
   label: string;
 }
 
-interface Settings {
+interface SettingsOption {
   id: string;
   label: string;
   path: string;
 }
-
-interface TemplateRow {
-  id: string;
-  name: string;
-  isActive: boolean;
-}
-
-// ─── Template Types ───────────────────────────────────────────────────────────
 
 const TEMPLATE_TYPES: TemplateType[] = [
   { id: "regulatory", label: "Regulatory Services" },
   { id: "logistics", label: "Logistics Services" },
 ];
 
-const SETTINGS: Settings[] = [
+const SETTINGS: SettingsOption[] = [
   { id: "details", label: "Details", path: "" },
   { id: "billing", label: "Billing", path: "" },
   {
@@ -46,16 +41,9 @@ const SETTINGS: Settings[] = [
   },
 ];
 
-const INITIAL_TEMPLATES: TemplateRow[] = [
-  { id: "tpl-1", name: "Regulatory - Basic", isActive: true },
-  { id: "tpl-2", name: "Logistics - Standard", isActive: false },
-  { id: "tpl-3", name: "Regulatory - Premium", isActive: true },
-];
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function TemplatesPage() {
-  const [templates, setTemplates] = useState<TemplateRow[]>(INITIAL_TEMPLATES);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [addModalOpened, { open: openAddModal, close: closeAddModal }] =
     useDisclosure(false);
   const [
@@ -63,27 +51,139 @@ export function TemplatesPage() {
     { open: openSettingsModal, close: closeSettingsModal },
   ] = useDisclosure(false);
 
-  const columns = useMemo(
-    () => [{ key: "name", label: "TEMPLATE NAME", width: "100%" }],
+  const [search, setSearch] = useState("");
+  const [perPage, setPerPage] = useState(10);
+  const [pendingToggleIds, setPendingToggleIds] = useState<number[]>([]);
+  const [toggleOverrides, setToggleOverrides] = useState<Record<number, boolean>>(
+    {},
+  );
+  const toggleTimersRef = useRef<Record<number, ReturnType<typeof setTimeout>>>(
+    {},
+  );
+
+  const { data: templatesResponse } = useQuery({
+    queryKey: ["templates"],
+    queryFn: () => templatesService.getTemplates(),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: boolean }) =>
+      templatesService.toggleTemplateStatus(id, status),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => templatesService.deleteTemplate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      notifications.show({
+        title: "Success",
+        message: "Template deleted successfully",
+        color: "teal",
+      });
+    },
+    onError: () => {
+      notifications.show({
+        title: "Error",
+        message: "Failed to delete template",
+        color: "red",
+      });
+    },
+  });
+
+  const templates = useMemo(
+    () => templatesResponse?.data ?? [],
+    [templatesResponse?.data],
+  );
+
+  const filteredTemplates = useMemo(() => {
+    if (!search) {
+      return templates;
+    }
+
+    const keyword = search.toLowerCase();
+    return templates.filter((template) =>
+      template.name.toLowerCase().includes(keyword),
+    );
+  }, [search, templates]);
+
+  const paginatedTemplates = useMemo(
+    () => filteredTemplates.slice(0, perPage),
+    [filteredTemplates, perPage],
+  );
+
+  const columns: AppTableColumn<QuotationTemplateResource>[] = useMemo(
+    () => [
+      {
+        key: "name",
+        label: "TEMPLATE NAME",
+      },
+    ],
     [],
   );
 
-  const handleToggle = useCallback((row: TemplateRow, value: boolean) => {
-    setTemplates((prev) =>
-      prev.map((item) =>
-        item.id === row.id ? { ...item, isActive: value } : item,
-      ),
-    );
+  const handleToggle = (row: QuotationTemplateResource, value: boolean) => {
+    const { id } = row;
+
+    setToggleOverrides((prev) => ({ ...prev, [id]: value }));
+
+    const existingTimer = toggleTimersRef.current[id];
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    toggleTimersRef.current[id] = setTimeout(() => {
+      setPendingToggleIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+
+      toggleMutation.mutate(
+        { id, status: value },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
+            notifications.show({
+              title: "Success",
+              message: "Template status updated",
+              color: "teal",
+            });
+          },
+          onError: () => {
+            notifications.show({
+              title: "Error",
+              message: "Failed to update template status",
+              color: "red",
+            });
+          },
+          onSettled: () => {
+            setPendingToggleIds((prev) => prev.filter((itemId) => itemId !== id));
+            setToggleOverrides((prev) => {
+              const next = { ...prev };
+              delete next[id];
+              return next;
+            });
+          },
+        },
+      );
+
+      delete toggleTimersRef.current[id];
+    }, 350);
+  };
+
+  useEffect(() => {
+    const toggleTimers = toggleTimersRef.current;
+
+    return () => {
+      Object.values(toggleTimers).forEach((timerId) => {
+        clearTimeout(timerId);
+      });
+    };
   }, []);
 
-  const handleEdit = useCallback((row: TemplateRow) => {
-    // Placeholder until edit flow is wired.
-    console.info("Edit template", row.id);
-  }, []);
+  const handleEdit = (row: QuotationTemplateResource) => {
+    navigate(`/tools/templates/${row.id}/edit`);
+  };
 
-  const handleDelete = useCallback((row: TemplateRow) => {
-    setTemplates((prev) => prev.filter((item) => item.id !== row.id));
-  }, []);
+  const handleDelete = (row: QuotationTemplateResource) => {
+    deleteMutation.mutate(row.id);
+  };
 
   return (
     <>
@@ -128,13 +228,17 @@ export function TemplatesPage() {
       >
         <AppTable
           columns={columns}
-          data={templates}
+          data={paginatedTemplates}
           rowKey={(row) => row.id}
           withNumbering
           withToggle={{
-            getValue: (row) => row.isActive,
+            getValue: (row) =>
+              toggleOverrides[row.id] !== undefined
+                ? toggleOverrides[row.id]
+                : row.is_active,
             onChange: handleToggle,
             label: "ACTIVE",
+            disabled: (row) => pendingToggleIds.includes(row.id),
           }}
           withEdit={{
             onClick: handleEdit,
@@ -147,11 +251,16 @@ export function TemplatesPage() {
               `Are you sure you want to delete "${row.name}"?`,
           }}
           withEntryControls
-          searchPlaceholder="SEARCH TEMPLATE"
+          perPage={perPage}
+          onPerPageChange={setPerPage}
+          total={filteredTemplates.length}
+          showingCount={paginatedTemplates.length}
+          searchPlaceholder="SEARCH TEMPLATE NAME"
+          searchValue={search}
+          onSearchChange={setSearch}
         />
       </PageCard>
 
-      {/* Add Template Modal (Reusable) */}
       <ToolModal
         opened={addModalOpened}
         onClose={closeAddModal}
@@ -167,13 +276,11 @@ export function TemplatesPage() {
               key={type.id}
               number={index + 1}
               label={type.label}
-              // onClick={}
             />
           ))}
         </Group>
       </ToolModal>
 
-      {/* Configuration Modal */}
       <ToolModal
         opened={settingsModalOpened}
         onClose={closeSettingsModal}
@@ -189,7 +296,6 @@ export function TemplatesPage() {
               key={setting.id}
               number={index + 1}
               label={setting.label}
-              // onClick={() => {}}
             />
           ))}
         </Group>
