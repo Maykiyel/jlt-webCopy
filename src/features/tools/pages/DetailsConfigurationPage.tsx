@@ -3,7 +3,6 @@ import {
   ActionIcon,
   Box,
   Button,
-  Divider,
   Group,
   Modal,
   Stack,
@@ -273,7 +272,7 @@ export function DetailsConfigurationPage() {
   };
 
   return (
-    <Box>
+    <>
       <Group mb="md" gap={"sm"}>
         <ActionIcon
           variant="subtle"
@@ -291,7 +290,10 @@ export function DetailsConfigurationPage() {
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "1rem",
-          minHeight: "calc(100vh - var(--app-shell-header-height) - 10rem)",
+          height: "calc(100vh - var(--app-shell-header-height) - 5rem)",
+          minWidth: 0,
+          minHeight: 0,
+          overflow: "hidden",
         }}
       >
         <PageCard
@@ -299,7 +301,7 @@ export function DetailsConfigurationPage() {
           hideBackButton
           bodyPx="md"
           bodyPy="sm"
-          cardStyle={{ height: "100%" }}
+          cardStyle={{ height: "100%", minHeight: 0 }}
           action={
             <ActionIcon
               color="jltAccent.6"
@@ -319,14 +321,21 @@ export function DetailsConfigurationPage() {
         </PageCard>
 
         <Box
-          style={{ display: "grid", gridTemplateRows: "1fr 1fr", gap: "1rem" }}
+          style={{
+            display: "grid",
+            gridTemplateRows: "1fr 1fr",
+            gap: "1rem",
+            height: "100%",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
         >
           <PageCard
             title="TEXT FIELD"
             hideBackButton
             bodyPx="md"
             bodyPy="sm"
-            cardStyle={{ height: "100%" }}
+            cardStyle={{ height: "100%", minHeight: 0 }}
             action={
               <ActionIcon
                 color="jltAccent.6"
@@ -350,7 +359,7 @@ export function DetailsConfigurationPage() {
             hideBackButton
             bodyPx="md"
             bodyPy="sm"
-            cardStyle={{ height: "100%" }}
+            cardStyle={{ height: "100%", minHeight: 0 }}
             action={
               <ActionIcon
                 color="jltAccent.6"
@@ -428,7 +437,7 @@ export function DetailsConfigurationPage() {
           </Button>
         </Stack>
       </Modal>
-    </Box>
+    </>
   );
 }
 
