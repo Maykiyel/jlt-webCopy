@@ -1,6 +1,6 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Group, ActionIcon, Button } from "@mantine/core";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
@@ -53,6 +53,13 @@ export function TemplatesPage() {
 
   const [search, setSearch] = useState("");
   const [perPage, setPerPage] = useState(10);
+  const [pendingToggleIds, setPendingToggleIds] = useState<number[]>([]);
+  const [toggleOverrides, setToggleOverrides] = useState<Record<number, boolean>>(
+    {},
+  );
+  const toggleTimersRef = useRef<Record<number, ReturnType<typeof setTimeout>>>(
+    {},
+  );
 
   const { data: templatesResponse } = useQuery({
     queryKey: ["templates"],
@@ -62,21 +69,6 @@ export function TemplatesPage() {
   const toggleMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: boolean }) =>
       templatesService.toggleTemplateStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
-      notifications.show({
-        title: "Success",
-        message: "Template status updated",
-        color: "teal",
-      });
-    },
-    onError: () => {
-      notifications.show({
-        title: "Error",
-        message: "Failed to update template status",
-        color: "red",
-      });
-    },
   });
 
   const deleteMutation = useMutation({
@@ -130,8 +122,60 @@ export function TemplatesPage() {
   );
 
   const handleToggle = (row: QuotationTemplateResource, value: boolean) => {
-    toggleMutation.mutate({ id: row.id, status: value });
+    const { id } = row;
+
+    setToggleOverrides((prev) => ({ ...prev, [id]: value }));
+
+    const existingTimer = toggleTimersRef.current[id];
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    toggleTimersRef.current[id] = setTimeout(() => {
+      setPendingToggleIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+
+      toggleMutation.mutate(
+        { id, status: value },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
+            notifications.show({
+              title: "Success",
+              message: "Template status updated",
+              color: "teal",
+            });
+          },
+          onError: () => {
+            notifications.show({
+              title: "Error",
+              message: "Failed to update template status",
+              color: "red",
+            });
+          },
+          onSettled: () => {
+            setPendingToggleIds((prev) => prev.filter((itemId) => itemId !== id));
+            setToggleOverrides((prev) => {
+              const next = { ...prev };
+              delete next[id];
+              return next;
+            });
+          },
+        },
+      );
+
+      delete toggleTimersRef.current[id];
+    }, 350);
   };
+
+  useEffect(() => {
+    const toggleTimers = toggleTimersRef.current;
+
+    return () => {
+      Object.values(toggleTimers).forEach((timerId) => {
+        clearTimeout(timerId);
+      });
+    };
+  }, []);
 
   const handleEdit = (row: QuotationTemplateResource) => {
     navigate(`/tools/templates/${row.id}/edit`);
@@ -188,9 +232,13 @@ export function TemplatesPage() {
           rowKey={(row) => row.id}
           withNumbering
           withToggle={{
-            getValue: (row) => row.is_active,
+            getValue: (row) =>
+              toggleOverrides[row.id] !== undefined
+                ? toggleOverrides[row.id]
+                : row.is_active,
             onChange: handleToggle,
             label: "ACTIVE",
+            disabled: (row) => pendingToggleIds.includes(row.id),
           }}
           withEdit={{
             onClick: handleEdit,
