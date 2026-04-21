@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { Button, Box, Stack, Title, Text } from "@mantine/core";
+import { Button, Box, Stack, Title, Text, Card } from "@mantine/core";
 import {
   TextInputField,
   PasswordInputField,
@@ -22,63 +22,63 @@ export function LoginFormView({
   onSubmit,
 }: LoginFormViewProps) {
   return (
-    <Stack gap="lg" w={450}>
-      <Title ta="center" c="jltOrange.5">
-        LOGIN
-      </Title>
-      <Box
-        py={12}
-        pl={12}
-        style={(theme) => ({
-          boxShadow: `inset 5px 0 0 ${theme.colors.jltOrange[5]}`,
-        })}
-      >
-        <Text
-          size="1.6875rem"
-          c="jltBlue"
-          ta="right"
-          style={{
-            whiteSpace: "nowrap",
-          }}
-        >
-          Welcome back, you've been missed!
-        </Text>
-      </Box>
+    <Card w={500} h={420} 
+          shadow="xl" padding="xl" 
+          right={-60} top={-40}>
+      <Stack gap="lg">
+        {/* Title in black */}
+        <Title ta="center" c="black">
+          LOGIN
+        </Title>
 
-      <form onSubmit={onSubmit} noValidate>
-        <Stack gap="md" align="stretch">
-          <TextInputField
-            control={control}
-            name="email"
-            placeholder="USERNAME OR EMAIL"
-            type="text"
-            required
-            size="lg"
-          />
-
-          <PasswordInputField
-            control={control}
-            name="password"
-            placeholder="PASSWORD"
-            required
-            size="lg"
-          />
-
-          <Button
-            type="submit"
-            fullWidth
-            loading={isLoading}
-            mt="sm"
-            radius="sm"
-            size="lg"
-            style={{
-              boxShadow: "0 4px 4px #BEBEBE",
-            }}
+        {/* Accent bar in black */}
+        <Box py={12} pl={12} style={{ boxShadow: "inset 5px 0 0 black" }}>
+          <Text
+            size="1.6875rem"
+            c="jlt-blue"
+            ta="right"
+            style={{ whiteSpace: "nowrap" }}
           >
-            Sign in
-          </Button>
-        </Stack>
-      </form>
-    </Stack>
+            Welcome back, you've been missed!
+          </Text>
+        </Box>
+
+        {/* Form */}
+        <form onSubmit={onSubmit} noValidate>
+          <Stack gap="md" align="stretch" pt={10}>
+            <TextInputField
+              control={control}
+              name="email"
+              placeholder="USERNAME OR EMAIL"
+              type="text"
+              required
+              size="lg"
+            />
+
+            <PasswordInputField
+              control={control}
+              name="password"
+              placeholder="PASSWORD"
+              required
+              size="lg"
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              loading={isLoading}
+              mt="sm"
+              radius="sm"
+              size="md"
+              fw="400"
+              pt={5}
+              style={{ boxShadow: "0 4px 4px #BEBEBE" }}
+            >
+              SIGN IN
+            </Button>
+          </Stack>
+        </form>
+      </Stack>
+    </Card>
   );
 }

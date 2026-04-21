@@ -6,7 +6,7 @@ import LoginForm from "@/features/auth/components/LoginForm";
 import { useMutation } from "@tanstack/react-query";
 import type { LoginRequest } from "@/types/api";
 import { Box, Image } from "@mantine/core";
-import bgImage from "@/assets/bgImage.png";
+import jlt from "@/assets/jlt.svg";
 import wave1 from "@/assets/wave1.svg?url";
 import wave2 from "@/assets/wave2.svg?url";
 import wave3 from "@/assets/wave3.svg?url";
@@ -43,20 +43,22 @@ export default function LoginPage() {
       }}
     >
       <Image
-        src={bgImage}
-        w={{ base: "45%", lg: 636 }}
+        src={jlt}
+        w="30%"
         pos="absolute"
         bottom={0}
+        top={120}
+        left={130}
       />
       <Image src={wave1} w={"71.4vw"} pos="absolute" bottom={0} />
-      <Image src={wave2} w={"64.5vw"} pos="absolute" bottom={0} left={-10} />
+      <Image src={wave2} w={"47vw"} pos="absolute" bottom={0} right={-10} style={{zIndex: -1}} />
       <Image
         src={wave3}
-        w={"38.1vw"}
+        w={"45vw"}
         pos="absolute"
         bottom={0}
         right={0}
-        style={{ zIndex: -1 }}
+        style={{ zIndex: -2 }}
       />
       <Box pos="absolute" top={"19.35vh"} left={"47.66vw"}>
         <LoginForm onSubmit={handleSubmit} isLoading={isPending} />
