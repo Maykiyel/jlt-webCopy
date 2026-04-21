@@ -32,7 +32,7 @@ const TEMPLATE_TYPES: TemplateType[] = [
 ];
 
 const SETTINGS: SettingsOption[] = [
-  { id: "details", label: "Details", path: "" },
+  { id: "details", label: "Details", path: "/tools/templates/config/details" },
   { id: "billing", label: "Billing", path: "" },
   {
     id: "standard_quotation_templates",
@@ -296,6 +296,12 @@ export function TemplatesPage() {
               key={setting.id}
               number={index + 1}
               label={setting.label}
+              onClick={() => {
+                if (setting.path) {
+                  closeSettingsModal();
+                  navigate(setting.path);
+                }
+              }}
             />
           ))}
         </Group>
