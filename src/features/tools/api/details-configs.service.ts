@@ -1,10 +1,10 @@
-import { GET, POST } from "@/lib/api/client";
+import { DELETE, GET, POST, PUT } from "@/lib/api/client";
 import type { ApiResponse } from "@/types/api";
 
 export type DetailConfigType = "DROPDOWN" | "TEXT" | "DATE PICKER";
 
 export interface DetailConfigOption {
-  id: number;
+  id?: number;
   name: string;
 }
 
@@ -28,6 +28,11 @@ export interface StoreDetailConfigRequest {
   options?: string[];
 }
 
+export interface UpdateDetailConfigRequest {
+  label: string;
+  options?: DetailConfigOption[];
+}
+
 export const detailsConfigsService = {
   async getDetailsConfigs(): Promise<ApiResponse<DetailsConfigGroups>> {
     return GET<ApiResponse<DetailsConfigGroups>>("/configs/details");
@@ -37,5 +42,20 @@ export const detailsConfigsService = {
     payload: StoreDetailConfigRequest,
   ): Promise<ApiResponse<DetailConfigResource>> {
     return POST<ApiResponse<DetailConfigResource>>("/configs/details", payload);
+  },
+
+  async getDetailsConfig(id: number): Promise<ApiResponse<DetailConfigResource>> {
+    return GET<ApiResponse<DetailConfigResource>>(`/configs/details/${id}`);
+  },
+
+  async updateDetailsConfig(
+    id: number,
+    payload: UpdateDetailConfigRequest,
+  ): Promise<ApiResponse<DetailConfigResource>> {
+    return PUT<ApiResponse<DetailConfigResource>>(`/configs/details/${id}`, payload);
+  },
+
+  async deleteDetailsConfig(id: number): Promise<ApiResponse<null>> {
+    return DELETE<ApiResponse<null>>(`/configs/details/${id}`);
   },
 };

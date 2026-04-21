@@ -24,6 +24,7 @@ interface PageCardProps {
   hideDivider?: boolean;
   bodyPx?: string | number;
   bodyPy?: string | number;
+  hideBackButton?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ export function PageCard({
   hideDivider = false,
   bodyPx = "xl",
   bodyPy = "lg",
+  hideBackButton = false,
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -72,9 +74,11 @@ export function PageCard({
         className={classes.header}
       >
         <Group gap="xs" wrap="nowrap">
-          <UnstyledButton onClick={handleBack} className={classes.backButton}>
-            <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
-          </UnstyledButton>
+          {!hideBackButton && (
+            <UnstyledButton onClick={handleBack} className={classes.backButton}>
+              <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
+            </UnstyledButton>
+          )}
 
           <Group gap="0.5rem" align="baseline" wrap="nowrap">
             <Title order={5} fw={800} tt="uppercase" c="jltBlue.8">
