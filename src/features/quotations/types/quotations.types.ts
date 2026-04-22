@@ -29,19 +29,55 @@ export interface QuotationsIndexResponse {
 
 export interface RespondedQuotationListItem {
   id: string;
-  issued_quotation_id?: number | string | null;
-  client_name: string;
   reference_number: string;
-  commodity: string | null;
-  service_type: string | null;
   date: string;
+  client_full_name: string;
   status: string;
-  conversation_id: string | null;
-  prepared_by: string | null;
+  assignment_status?: string;
+  as_username: string;
+  as_full_name: string;
+  assigned_at: string;
+  service: string;
+  logistics_service: string;
 }
 
 export interface RespondedQuotationsResponse {
   quotations: RespondedQuotationListItem[];
+  pagination: QuotationsPagination;
+}
+
+export interface RequestedQuotationLogisticsService {
+  commodity: string;
+  service_type: string;
+  transport_mode: string;
+  origin: string;
+  destination: string;
+}
+
+export interface RequestedQuotationRegulatoryService {
+  application_type: string;
+}
+
+export interface RequestedQuotationListItem {
+  id: string | number;
+  reference_number: string;
+  date: string;
+  client_full_name: string;
+  status: string;
+  assignment_status: string | null;
+  as_username: string | null;
+  as_full_name: string | null;
+  assigned_at: string | null;
+  service: string;
+  logistics_service: RequestedQuotationLogisticsService | null;
+  regulatory_service: RequestedQuotationRegulatoryService | null;
+  conversation_id: string | null;
+  prepared_by: string | null;
+  issued_quotation_id: string | null;
+}
+
+export interface RequestedQuotationsResponse {
+  quotations: RequestedQuotationListItem[];
   pagination: QuotationsPagination;
 }
 

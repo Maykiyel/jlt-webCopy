@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api/client";
 import type {
   IssuedQuotationResource,
   QuotationsIndexResponse,
+  RequestedQuotationsResponse,
   RespondedQuotationsResponse,
   RespondedQuotationListItem,
   QuotationResource,
@@ -128,6 +129,38 @@ export async function updateQuotationAssignee(
 interface FetchRespondedQuotationsParams {
   search?: string;
   perPage?: number;
+}
+
+interface FetchRequestedQuotationsParams {
+  search?: string;
+  perPage?: number;
+}
+
+export async function fetchRequestedQuotations(
+  params: FetchRequestedQuotationsParams,
+): Promise<RequestedQuotationsResponse> {
+  const response = await apiClient.get<{
+    data: RequestedQuotationsResponse | [];
+  }>("/quotations", {
+    params: {
+      "filter[status]": "REQUESTED",
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.perPage ? { perPage: params.perPage } : {}),
+    },
+  });
+
+  if (Array.isArray(response.data.data)) {
+    return {
+      quotations: [],
+      pagination: {
+        count: 0,
+        per_page: params.perPage ?? 10,
+        total: 0,
+      },
+    };
+  }
+
+  return response.data.data;
 }
 
 export async function fetchRespondedQuotations(

@@ -1,45 +1,20 @@
 import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageCard } from "@/components/PageCard";
-import { AppTable, type AppTableColumn } from "@/components/AppTable";
-import { fetchQuotations } from "@/features/quotations/api/quotations.api";
-import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
-import { requestedQueryKeys } from "./utils/requestedQueryKeys";
-import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
+import AppTable2 from "@/components/AppTable2";
+import { useState } from "react";
 import {
-  QUOTATION_STATUS,
-  type QuotationClientGroup,
-} from "../../types/quotations.types";
-
-const COLUMNS: AppTableColumn<QuotationClientGroup>[] = [
-  {
-    key: "no",
-    label: "NO.",
-    width: "10%",
-    render: (_row, index) => String(index + 1).padStart(2, "0"),
-  },
-  {
-    key: "quotations",
-    label: "DATE",
-    width: "15%",
-    // Most recent quotation date from the client's list
-    render: (row) => row.quotations?.[0]?.date ?? "—",
-  },
-  {
-    key: "name",
-    label: "FULL NAME",
-    width: "55%",
-    render: (row) => row.name,
-  },
-  {
-    key: "request_count",
-    label: "NO. OF REQUEST",
-    width: "20%",
-    render: (row) => String(row.request_count),
-  },
-];
+  fetchQuotation,
+  fetchRequestedQuotations,
+} from "@/features/quotations/api/quotations.api";
+import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
+import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
+import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
+import { requestedQueryKeys } from "./utils/requestedQueryKeys";
 
 export function QuotationsRequested() {
+  const [jobFilter, setJobFilter] = useState<"all" | "my-jobs">("all");
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
@@ -54,53 +29,50 @@ export function QuotationsRequested() {
   const { data, isLoading } = useQuery({
     queryKey: requestedQueryKeys.requestedList({ searchQuery, perPage }),
     queryFn: () =>
-      fetchQuotations({
-        status: QUOTATION_STATUS.REQUESTED,
+      fetchRequestedQuotations({
         search: searchQuery || undefined,
         perPage,
       }),
   });
 
-  const quotations = data?.quotations ?? [];
+  const rows = data?.quotations ?? [];
   const total = data?.pagination.total ?? 0;
-  const count = data?.pagination.count ?? 0;
+  const count = data?.pagination.count ?? rows.length;
 
-  const prefetchClientQuotations = (clientId: number) => {
+  const prefetchQuotationDetails = (quotationId: string) => {
     void queryClient.prefetchQuery({
-      queryKey: requestedQueryKeys.requestedClientList({
-        clientId: String(clientId),
-        searchQuery: "",
-        perPage: 10,
-      }),
-      queryFn: () =>
-        fetchQuotations({
-          status: QUOTATION_STATUS.REQUESTED,
-          clientId,
-          perPage: 10,
-        }),
+      queryKey: quotationQueryKeys.quotationDetails(quotationId),
+      queryFn: () => fetchQuotation(quotationId),
       staleTime: 30_000,
     });
   };
 
   return (
-    <PageCard title="LIST OF NEW REQUEST">
-      <AppTable
-        columns={COLUMNS}
-        data={isLoading ? [] : quotations}
-        rowKey={(row) => row.client_id}
-        onRowHover={(row) => prefetchClientQuotations(row.client_id)}
-        withEntryControls
-        perPage={perPage}
-        onPerPageChange={setPerPage}
-        total={total}
-        showingCount={count}
-        searchPlaceholder="SEARCH CLIENT NAME"
+    <PageCard
+      title="LIST OF NEW REQUEST"
+      showJobSwitch
+      jobSwitchValue={jobFilter}
+      onJobSwitchChange={setJobFilter}
+    >
+      <AppTable2
+        quotations={rows}
+        isLoading={isLoading}
         searchValue={search}
         onSearchChange={handleSearchChange}
         onSearch={handleSearch}
+        perPage={perPage}
+        onPerPageChange={setPerPage}
+        showingCount={count}
+        total={total}
         onRowClick={(row) => {
-          prefetchClientQuotations(row.client_id);
-          navigate(quotationRoutes.client("requested", row.client_id));
+          const quotationId = String(row.id);
+          prefetchQuotationDetails(quotationId);
+          navigate(
+            quotationRoutes.details({
+              tab: "requested",
+              quotationId,
+            }),
+          );
         }}
       />
     </PageCard>
