@@ -15,7 +15,6 @@ import {
   Edit,
   Delete,
 } from "@nine-thirty-five/material-symbols-react/rounded";
-import { modals } from "@mantine/modals";
 import { useMemo, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import type { ReactNode } from "react";
@@ -189,7 +188,7 @@ export function AppTable<T>({
               }}
               onMouseDown={(event) => event.stopPropagation()}
             >
-              {withEdit.icon ?? <Edit width={18} height={18} />}
+              {withEdit.icon ?? <Edit width={24} height={24} />}
             </ActionIcon>
           );
 
@@ -220,13 +219,11 @@ export function AppTable<T>({
                 ? withDelete.confirmMessage(row)
                 : withDelete.confirmMessage;
 
-            modals.openConfirmModal({
-              title: "Confirm Delete",
-              children: <Text>{message}</Text>,
-              labels: { confirm: "Delete", cancel: "Cancel" },
-              confirmProps: { color: "red" },
-              onConfirm: () => withDelete.onClick(row),
-            });
+            const confirmed = window.confirm(message);
+
+            if (confirmed) {
+              withDelete.onClick(row);
+            }
           };
 
           const deleteButton = (
@@ -237,7 +234,7 @@ export function AppTable<T>({
               onClick={onDeleteClick}
               onMouseDown={(event) => event.stopPropagation()}
             >
-              {withDelete.icon ?? <Delete width={18} height={18} />}
+              {withDelete.icon ?? <Delete width={24} height={24} />}
             </ActionIcon>
           );
 

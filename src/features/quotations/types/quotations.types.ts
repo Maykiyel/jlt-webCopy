@@ -65,8 +65,7 @@ export interface RequestedQuotationListItem {
   client_full_name: string;
   status: string;
   assignment_status: string | null;
-  as_username: string | null;
-  as_full_name: string | null;
+  account_specialist: string | null;
   assigned_at: string | null;
   service: string;
   logistics_service: RequestedQuotationLogisticsService | null;

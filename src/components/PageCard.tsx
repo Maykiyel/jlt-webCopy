@@ -77,9 +77,9 @@ export function PageCard({
         className={classes.header}
       >
         <Group gap="xs" wrap="nowrap">
-          <UnstyledButton onClick={handleBack} className={classes.backButton}>
-            <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
-          </UnstyledButton>
+            <UnstyledButton onClick={handleBack} className={classes.backButton}>
+              <ArrowBack width="1.25rem" height="1.25rem" fill="currentColor" />
+            </UnstyledButton>
 
           <Group gap="0.5rem" align="baseline" wrap="nowrap">
             <Title order={5} fw={800} tt="uppercase" c="jltBlue.8">
