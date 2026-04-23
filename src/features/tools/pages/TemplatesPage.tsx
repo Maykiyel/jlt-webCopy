@@ -33,7 +33,7 @@ const TEMPLATE_TYPES: TemplateType[] = [
 
 const SETTINGS: SettingsOption[] = [
   { id: "details", label: "Details", path: "/tools/templates/config/details" },
-  { id: "billing", label: "Billing", path: "" },
+  { id: "billing", label: "Billing", path: "/tools/templates/config/billing" },
   {
     id: "standard_quotation_templates",
     label: "Standard Quotation Templates",
@@ -174,34 +174,47 @@ export function TemplatesPage() {
   // Clear toggleOverrides only after templates data is updated and matches the expected value
   useEffect(() => {
     if (
-      !isTemplatesFetching &&
-      templatesResponse?.data &&
-      Object.keys(pendingToggleValues).length > 0
+      isTemplatesFetching ||
+      !templatesResponse?.data ||
+      Object.keys(pendingToggleValues).length === 0
     ) {
+      return;
+    }
+
+    const idsToClear = Object.entries(pendingToggleValues)
+      .filter(([id, expectedValue]) => {
+        const numId = Number(id);
+        const template = templatesResponse.data.find((t) => t.id === numId);
+        return Boolean(template && template.is_active === expectedValue);
+      })
+      .map(([id]) => Number(id));
+
+    if (idsToClear.length === 0) {
+      return;
+    }
+
+    const clearTimer = window.setTimeout(() => {
       setToggleOverrides((prev) => {
         const next: Record<number, boolean> = { ...prev };
-        Object.entries(pendingToggleValues).forEach(([id, expectedValue]) => {
-          const numId = Number(id);
-          const template = templatesResponse.data.find((t) => t.id === numId);
-          if (template && template.is_active === expectedValue) {
-            delete next[numId];
-          }
+        idsToClear.forEach((id) => {
+          delete next[id];
         });
         return next;
       });
+
       setPendingToggleValues((prev) => {
         const next: Record<number, boolean> = { ...prev };
-        Object.entries(prev).forEach(([id, expectedValue]) => {
-          const numId = Number(id);
-          const template = templatesResponse.data.find((t) => t.id === numId);
-          if (template && template.is_active === expectedValue) {
-            delete next[numId];
-          }
+        idsToClear.forEach((id) => {
+          delete next[id];
         });
         return next;
       });
-    }
-  }, [isTemplatesFetching, templatesResponse]);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(clearTimer);
+    };
+  }, [isTemplatesFetching, pendingToggleValues, templatesResponse?.data]);
 
   useEffect(() => {
     const toggleTimers = toggleTimersRef.current;
