@@ -12,6 +12,7 @@ export interface DetailConfigResource {
   id: number;
   label: string;
   type: DetailConfigType;
+  count?: number;
   dropdown_options?: DetailConfigOption[];
   dropdownOptions?: DetailConfigOption[];
 }
