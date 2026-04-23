@@ -20,6 +20,7 @@ const tableHead = ["REQUEST", "DETAILS", "STATUS", ""] as const;
 
 export interface AppTable2Props {
   quotations: RequestedQuotationRow[];
+  jobFilter: "all" | "my-jobs" | "my-quotes";
   isLoading?: boolean;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -30,6 +31,8 @@ export interface AppTable2Props {
   total?: number;
   onRowClick?: (row: RequestedQuotationRow) => void;
   searchPlaceholder?: string;
+  onAcceptClick?: (row: RequestedQuotationRow) => void;
+  onReassignClick?: (row: RequestedQuotationRow) => void;
 }
 
 function toTitleCase(value: string) {
@@ -65,6 +68,9 @@ export default function AppTable2({
   total,
   onRowClick,
   searchPlaceholder = "SEARCH REFERENCE OR CLIENT",
+  onAcceptClick,
+  onReassignClick,
+  jobFilter,
 }: AppTable2Props) {
   const currentShowingCount = showingCount ?? quotations.length;
   const currentTotal = total ?? quotations.length;
@@ -198,8 +204,8 @@ export default function AppTable2({
                       <div className={classes.subText}>—</div>
                     )}
                   </Table.Td>
-
-                  <Table.Td className={classes.cellStatus}>
+              
+                    <Table.Td className={classes.cellStatus}>
                     <Button
                       color={
                         row.assignment_status === "AVAILABLE"
@@ -213,6 +219,18 @@ export default function AppTable2({
                           : row.assignment_status === "ASSIGNED"
                             ? <CheckCircle width={20} />
                             : <Autorenew width={20} />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (row.assignment_status === "AVAILABLE") {
+                          onAcceptClick?.(row);
+                          return;
+                        }
+
+                        if (row.assignment_status !== "ASSIGNED") {
+                          onReassignClick?.(row);
+                        }
+                      }}
+                      disabled={row.assignment_status === "ASSIGNED"}
                     >
                       {getStatusLabel(row)}
                     </Button>

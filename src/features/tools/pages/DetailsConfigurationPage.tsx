@@ -301,7 +301,6 @@ export function DetailsConfigurationPage() {
           hideBackButton
           bodyPx="md"
           bodyPy="sm"
-          cardStyle={{ height: "100%", minHeight: 0 }}
           action={
             <ActionIcon
               color="jltAccent.6"
@@ -335,7 +334,6 @@ export function DetailsConfigurationPage() {
             hideBackButton
             bodyPx="md"
             bodyPy="sm"
-            cardStyle={{ height: "100%", minHeight: 0 }}
             action={
               <ActionIcon
                 color="jltAccent.6"
@@ -359,7 +357,6 @@ export function DetailsConfigurationPage() {
             hideBackButton
             bodyPx="md"
             bodyPy="sm"
-            cardStyle={{ height: "100%", minHeight: 0 }}
             action={
               <ActionIcon
                 color="jltAccent.6"

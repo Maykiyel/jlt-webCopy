@@ -152,6 +152,7 @@ export async function fetchRequestedQuotations(
   if (Array.isArray(response.data.data)) {
     return {
       quotations: [],
+      my_quotations: [],
       pagination: {
         count: 0,
         per_page: params.perPage ?? 10,

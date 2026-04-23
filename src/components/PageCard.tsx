@@ -1,7 +1,6 @@
 import {
   Box,
   Card,
-  Divider,
   Group,
   Text,
   Title,
@@ -25,8 +24,10 @@ interface PageCardProps {
   bodyPx?: string | number;
   bodyPy?: string | number;
   showJobSwitch?: boolean;
-  jobSwitchValue?: "all" | "my-jobs";
-  onJobSwitchChange?: (value: "all" | "my-jobs") => void;
+  jobSwitchValue?: "all" | "my-jobs" | "my-quotes";
+  onJobSwitchChange?: (value: "all" | "my-jobs" | "my-quotes") => void;
+  jobSwitchSecondaryValue?: "my-jobs" | "my-quotes";
+  jobSwitchSecondaryLabel?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -44,6 +45,8 @@ export function PageCard({
   showJobSwitch = false,
   jobSwitchValue = "all",
   onJobSwitchChange,
+  jobSwitchSecondaryValue = "my-jobs",
+  jobSwitchSecondaryLabel = "MY JOBS",
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -109,11 +112,11 @@ export function PageCard({
               <UnstyledButton
                 type="button"
                 className={classes.jobSwitchOption}
-                data-active={jobSwitchValue === "my-jobs" || undefined}
-                aria-pressed={jobSwitchValue === "my-jobs"}
-                onClick={() => onJobSwitchChange?.("my-jobs")}
+                data-active={jobSwitchValue === jobSwitchSecondaryValue || undefined}
+                aria-pressed={jobSwitchValue === jobSwitchSecondaryValue}
+                onClick={() => onJobSwitchChange?.(jobSwitchSecondaryValue)}
               >
-                <span className={classes.jobSwitchLabel}>MY JOBS</span>
+                <span className={classes.jobSwitchLabel}>{jobSwitchSecondaryLabel}</span>
               </UnstyledButton>
             </Group>
           )}

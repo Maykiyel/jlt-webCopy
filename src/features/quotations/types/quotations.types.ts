@@ -77,6 +77,7 @@ export interface RequestedQuotationListItem {
 
 export interface RequestedQuotationsResponse {
   quotations: RequestedQuotationListItem[];
+  my_quotations: RequestedQuotationListItem[];
   pagination: QuotationsPagination;
 }
 
