@@ -133,27 +133,40 @@ interface FetchRespondedQuotationsParams {
 
 interface FetchRequestedQuotationsParams {
   search?: string;
+  client_type?: "NEW" | "OLD";
   perPage?: number;
 }
 
 export async function fetchRequestedQuotations(
   params: FetchRequestedQuotationsParams,
 ): Promise<RequestedQuotationsResponse> {
+  console.log("khate", params);
   const response = await apiClient.get<{
     data: RequestedQuotationsResponse | [];
   }>("/quotations", {
     params: {
       "filter[status]": "REQUESTED",
       ...(params.search ? { search: params.search } : {}),
+      ...(params.client_type ? { client_type: params.client_type } : {}),
       ...(params.perPage ? { perPage: params.perPage } : {}),
     },
   });
 
   if (Array.isArray(response.data.data)) {
     return {
+      counts: {
+        all_quotations: 0,
+        old_user_quotations: 0,
+        new_user_quotations: 0,
+      },
       quotations: [],
       my_quotations: [],
       pagination: {
+        count: 0,
+        per_page: params.perPage ?? 10,
+        total: 0,
+      },
+      my_quotations_pagination: {
         count: 0,
         per_page: params.perPage ?? 10,
         total: 0,

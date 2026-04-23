@@ -75,10 +75,18 @@ export interface RequestedQuotationListItem {
   issued_quotation_id: string | null;
 }
 
+export interface ClientCounts {
+  all_quotations: number;
+  old_user_quotations: number;
+  new_user_quotations: number;
+}
+
 export interface RequestedQuotationsResponse {
+  counts: ClientCounts;
   quotations: RequestedQuotationListItem[];
   my_quotations: RequestedQuotationListItem[];
   pagination: QuotationsPagination;
+  my_quotations_pagination: QuotationsPagination;
 }
 
 // ─── Full quotation resource (GET /quotations/{id}) ───────────────────────────
@@ -213,3 +221,6 @@ export const QUOTATION_STATUS = {
 
 export type QuotationStatus =
   (typeof QUOTATION_STATUS)[keyof typeof QUOTATION_STATUS];
+
+
+  

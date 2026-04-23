@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Button, Group, Modal, Text } from "@mantine/core";
+import { useState, useEffect } from "react";
+import { Box, Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { PageCard } from "@/components/PageCard";
-import AppTable2 from "@/components/AppTable2";
 import {
   fetchQuotation,
   fetchRequestedQuotations,
@@ -11,16 +11,31 @@ import {
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
-import { requestedQueryKeys } from "./utils/requestedQueryKeys";
 import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
+
+import { requestedQueryKeys } from "./utils/requestedQueryKeys";
+
+import { RequestFilterClient } from "./components/requestFilterClient";
+import { RequestFilterTable } from "./components/requestFilterTable";
+import { RequestTable } from "./components/requestTable";
+import ReassignModal from "./components/ReassignModal";
+import AcceptModal from "./components/AcceptModal";
 
 export function QuotationsRequested() {
   const [selectedQuotation, setSelectedQuotation] =
     useState<RequestedQuotationListItem | null>(null);
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
+  const [selectedReassignAsId, setSelectedReassignAsId] = useState<
+    string | null
+  >(null);
 
-  const [jobFilter, setJobFilter] = useState<"all" | "my-jobs" | "my-quotes">("all");
+  const [jobFilter, setJobFilter] = useState<"all" | "my-jobs" | "my-quotes">(
+    "all",
+  );
+  const [clientFilter, setClientFilter] = useState<"ALL" | "NEW" | "OLD">(
+    "ALL",
+  );
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -33,20 +48,35 @@ export function QuotationsRequested() {
     handleSearchChange,
   } = useQuotationTableSearch();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: requestedQueryKeys.requestedList({ searchQuery, perPage }),
     queryFn: () =>
       fetchRequestedQuotations({
         search: searchQuery || undefined,
+        client_type: clientFilter === "ALL" ? undefined : clientFilter,
         perPage,
       }),
   });
 
+  useEffect(() => {
+  void refetch();
+}, [clientFilter, refetch])
+
   console.log("khate", data)
 
-  const rows = jobFilter === "all"? data?.quotations || []: data?.my_quotations || [];
+  const rows =
+    jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || [];
   const total = data?.pagination.total ?? 0;
-  const count = data?.pagination.count ?? rows.length;
+  // assigning ops or client
+  // const { data: specialistsResponse } = useQuery({
+  //   queryKey: requestedQueryKeys.accountSpecialists(),
+  //   queryFn: () => userService.getAccountSpecialists(),
+  // });
+
+  // const specialistOptions = (specialistsResponse?.data ?? []).map((specialist) => ({
+  //   value: String(specialist.id),
+  //   label: specialist.full_name,
+  // }));
 
   const prefetchQuotationDetails = (quotationId: string) => {
     void queryClient.prefetchQuery({
@@ -63,6 +93,7 @@ export function QuotationsRequested() {
 
   const openReassignModal = (row: RequestedQuotationListItem) => {
     setSelectedQuotation(row);
+    setSelectedReassignAsId(null);
     setReassignModalOpen(true);
   };
 
@@ -76,82 +107,65 @@ export function QuotationsRequested() {
         jobSwitchSecondaryValue="my-quotes"
         jobSwitchSecondaryLabel="MY QUOTES"
       >
-        <AppTable2
-          quotations={rows}
-          jobFilter={jobFilter}
-          isLoading={isLoading}
-          searchValue={search}
-          onSearchChange={handleSearchChange}
-          onSearch={handleSearch}
-          perPage={perPage}
-          onPerPageChange={setPerPage}
-          showingCount={count}
-          total={total}
-          onAcceptClick={openAcceptModal}
-          onReassignClick={openReassignModal}
-          onRowClick={(row) => {
-            const quotationId = String(row.id);
-            prefetchQuotationDetails(quotationId);
-            navigate(
-              quotationRoutes.details({
-                tab: "requested",
-                quotationId,
-              }),
-            );
-          }}
-        />
+        <Stack gap="xs">
+
+          <RequestFilterClient
+            clientFilter={clientFilter}
+            setClientFilter={setClientFilter}
+            clientCounts={data?.counts}
+          />
+
+          <Box
+            p="xs"
+            style={{
+              borderRadius: "0.75rem",
+              border: "1px solid #e0e5eb",
+            }}
+          >
+            <Box>
+              <RequestFilterTable
+                quotations={rows}
+                searchValue={search}
+                onSearchChange={handleSearchChange}
+                onSearch={handleSearch}
+                perPage={perPage}
+                onPerPageChange={setPerPage}
+              />
+
+              <RequestTable
+                rows={rows}
+                isLoading={isLoading || isFetching}
+                showingCount={data?.pagination.count}
+                total={total}
+                onAcceptClick={openAcceptModal}
+                onReassignClick={openReassignModal}
+                onRowClick={(row: RequestedQuotationListItem) => {
+                  const quotationId = String(row.id);
+                  prefetchQuotationDetails(quotationId);
+                  navigate(
+                    quotationRoutes.details({
+                      tab: "requested",
+                      quotationId,
+                    }),
+                  );
+                }}
+              />
+            </Box>
+          </Box>
+        </Stack>
       </PageCard>
 
-      <Modal
-        opened={acceptModalOpen}
-        onClose={() => setAcceptModalOpen(false)}
-        title="Accept quotation request"
-        centered
-      >
-        <Text size="sm" mb="md">
-          Accept quotation <strong>{selectedQuotation?.reference_number ?? ""}</strong>
-          {" "}for <strong>{selectedQuotation?.client_full_name ?? ""}</strong>?
-        </Text>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => setAcceptModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            color="green"
-            onClick={() => {
-              // TODO: connect accept mutation here.
-              setAcceptModalOpen(false);
-            }}
-          >
-            Confirm Accept
-          </Button>
-        </Group>
-      </Modal>
+      {/* underconstruction */}
+      <ReassignModal
+        reassignModalOpen={reassignModalOpen}
+        setReassignModalOpen={setReassignModalOpen}
+        selectedQuotation={selectedQuotation}
+      />
 
-      <Modal
-        opened={reassignModalOpen}
-        onClose={() => setReassignModalOpen(false)}
-        title="Reassignment request"
-        centered
-      >
-        <Text size="sm" mb="md">
-          Open reassignment flow for quotation <strong>{selectedQuotation?.reference_number ?? ""}</strong>?
-        </Text>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => setReassignModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            color="indigo"
-            onClick={() => {
-              // TODO: connect reassignment mutation here.
-              setReassignModalOpen(false);
-            }}
-          >
-            Continue
-          </Button>
-        </Group>
-      </Modal>
+      <AcceptModal
+        acceptModalOpen={acceptModalOpen}
+        setAcceptModalOpen={setAcceptModalOpen}
+      />
     </>
   );
 }

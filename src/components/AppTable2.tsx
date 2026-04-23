@@ -1,16 +1,30 @@
-import { Button, Box, Select, Stack, Table, TextInput } from "@mantine/core";
+import { useMemo, useState } from "react";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Divider,
+  Group,
+  Select,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  UnstyledButton,
+} from "@mantine/core";
 import {
   MoreVert,
   Search,
+  ChevronRight,
 } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   ArrowRightAlt,
   CheckCircle,
   Autorenew,
-  PanToolAlt
+  PanToolAlt,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
-import classes from "./AppTable2.module.css";
 
 const entryOptions = ["10", "25", "50"];
 
@@ -72,66 +86,232 @@ export default function AppTable2({
   onReassignClick,
   jobFilter,
 }: AppTable2Props) {
+  const [dateFilter, setDateFilter] = useState("");
+  const [serviceFilter, setServiceFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
+  const serviceOptions = useMemo(() => {
+    const values = new Set<string>();
+
+    quotations.forEach((row) => {
+      if (row.service) {
+        values.add(toTitleCase(row.service));
+      }
+    });
+
+    return Array.from(values).map((value) => ({ value, label: value }));
+  }, [quotations]);
+
+  const statusOptions = useMemo(() => {
+    const values = new Set<string>();
+
+    quotations.forEach((row) => {
+      values.add(getStatusLabel(row));
+    });
+
+    return Array.from(values).map((value) => ({ value, label: value }));
+  }, [quotations]);
+
+  const allClientCount = total ?? quotations.length;
+  const newClientCount = quotations.filter(
+    (row) => row.assignment_status === "AVAILABLE",
+  ).length;
+  const oldClientCount = Math.max(allClientCount - newClientCount, 0);
   const currentShowingCount = showingCount ?? quotations.length;
   const currentTotal = total ?? quotations.length;
 
+  const topTabStyles = {
+    root: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.4rem",
+      padding: "0.45rem 0.7rem",
+      borderBottom: "2px solid transparent",
+    },
+    label: {
+      fontSize: "0.82rem",
+      fontWeight: 700,
+      color: "#2c3f55",
+      textTransform: "uppercase" as const,
+    },
+  };
+
+  const statusButtonBg = (row: RequestedQuotationRow) => {
+    if (row.assignment_status === "AVAILABLE") return "#007406";
+    if (row.assignment_status === "ASSIGNED") return "#3B82F6";
+    return "#1D274E";
+  };
+
   return (
-    <Stack gap="md">
-      <Box className={classes.filtersPanel}>
-        <div className={classes.filters}>
-          <TextInput
-            className={classes.searchInput}
-            size="sm"
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={(event) => onSearchChange(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                onSearch(searchValue);
-              }
-            }}
-          />
-
-          <Button
-            type="button"
-            className={classes.searchButton}
-            aria-label="Search"
-            onClick={() => onSearch(searchValue)}
+    <Stack gap="xs">
+      <Box
+        p="xs"
+        style={{
+          background: "#ffffff",
+          borderRadius: "0.55rem",
+          border: "1px solid #e2e6eb",
+        }}
+      >
+        <Group gap="xs">
+          <UnstyledButton
+            styles={topTabStyles}
+            style={{ borderBottomColor: jobFilter === "all" ? "#ef8f27" : "transparent" }}
           >
-            <Search width={16} />
-          </Button>
+            <Text fz="0.82rem" fw={700} c="#2c3f55">ALL CLIENTS</Text>
+            <Text fz="0.82rem" fw={700} c="#8a8f99">{allClientCount}</Text>
+          </UnstyledButton>
 
-          <Button
-            type="button"
-            className={classes.resetButton}
-            onClick={() => {
-              onSearchChange("");
-              onSearch("");
-            }}
+          <Divider orientation="vertical" color="#dde2e8" />
+
+          <UnstyledButton
+            styles={topTabStyles}
+            style={{ borderBottomColor: jobFilter === "my-jobs" ? "#ef8f27" : "transparent" }}
           >
-            RESET
-          </Button>
-        </div>
+            <Badge circle size="8" color="teal" p={0} />
+            <Text fz="0.82rem" fw={700} c="#2c3f55">NEW CLIENT</Text>
+            <Text fz="0.82rem" fw={700} c="#8a8f99">{newClientCount}</Text>
+          </UnstyledButton>
 
-        <div className={classes.entryRow}>
-          <span>Show</span>
-          <Select
-            className={classes.entrySelect}
-            size="xs"
-            data={entryOptions}
-            value={String(perPage)}
-            onChange={(value) => {
-              if (value) {
-                onPerPageChange(Number(value));
-              }
-            }}
-          />
-          <span>entries</span>
-        </div>
+          <Divider orientation="vertical" color="#dde2e8" />
+
+          <UnstyledButton
+            styles={topTabStyles}
+            style={{ borderBottomColor: jobFilter === "my-quotes" ? "#ef8f27" : "transparent" }}
+          >
+            <Badge circle size="8" color="blue" p={0} />
+            <Text fz="0.82rem" fw={700} c="#2c3f55">OLD CLIENT</Text>
+            <Text fz="0.82rem" fw={700} c="#8a8f99">{oldClientCount}</Text>
+          </UnstyledButton>
+        </Group>
       </Box>
 
-      <div className={classes.tableShell}>
-        <Table withTableBorder withColumnBorders={false}>
+      <Box
+        p="xs"
+        style={{
+          background: "#f3f5f7",
+          borderRadius: "0.75rem",
+          border: "1px solid #e0e5eb",
+        }}
+      >
+        <Box
+          p="xs"
+          style={{
+            background: "#ffffff",
+            borderRadius: "0.55rem",
+            border: "1px solid #e2e6eb",
+          }}
+        >
+          <Group gap="xs" wrap="wrap" mb="sm">
+            <TextInput
+              w={220}
+              size="sm"
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(event) => onSearchChange(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  onSearch(searchValue);
+                }
+              }}
+            />
+
+            <Button
+              type="button"
+              h={36}
+              px="sm"
+              radius="sm"
+              color="#4f657d"
+              aria-label="Search"
+              onClick={() => onSearch(searchValue)}
+            >
+              <Search width={16} />
+            </Button>
+
+            <TextInput
+              w={170}
+              size="sm"
+              placeholder="REQ. DATE"
+              value={dateFilter}
+              onChange={(event) => setDateFilter(event.currentTarget.value)}
+              rightSection={
+                <ActionIcon
+                  size={28}
+                  radius="xs"
+                  variant="filled"
+                  color="#4f657d"
+                  aria-label="Request date"
+                >
+                  <ChevronRight width={16} />
+                </ActionIcon>
+              }
+            />
+
+            <Select
+              w={185}
+              size="sm"
+              placeholder="ALL SERVICES"
+              data={serviceOptions}
+              value={serviceFilter}
+              onChange={setServiceFilter}
+              rightSection={<ChevronRight width={16} />}
+            />
+
+            <Select
+              w={185}
+              size="sm"
+              placeholder="SELECT STATUS"
+              data={statusOptions}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              rightSection={<ChevronRight width={16} />}
+            />
+
+            <Button
+              type="button"
+              h={36}
+              px="md"
+              radius="sm"
+              color="#4f657d"
+              onClick={() => {
+                setDateFilter("");
+                setServiceFilter(null);
+                setStatusFilter(null);
+                onSearchChange("");
+                onSearch("");
+              }}
+            >
+              RESET
+            </Button>
+          </Group>
+
+          <Divider color="#e5e8ed" mb="xs" />
+
+          <Group gap="xs" align="center">
+            <Text c="#7a808a" fz="0.9rem">Show</Text>
+            <Select
+              w={70}
+              size="xs"
+              data={entryOptions}
+              value={String(perPage)}
+              onChange={(value) => {
+                if (value) {
+                  onPerPageChange(Number(value));
+                }
+              }}
+            />
+            <Text c="#7a808a" fz="0.9rem">entries</Text>
+          </Group>
+        </Box>
+
+        <Box mt="sm" style={{ border: "1px solid #d7dce3" }}>
+        <Table
+          withTableBorder
+          withColumnBorders={false}
+          styles={{
+            table: { width: "100%" },
+            tr: { "&:hover": { background: "#f8fafc" } },
+          }}
+        >
           <Table.Thead style={{ backgroundColor: "#17324f", color: "white" }}>
             <Table.Tr>
               {tableHead.map((heading, index) => (
@@ -143,14 +323,14 @@ export default function AppTable2({
           <Table.Tbody>
             {isLoading ? (
               <Table.Tr>
-                <Table.Td colSpan={4} className={classes.subText}>
-                  Loading quotations...
+                <Table.Td colSpan={4}>
+                  <Text c="#475569" fz="0.813rem" lh={1.45}>Loading quotations...</Text>
                 </Table.Td>
               </Table.Tr>
             ) : quotations.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={4} className={classes.subText}>
-                  No quotations found.
+                <Table.Td colSpan={4}>
+                  <Text c="#475569" fz="0.813rem" lh={1.45}>No quotations found.</Text>
                 </Table.Td>
               </Table.Tr>
             ) : (
@@ -160,65 +340,54 @@ export default function AppTable2({
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   style={onRowClick ? { cursor: "pointer" } : undefined}
                 >
-                  <Table.Td className={classes.cellRequest}>
-                    <div className={classes.requestCode}>
-                      {row.reference_number}
-                    </div>
-                    <div className={classes.subText}>
-                      {row.client_full_name}
-                    </div>
-                    <div className={classes.subText}>Req. Date: {row.date}</div>
+                  <Table.Td style={{ minWidth: "16.25rem" }}>
+                    <Stack gap={2}>
+                      <Text c="#334155" fz="0.875rem" fw={700}>{row.reference_number}</Text>
+                      <Text c="#475569" fz="0.813rem" lh={1.45}>{row.client_full_name}</Text>
+                      <Text c="#475569" fz="0.813rem" lh={1.45}>Req. Date: {row.date}</Text>
+                    </Stack>
                   </Table.Td>
 
-                  <Table.Td className={classes.cellDetails}>
-                    <div className={classes.detailTitle}>
-                      {getServiceLabel(row.service)}
-                    </div>
+                  <Table.Td style={{ minWidth: "22.5rem" }}>
+                    <Stack gap={2}>
+                      <Text c="#2a4058" fz="0.875rem" fw={700}>{getServiceLabel(row.service)}</Text>
                     {row.logistics_service ? (
                       <>
-                        <div className={classes.subText}>
-                          {row.logistics_service.commodity}
-                        </div>
-                        <div className={classes.subText}>
+                        <Text c="#475569" fz="0.813rem" lh={1.45}>{row.logistics_service.commodity}</Text>
+                        <Text c="#475569" fz="0.813rem" lh={1.45}>
                           {toTitleCase(row.logistics_service.service_type)} ·{" "}
                           {toTitleCase(row.logistics_service.transport_mode)}
-                        </div>
-                        <div className={classes.routeLine}>
-                          <span className={classes.subText}>
-                            {row.logistics_service.origin}
-                          </span>
+                        </Text>
+                        <Group gap={5} align="center" wrap="nowrap">
+                          <Text c="#475569" fz="0.813rem" lh={1.45}>{row.logistics_service.origin}</Text>
                           <ArrowRightAlt width={15} />
-                          <span className={classes.subText}>
-                            {row.logistics_service.destination}
-                          </span>
-                        </div>
+                          <Text c="#475569" fz="0.813rem" lh={1.45}>{row.logistics_service.destination}</Text>
+                        </Group>
                       </>
                     ) : row.regulatory_service ? (
                       <>
-                        <div className={classes.subText}>Application Type</div>
-                        <div className={classes.detailTitle}>
+                        <Text c="#475569" fz="0.813rem" lh={1.45}>Application Type</Text>
+                        <Text c="#2a4058" fz="0.875rem" fw={700}>
                           {toTitleCase(row.regulatory_service.application_type)}
-                        </div>
+                        </Text>
                       </>
                     ) : (
-                      <div className={classes.subText}>—</div>
+                      <Text c="#475569" fz="0.813rem" lh={1.45}>-</Text>
                     )}
+                    </Stack>
                   </Table.Td>
-              
-                    <Table.Td className={classes.cellStatus}>
+
+                  <Table.Td style={{ minWidth: "18.125rem" }}>
+                    <Stack gap={4}>
                     <Button
-                      color={
+                      styles={{ root: { background: statusButtonBg(row) } }}
+                      leftSection={
                         row.assignment_status === "AVAILABLE"
-                          ? "#007406"
-                          : row.assignment_status === "ASSIGNED"
-                            ? "#3B82F6"
-                            : "#1D274E"
-                      }
-                      leftSection={row.assignment_status === "AVAILABLE"
                           ? <PanToolAlt width={20} />
                           : row.assignment_status === "ASSIGNED"
                             ? <CheckCircle width={20} />
-                            : <Autorenew width={20} />}
+                            : <Autorenew width={20} />
+                      }
                       onClick={(event) => {
                         event.stopPropagation();
                         if (row.assignment_status === "AVAILABLE") {
@@ -235,42 +404,36 @@ export default function AppTable2({
                       {getStatusLabel(row)}
                     </Button>
                     {row.account_specialist && (
-                      <div className={classes.statusOwner}>
-                        {row.account_specialist}
-                      </div>
+                      <Text c="#334155" fz="0.75rem" lh={1.4}>{row.account_specialist}</Text>
                     )}
                     {row.assignment_status === "AVAILABLE" && (
-                      <div
-                        className={`${classes.statusOwner} ${classes.statusNote}`}
-                      >
-                        {toTitleCase(row.assignment_status)}
-                      </div>
+                      <Text c="#16803d" fz="0.75rem" fw={700} lh={1.4}>{toTitleCase(row.assignment_status)}</Text>
                     )}
                     {row.assigned_at && (
-                      <div className={classes.statusOwner}>
-                        Assigned at: {row.assigned_at}
-                      </div>
+                      <Text c="#334155" fz="0.75rem" lh={1.4}>Assigned at: {row.assigned_at}</Text>
                     )}
                     {row.prepared_by && (
-                      <div className={classes.statusOwner}>
-                        Prepared by: {row.prepared_by}
-                      </div>
+                      <Text c="#334155" fz="0.75rem" lh={1.4}>Prepared by: {row.prepared_by}</Text>
                     )}
+                    </Stack>
                   </Table.Td>
 
-                  <Table.Td className={classes.cellActions}>
-                    <MoreVert width={16} />
+                  <Table.Td style={{ width: "2.75rem", textAlign: "center" }}>
+                    <ActionIcon variant="subtle" color="#334155" aria-label="More actions">
+                      <MoreVert width={16} />
+                    </ActionIcon>
                   </Table.Td>
                 </Table.Tr>
               ))
             )}
           </Table.Tbody>
         </Table>
-      </div>
+        </Box>
 
-      <div className={classes.footer}>
-        Showing {currentShowingCount} out of {currentTotal} entries
-      </div>
+        <Text mt="lg" ml="xs" c="#8a8f99" fz="0.813rem">
+          Showing {currentShowingCount} out of {currentTotal} entries
+        </Text>
+      </Box>
     </Stack>
   );
 }
