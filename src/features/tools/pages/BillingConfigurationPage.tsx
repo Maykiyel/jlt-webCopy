@@ -1,24 +1,18 @@
 import { useMemo, useState } from "react";
 import {
   ActionIcon,
-  Box,
   Button,
-  Group,
   Modal,
   Stack,
-  Table,
-  Text,
   TextInput,
 } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Add,
-  ArrowBack,
-  Delete,
-  Edit,
-} from "@nine-thirty-five/material-symbols-react/rounded";
+import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
 import { PageCard } from "@/components/PageCard";
+import { ConfigLayout } from "../components/ConfigLayout";
+import { ConfigPageHeader } from "../components/ConfigPageHeader";
+import { ConfigRowsTable } from "../components/ConfigRowsTable";
 import {
   billingConfigsService,
   type BillingConfigResource,
@@ -178,64 +172,33 @@ export function BillingConfigurationPage() {
 
   return (
     <>
-      <Group mb="md" gap="sm">
-        <ActionIcon
-          variant="subtle"
-          onClick={() => window.history.back()}
-          aria-label="Back"
-        >
-          <ArrowBack width={24} height={24} />
-        </ActionIcon>
-        <Text fw={700} size="lg" c="jltBlue">
-          BILLING CONFIGURATION
-        </Text>
-      </Group>
-      <Box
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "1rem",
-          height: "calc(100vh - var(--app-shell-header-height) - 5rem)",
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
-        <PageCard
-          title="LIST OF RECEIPT CHARGES"
-          hideBackButton
-          bodyPx="md"
-          bodyPy="sm"
-          action={
-            <ActionIcon
-              color="jltAccent.6"
-              onClick={() => openCreateModal("RECEIPT CHARGES")}
-            >
-              <Add />
-            </ActionIcon>
-          }
-        >
-          {renderRows(
-            groupedRows["RECEIPT CHARGES"],
-            "receipt charges",
-            openEditModal,
-            handleDelete,
-          )}
-        </PageCard>
-
-        <Box
-          style={{
-            display: "grid",
-            gridTemplateRows: "1fr 1fr",
-            gap: "1rem",
-            height: "100%",
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
+      <ConfigPageHeader title="BILLING CONFIGURATION" />
+      <ConfigLayout
+        left={
+          <PageCard
+            title="LIST OF RECEIPT CHARGES"
+            bodyPx="md"
+            bodyPy="sm"
+            action={
+              <ActionIcon
+                color="jltAccent.6"
+                onClick={() => openCreateModal("RECEIPT CHARGES")}
+              >
+                <Add />
+              </ActionIcon>
+            }
+          >
+            <ConfigRowsTable
+              rows={groupedRows["RECEIPT CHARGES"]}
+              emptyLabel="receipt charges"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+            />
+          </PageCard>
+        }
+        rightTop={
           <PageCard
             title="LIST OF CURRENCY"
-            hideBackButton
             bodyPx="md"
             bodyPy="sm"
             action={
@@ -247,17 +210,17 @@ export function BillingConfigurationPage() {
               </ActionIcon>
             }
           >
-            {renderRows(
-              groupedRows.CURRENCY,
-              "currency",
-              openEditModal,
-              handleDelete,
-            )}
+            <ConfigRowsTable
+              rows={groupedRows.CURRENCY}
+              emptyLabel="currency"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+            />
           </PageCard>
-
+        }
+        rightBottom={
           <PageCard
             title="LIST OF UOM"
-            hideBackButton
             bodyPx="md"
             bodyPy="sm"
             action={
@@ -269,10 +232,15 @@ export function BillingConfigurationPage() {
               </ActionIcon>
             }
           >
-            {renderRows(groupedRows.UOM, "uom", openEditModal, handleDelete)}
+            <ConfigRowsTable
+              rows={groupedRows.UOM}
+              emptyLabel="uom"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+            />
           </PageCard>
-        </Box>
-      </Box>
+        }
+      />
 
       <Modal
         opened={Boolean(activeType)}
@@ -297,54 +265,5 @@ export function BillingConfigurationPage() {
         </Stack>
       </Modal>
     </>
-  );
-}
-
-function renderRows(
-  rows: BillingConfigResource[],
-  emptyLabel: string,
-  onEdit: (item: BillingConfigResource) => void,
-  onDelete: (item: BillingConfigResource) => void,
-) {
-  return (
-    <Table withRowBorders withColumnBorders withTableBorder>
-      <Table.Tbody>
-        {rows.map((item, index) => (
-          <Table.Tr key={item.id}>
-            <Table.Td w={56} ta="center">
-              {String(index + 1).padStart(2, "0")}
-            </Table.Td>
-            <Table.Td>{item.label}</Table.Td>
-            <Table.Td w={88}>
-              <Group gap={8} justify="flex-end" wrap="nowrap">
-                <ActionIcon
-                  variant="subtle"
-                  color="jltAccent.6"
-                  onClick={() => onEdit(item)}
-                >
-                  <Edit width={24} height={24} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={() => onDelete(item)}
-                >
-                  <Delete width={24} height={24} />
-                </ActionIcon>
-              </Group>
-            </Table.Td>
-          </Table.Tr>
-        ))}
-        {rows.length === 0 && (
-          <Table.Tr>
-            <Table.Td colSpan={4}>
-              <Text c="dimmed" size="sm">
-                No {emptyLabel} configs yet.
-              </Text>
-            </Table.Td>
-          </Table.Tr>
-        )}
-      </Table.Tbody>
-    </Table>
   );
 }
