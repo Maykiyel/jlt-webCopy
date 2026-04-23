@@ -1,12 +1,10 @@
 import { useMemo, useState } from "react";
 import {
   ActionIcon,
-  Box,
   Button,
   Group,
   Modal,
   Stack,
-  Table,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -16,14 +14,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import {
-  Add,
-  ArrowBack,
-  Delete,
-  Edit,
-} from "@nine-thirty-five/material-symbols-react/rounded";
+import { Add, Delete } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
 import { PageCard } from "@/components/PageCard";
+import { ConfigLayout } from "../components/ConfigLayout";
+import { ConfigPageHeader } from "../components/ConfigPageHeader";
+import { ConfigRowsTable } from "../components/ConfigRowsTable";
 import {
   detailsConfigsService,
   type DetailConfigOption,
@@ -273,65 +269,49 @@ export function DetailsConfigurationPage() {
 
   return (
     <>
-      <Group mb="md" gap={"sm"}>
-        <ActionIcon
-          variant="subtle"
-          onClick={() => window.history.back()}
-          aria-label="Back"
-        >
-          <ArrowBack width={24} height={24} />
-        </ActionIcon>
-        <Text fw={700} size="lg" c={"jltBlue"}>
-          DETAILS CONFIGURATION
-        </Text>
-      </Group>
-      <Box
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "1rem",
-          height: "calc(100vh - var(--app-shell-header-height) - 5rem)",
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
-        <PageCard
-          title="DROPDOWN"
-          hideBackButton
-          bodyPx="md"
-          bodyPy="sm"
-          action={
-            <ActionIcon
-              color="jltAccent.6"
-              onClick={() => openCreateModal("DROPDOWN")}
-            >
-              <Add />
-            </ActionIcon>
-          }
-        >
-          {renderRows(
-            groupedRows.DROPDOWN,
-            "DROPDOWN",
-            openEditModal,
-            handleDelete,
-            dropdownOptionCountById,
-          )}
-        </PageCard>
-
-        <Box
-          style={{
-            display: "grid",
-            gridTemplateRows: "1fr 1fr",
-            gap: "1rem",
-            height: "100%",
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
+      <ConfigPageHeader title="DETAILS CONFIGURATION" />
+      <ConfigLayout
+        left={
+          <PageCard
+            title="DROPDOWN"
+            bodyPx="md"
+            bodyPy="sm"
+            action={
+              <ActionIcon
+                color="jltAccent.6"
+                onClick={() => openCreateModal("DROPDOWN")}
+              >
+                <Add />
+              </ActionIcon>
+            }
+          >
+            <ConfigRowsTable
+              rows={groupedRows.DROPDOWN}
+              emptyLabel="dropdown"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              renderMeta={(item) =>
+                item.type === "DROPDOWN" ? (
+                  <Text
+                    component="span"
+                    w={120}
+                    c="dimmed"
+                    fs="italic"
+                    ml="sm"
+                  >
+                    (
+                    {dropdownOptionCountById[item.id] ??
+                      getDropdownOptions(item).length}{" "}
+                    Options)
+                  </Text>
+                ) : null
+              }
+            />
+          </PageCard>
+        }
+        rightTop={
           <PageCard
             title="TEXT FIELD"
-            hideBackButton
             bodyPx="md"
             bodyPy="sm"
             action={
@@ -343,18 +323,17 @@ export function DetailsConfigurationPage() {
               </ActionIcon>
             }
           >
-            {renderRows(
-              groupedRows.TEXT,
-              "TEXT FIELD",
-              openEditModal,
-              handleDelete,
-              dropdownOptionCountById,
-            )}
+            <ConfigRowsTable
+              rows={groupedRows.TEXT}
+              emptyLabel="text field"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+            />
           </PageCard>
-
+        }
+        rightBottom={
           <PageCard
             title="DATE PICKER"
-            hideBackButton
             bodyPx="md"
             bodyPy="sm"
             action={
@@ -366,16 +345,15 @@ export function DetailsConfigurationPage() {
               </ActionIcon>
             }
           >
-            {renderRows(
-              groupedRows["DATE PICKER"],
-              "DATE PICKER",
-              openEditModal,
-              handleDelete,
-              dropdownOptionCountById,
-            )}
+            <ConfigRowsTable
+              rows={groupedRows["DATE PICKER"]}
+              emptyLabel="date picker"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+            />
           </PageCard>
-        </Box>
-      </Box>
+        }
+      />
 
       <Modal
         opened={Boolean(activeType)}
@@ -440,61 +418,4 @@ export function DetailsConfigurationPage() {
 
 function getDropdownOptions(item: DetailConfigResource): DetailConfigOption[] {
   return item.dropdown_options ?? item.dropdownOptions ?? [];
-}
-
-function renderRows(
-  rows: DetailConfigResource[],
-  emptyLabel: string,
-  onEdit: (item: DetailConfigResource) => void,
-  onDelete: (item: DetailConfigResource) => void,
-  dropdownOptionCountById: Record<number, number>,
-) {
-  return (
-    <Table withRowBorders withColumnBorders withTableBorder>
-      <Table.Tbody>
-        {rows.map((item, index) => (
-          <Table.Tr key={item.id}>
-            <Table.Td w={56} ta={"center"}>
-              {String(index + 1).padStart(2, "0")}
-            </Table.Td>
-            <Table.Td>
-              {item.label}
-              <Text component="span" w={120} c="dimmed" fs="italic" ml={"sm"}>
-                {item.type === "DROPDOWN"
-                  ? `(${dropdownOptionCountById[item.id] ?? getDropdownOptions(item).length} Options)`
-                  : ""}
-              </Text>
-            </Table.Td>
-            <Table.Td w={88}>
-              <Group gap={8} justify="flex-end" wrap="nowrap">
-                <ActionIcon
-                  variant="subtle"
-                  color="jltAccent.6"
-                  onClick={() => onEdit(item)}
-                >
-                  <Edit width={24} height={24} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={() => onDelete(item)}
-                >
-                  <Delete width={24} height={24} />
-                </ActionIcon>
-              </Group>
-            </Table.Td>
-          </Table.Tr>
-        ))}
-        {rows.length === 0 && (
-          <Table.Tr>
-            <Table.Td colSpan={4}>
-              <Text c="dimmed" size="sm">
-                No {emptyLabel.toLowerCase()} configs yet.
-              </Text>
-            </Table.Td>
-          </Table.Tr>
-        )}
-      </Table.Tbody>
-    </Table>
-  );
 }
