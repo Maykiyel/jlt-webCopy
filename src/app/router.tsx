@@ -133,6 +133,14 @@ export const router = createBrowserRouter([
             path: "tools/templates/config/standard-quotation-template",
             Component: Tools,
           },
+          {
+            path: "tools/templates/config/standard-quotation-template/new",
+            Component: Tools,
+          },
+          {
+            path: "tools/templates/config/standard-quotation-template/:templateId/edit",
+            Component: Tools,
+          },
           { path: "tools/services", Component: Tools },
           { path: "tools/messages", Component: Tools },
           { path: "tools/templates", Component: Tools },
