@@ -33,10 +33,11 @@ Use these references as the source of truth while executing this skill.
 2. Classify scope by touched paths: shared layer, feature layer, app layer, or multi-layer.
 3. Run [enforcement checklist](./references/enforcement-checklist.md) and record pass/fail for each section.
 4. Apply or verify ESLint boundary zones using [ESLint boundary zones](./references/eslint-boundary-zones.md).
-5. Keep change sets minimal while correcting placement and import-direction violations.
-6. Run validation commands using [validation command matrix](./references/validation-command-matrix.md).
-7. If checks fail, fix touched-code regressions first, then re-run required gates.
-8. Produce final output using [result format](./references/result-format.md), including residual risk and assumptions.
+5. Enforce optimistic-mutation placement: shared mutation patterns belong in reusable hooks/API modules rather than ad hoc page-level handlers.
+6. Keep change sets minimal while correcting placement and import-direction violations, but prefer centralized fixes when a pattern recurs across modules.
+7. Run validation commands using [validation command matrix](./references/validation-command-matrix.md).
+8. If checks fail, fix touched-code regressions first, then re-run required gates.
+9. Produce final output using [result format](./references/result-format.md), including residual risk and assumptions.
 
 ## Operating Modes
 
@@ -52,6 +53,8 @@ Use these references as the source of truth while executing this skill.
 - Prefer direct imports over barrel files.
 - Compose features at src/app rather than coupling features together.
 - Keep patches scoped and avoid broad rewrites when extraction solves the issue.
+- Mutation UX standards (including optimistic update + rollback strategy) should be implemented through reusable feature/shared abstractions.
+- Prefer global architectural fixes over repeated local exceptions when enforcing standards.
 
 ## Escalation Rules
 
