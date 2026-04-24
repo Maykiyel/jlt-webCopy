@@ -1,24 +1,12 @@
 import { useMemo, useState } from "react";
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Group,
-  Modal,
-  Stack,
-  Table,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { ActionIcon, Button, Modal, Stack, TextInput } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Add,
-  ArrowBack,
-  Delete,
-  Edit,
-} from "@nine-thirty-five/material-symbols-react/rounded";
+import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
 import { PageCard } from "@/components/PageCard";
+import { ConfigLayout } from "../components/ConfigLayout";
+import { ConfigPageHeader } from "../components/ConfigPageHeader";
+import { ConfigRowsTable } from "../components/ConfigRowsTable";
 import {
   billingConfigsService,
   type BillingConfigResource,
@@ -31,13 +19,51 @@ export function BillingConfigurationPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [label, setLabel] = useState("");
 
-  const { data: billingResponse } = useQuery({
+  const { data: billingResponse, isLoading: isBillingLoading } = useQuery({
     queryKey: ["billing-configs"],
     queryFn: () => billingConfigsService.getBillingConfigs(),
   });
 
   const createMutation = useMutation({
     mutationFn: billingConfigsService.createBillingConfig,
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: ["billing-configs"] });
+      const previous = queryClient.getQueryData(["billing-configs"]);
+
+      queryClient.setQueryData(
+        ["billing-configs"],
+        (
+          current:
+            | { data?: Record<BillingConfigType, BillingConfigResource[]> }
+            | undefined,
+        ) => {
+          const optimisticItem: BillingConfigResource = {
+            id: Date.now(),
+            label: payload.label,
+            type: payload.type,
+          };
+
+          const nextData = current?.data ?? {
+            "RECEIPT CHARGES": [],
+            CURRENCY: [],
+            UOM: [],
+          };
+
+          return {
+            ...current,
+            data: {
+              ...nextData,
+              [payload.type]: [
+                ...(nextData[payload.type] ?? []),
+                optimisticItem,
+              ],
+            },
+          };
+        },
+      );
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing-configs"] });
       notifications.show({
@@ -47,7 +73,10 @@ export function BillingConfigurationPage() {
       });
       handleCloseModal();
     },
-    onError: () => {
+    onError: (_error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["billing-configs"], context.previous);
+      }
       notifications.show({
         title: "Error",
         message: "Failed to save billing configuration",
@@ -59,6 +88,42 @@ export function BillingConfigurationPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: { label: string } }) =>
       billingConfigsService.updateBillingConfig(id, payload),
+    onMutate: async ({ id, payload }) => {
+      await queryClient.cancelQueries({ queryKey: ["billing-configs"] });
+      const previous = queryClient.getQueryData(["billing-configs"]);
+
+      queryClient.setQueryData(
+        ["billing-configs"],
+        (
+          current:
+            | { data?: Record<BillingConfigType, BillingConfigResource[]> }
+            | undefined,
+        ) => {
+          if (!current?.data) {
+            return current;
+          }
+
+          return {
+            ...current,
+            data: {
+              ...current.data,
+              "RECEIPT CHARGES": (current.data["RECEIPT CHARGES"] ?? []).map(
+                (item) =>
+                  item.id === id ? { ...item, label: payload.label } : item,
+              ),
+              CURRENCY: (current.data.CURRENCY ?? []).map((item) =>
+                item.id === id ? { ...item, label: payload.label } : item,
+              ),
+              UOM: (current.data.UOM ?? []).map((item) =>
+                item.id === id ? { ...item, label: payload.label } : item,
+              ),
+            },
+          };
+        },
+      );
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing-configs"] });
       notifications.show({
@@ -68,7 +133,10 @@ export function BillingConfigurationPage() {
       });
       handleCloseModal();
     },
-    onError: () => {
+    onError: (_error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["billing-configs"], context.previous);
+      }
       notifications.show({
         title: "Error",
         message: "Failed to update billing configuration",
@@ -79,6 +147,39 @@ export function BillingConfigurationPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => billingConfigsService.deleteBillingConfig(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["billing-configs"] });
+      const previous = queryClient.getQueryData(["billing-configs"]);
+
+      queryClient.setQueryData(
+        ["billing-configs"],
+        (
+          current:
+            | { data?: Record<BillingConfigType, BillingConfigResource[]> }
+            | undefined,
+        ) => {
+          if (!current?.data) {
+            return current;
+          }
+
+          return {
+            ...current,
+            data: {
+              ...current.data,
+              "RECEIPT CHARGES": (current.data["RECEIPT CHARGES"] ?? []).filter(
+                (item) => item.id !== id,
+              ),
+              CURRENCY: (current.data.CURRENCY ?? []).filter(
+                (item) => item.id !== id,
+              ),
+              UOM: (current.data.UOM ?? []).filter((item) => item.id !== id),
+            },
+          };
+        },
+      );
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["billing-configs"] });
       notifications.show({
@@ -87,7 +188,10 @@ export function BillingConfigurationPage() {
         color: "teal",
       });
     },
-    onError: () => {
+    onError: (_error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["billing-configs"], context.previous);
+      }
       notifications.show({
         title: "Error",
         message: "Failed to delete billing configuration",
@@ -95,6 +199,10 @@ export function BillingConfigurationPage() {
       });
     },
   });
+  const isMutating =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   const grouped = useMemo(
     () => billingResponse?.data ?? {},
@@ -178,101 +286,90 @@ export function BillingConfigurationPage() {
 
   return (
     <>
-      <Group mb="md" gap="sm">
-        <ActionIcon
-          variant="subtle"
-          onClick={() => window.history.back()}
-          aria-label="Back"
-        >
-          <ArrowBack width={24} height={24} />
-        </ActionIcon>
-        <Text fw={700} size="lg" c="jltBlue">
-          BILLING CONFIGURATION
-        </Text>
-      </Group>
-      <Box
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "1rem",
-          height: "calc(100vh - var(--app-shell-header-height) - 5rem)",
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
-        <PageCard
-          title="LIST OF RECEIPT CHARGES"
-          hideBackButton
-          bodyPx="md"
-          bodyPy="sm"
-          action={
-            <ActionIcon
-              color="jltAccent.6"
-              onClick={() => openCreateModal("RECEIPT CHARGES")}
-            >
-              <Add />
-            </ActionIcon>
-          }
-        >
-          {renderRows(
-            groupedRows["RECEIPT CHARGES"],
-            "receipt charges",
-            openEditModal,
-            handleDelete,
-          )}
-        </PageCard>
-
-        <Box
-          style={{
-            display: "grid",
-            gridTemplateRows: "1fr 1fr",
-            gap: "1rem",
-            height: "100%",
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
+      <ConfigPageHeader title="BILLING CONFIGURATION" />
+      <ConfigLayout
+        left={
           <PageCard
-            title="LIST OF CURRENCY"
-            hideBackButton
+            title="LIST OF RECEIPT CHARGES"
             bodyPx="md"
             bodyPy="sm"
+            hideBackButton
+            showDivider
+            action={
+              <ActionIcon
+                color="jltAccent.6"
+                onClick={() => openCreateModal("RECEIPT CHARGES")}
+                disabled={isMutating}
+              >
+                <Add />
+              </ActionIcon>
+            }
+          >
+            <ConfigRowsTable
+              rows={groupedRows["RECEIPT CHARGES"]}
+              emptyLabel="receipt charges"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isBillingLoading}
+              isMutating={isMutating}
+            />
+          </PageCard>
+        }
+        rightTop={
+          <PageCard
+            title="LIST OF CURRENCY"
+            bodyPx="md"
+            bodyPy="sm"
+            hideBackButton
+            showDivider
             action={
               <ActionIcon
                 color="jltAccent.6"
                 onClick={() => openCreateModal("CURRENCY")}
+                disabled={isMutating}
               >
                 <Add />
               </ActionIcon>
             }
           >
-            {renderRows(
-              groupedRows.CURRENCY,
-              "currency",
-              openEditModal,
-              handleDelete,
-            )}
+            <ConfigRowsTable
+              rows={groupedRows.CURRENCY}
+              emptyLabel="currency"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isBillingLoading}
+              isMutating={isMutating}
+            />
           </PageCard>
-
+        }
+        rightBottom={
           <PageCard
             title="LIST OF UOM"
-            hideBackButton
             bodyPx="md"
             bodyPy="sm"
+            hideBackButton
+            showDivider
             action={
               <ActionIcon
                 color="jltAccent.6"
                 onClick={() => openCreateModal("UOM")}
+                disabled={isMutating}
               >
                 <Add />
               </ActionIcon>
             }
           >
-            {renderRows(groupedRows.UOM, "uom", openEditModal, handleDelete)}
+            <ConfigRowsTable
+              rows={groupedRows.UOM}
+              emptyLabel="uom"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isBillingLoading}
+              isMutating={isMutating}
+            />
           </PageCard>
-        </Box>
-      </Box>
+        }
+      />
 
       <Modal
         opened={Boolean(activeType)}
@@ -297,54 +394,5 @@ export function BillingConfigurationPage() {
         </Stack>
       </Modal>
     </>
-  );
-}
-
-function renderRows(
-  rows: BillingConfigResource[],
-  emptyLabel: string,
-  onEdit: (item: BillingConfigResource) => void,
-  onDelete: (item: BillingConfigResource) => void,
-) {
-  return (
-    <Table withRowBorders withColumnBorders withTableBorder>
-      <Table.Tbody>
-        {rows.map((item, index) => (
-          <Table.Tr key={item.id}>
-            <Table.Td w={56} ta="center">
-              {String(index + 1).padStart(2, "0")}
-            </Table.Td>
-            <Table.Td>{item.label}</Table.Td>
-            <Table.Td w={88}>
-              <Group gap={8} justify="flex-end" wrap="nowrap">
-                <ActionIcon
-                  variant="subtle"
-                  color="jltAccent.6"
-                  onClick={() => onEdit(item)}
-                >
-                  <Edit width={24} height={24} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={() => onDelete(item)}
-                >
-                  <Delete width={24} height={24} />
-                </ActionIcon>
-              </Group>
-            </Table.Td>
-          </Table.Tr>
-        ))}
-        {rows.length === 0 && (
-          <Table.Tr>
-            <Table.Td colSpan={4}>
-              <Text c="dimmed" size="sm">
-                No {emptyLabel} configs yet.
-              </Text>
-            </Table.Td>
-          </Table.Tr>
-        )}
-      </Table.Tbody>
-    </Table>
   );
 }

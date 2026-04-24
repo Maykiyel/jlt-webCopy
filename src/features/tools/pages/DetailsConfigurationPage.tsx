@@ -1,29 +1,20 @@
 import { useMemo, useState } from "react";
 import {
   ActionIcon,
-  Box,
   Button,
   Group,
   Modal,
   Stack,
-  Table,
   Text,
   TextInput,
 } from "@mantine/core";
-import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  Add,
-  ArrowBack,
-  Delete,
-  Edit,
-} from "@nine-thirty-five/material-symbols-react/rounded";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Add, Delete } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
 import { PageCard } from "@/components/PageCard";
+import { ConfigLayout } from "../components/ConfigLayout";
+import { ConfigPageHeader } from "../components/ConfigPageHeader";
+import { ConfigRowsTable } from "../components/ConfigRowsTable";
 import {
   detailsConfigsService,
   type DetailConfigOption,
@@ -43,13 +34,54 @@ export function DetailsConfigurationPage() {
   const [label, setLabel] = useState("");
   const [options, setOptions] = useState<OptionDraft[]>([{ name: "" }]);
 
-  const { data: detailsResponse } = useQuery({
+  const { data: detailsResponse, isLoading: isDetailsLoading } = useQuery({
     queryKey: ["details-configs"],
     queryFn: () => detailsConfigsService.getDetailsConfigs(),
   });
 
   const createMutation = useMutation({
     mutationFn: detailsConfigsService.createDetailsConfig,
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: ["details-configs"] });
+      const previous = queryClient.getQueryData(["details-configs"]);
+
+      queryClient.setQueryData(
+        ["details-configs"],
+        (
+          current:
+            | { data?: Record<DetailConfigType, DetailConfigResource[]> }
+            | undefined,
+        ) => {
+          const optimisticItem: DetailConfigResource = {
+            id: Date.now(),
+            label: payload.label,
+            type: payload.type,
+            ...(payload.type === "DROPDOWN"
+              ? { count: payload.options?.length ?? 0 }
+              : {}),
+          };
+
+          const nextData = current?.data ?? {
+            DROPDOWN: [],
+            TEXT: [],
+            "DATE PICKER": [],
+          };
+
+          return {
+            ...current,
+            data: {
+              ...nextData,
+              [payload.type]: [
+                ...(nextData[payload.type] ?? []),
+                optimisticItem,
+              ],
+            },
+          };
+        },
+      );
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["details-configs"] });
       notifications.show({
@@ -59,7 +91,10 @@ export function DetailsConfigurationPage() {
       });
       handleCloseModal();
     },
-    onError: () => {
+    onError: (_error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["details-configs"], context.previous);
+      }
       notifications.show({
         title: "Error",
         message: "Failed to save details configuration",
@@ -80,6 +115,48 @@ export function DetailsConfigurationPage() {
       id: number;
       payload: { label: string; options?: DetailConfigOption[] };
     }) => detailsConfigsService.updateDetailsConfig(id, payload),
+    onMutate: async ({ id, payload }) => {
+      await queryClient.cancelQueries({ queryKey: ["details-configs"] });
+      const previous = queryClient.getQueryData(["details-configs"]);
+
+      queryClient.setQueryData(
+        ["details-configs"],
+        (
+          current:
+            | { data?: Record<DetailConfigType, DetailConfigResource[]> }
+            | undefined,
+        ) => {
+          if (!current?.data) {
+            return current;
+          }
+
+          const updateItem = (item: DetailConfigResource) =>
+            item.id === id
+              ? {
+                  ...item,
+                  label: payload.label,
+                  ...(item.type === "DROPDOWN" && payload.options
+                    ? { count: payload.options.length }
+                    : {}),
+                }
+              : item;
+
+          return {
+            ...current,
+            data: {
+              ...current.data,
+              DROPDOWN: (current.data.DROPDOWN ?? []).map(updateItem),
+              TEXT: (current.data.TEXT ?? []).map(updateItem),
+              "DATE PICKER": (current.data["DATE PICKER"] ?? []).map(
+                updateItem,
+              ),
+            },
+          };
+        },
+      );
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["details-configs"] });
       notifications.show({
@@ -89,7 +166,10 @@ export function DetailsConfigurationPage() {
       });
       handleCloseModal();
     },
-    onError: () => {
+    onError: (_error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["details-configs"], context.previous);
+      }
       notifications.show({
         title: "Error",
         message: "Failed to update details configuration",
@@ -100,6 +180,39 @@ export function DetailsConfigurationPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => detailsConfigsService.deleteDetailsConfig(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["details-configs"] });
+      const previous = queryClient.getQueryData(["details-configs"]);
+
+      queryClient.setQueryData(
+        ["details-configs"],
+        (
+          current:
+            | { data?: Record<DetailConfigType, DetailConfigResource[]> }
+            | undefined,
+        ) => {
+          if (!current?.data) {
+            return current;
+          }
+
+          return {
+            ...current,
+            data: {
+              ...current.data,
+              DROPDOWN: (current.data.DROPDOWN ?? []).filter(
+                (item) => item.id !== id,
+              ),
+              TEXT: (current.data.TEXT ?? []).filter((item) => item.id !== id),
+              "DATE PICKER": (current.data["DATE PICKER"] ?? []).filter(
+                (item) => item.id !== id,
+              ),
+            },
+          };
+        },
+      );
+
+      return { previous };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["details-configs"] });
       notifications.show({
@@ -108,7 +221,10 @@ export function DetailsConfigurationPage() {
         color: "teal",
       });
     },
-    onError: () => {
+    onError: (_error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["details-configs"], context.previous);
+      }
       notifications.show({
         title: "Error",
         message: "Failed to delete details configuration",
@@ -130,38 +246,6 @@ export function DetailsConfigurationPage() {
     }),
     [grouped],
   );
-
-  const dropdownIds = useMemo(
-    () => groupedRows.DROPDOWN.map((item) => item.id),
-    [groupedRows.DROPDOWN],
-  );
-
-  const dropdownDetailQueries = useQueries({
-    queries: dropdownIds.map((id) => ({
-      queryKey: ["details-config", id],
-      queryFn: () => detailsConfigsService.getDetailsConfig(id),
-      staleTime: 60_000,
-    })),
-  });
-
-  const dropdownOptionCountById = useMemo(() => {
-    const counts: Record<number, number> = {};
-
-    groupedRows.DROPDOWN.forEach((row) => {
-      counts[row.id] = getDropdownOptions(row).length;
-    });
-
-    dropdownDetailQueries.forEach((query, index) => {
-      const itemId = dropdownIds[index];
-      if (!itemId || !query.data?.data) {
-        return;
-      }
-
-      counts[itemId] = getDropdownOptions(query.data.data).length;
-    });
-
-    return counts;
-  }, [dropdownDetailQueries, dropdownIds, groupedRows.DROPDOWN]);
 
   const openCreateModal = (type: DetailConfigType) => {
     setEditingId(null);
@@ -216,6 +300,10 @@ export function DetailsConfigurationPage() {
   };
 
   const isDropdown = activeType === "DROPDOWN";
+  const isMutating =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   const handleSave = () => {
     if (!activeType || !label.trim()) {
@@ -273,109 +361,97 @@ export function DetailsConfigurationPage() {
 
   return (
     <>
-      <Group mb="md" gap={"sm"}>
-        <ActionIcon
-          variant="subtle"
-          onClick={() => window.history.back()}
-          aria-label="Back"
-        >
-          <ArrowBack width={24} height={24} />
-        </ActionIcon>
-        <Text fw={700} size="lg" c={"jltBlue"}>
-          DETAILS CONFIGURATION
-        </Text>
-      </Group>
-      <Box
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "1rem",
-          height: "calc(100vh - var(--app-shell-header-height) - 5rem)",
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
-        <PageCard
-          title="DROPDOWN"
-          hideBackButton
-          bodyPx="md"
-          bodyPy="sm"
-          action={
-            <ActionIcon
-              color="jltAccent.6"
-              onClick={() => openCreateModal("DROPDOWN")}
-            >
-              <Add />
-            </ActionIcon>
-          }
-        >
-          {renderRows(
-            groupedRows.DROPDOWN,
-            "DROPDOWN",
-            openEditModal,
-            handleDelete,
-            dropdownOptionCountById,
-          )}
-        </PageCard>
-
-        <Box
-          style={{
-            display: "grid",
-            gridTemplateRows: "1fr 1fr",
-            gap: "1rem",
-            height: "100%",
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
+      <ConfigPageHeader title="DETAILS CONFIGURATION" />
+      <ConfigLayout
+        left={
           <PageCard
-            title="TEXT FIELD"
-            hideBackButton
+            title="DROPDOWN"
             bodyPx="md"
             bodyPy="sm"
+            hideBackButton
+            showDivider
+            action={
+              <ActionIcon
+                color="jltAccent.6"
+                onClick={() => openCreateModal("DROPDOWN")}
+                disabled={isMutating}
+              >
+                <Add />
+              </ActionIcon>
+            }
+          >
+            <ConfigRowsTable
+              rows={groupedRows.DROPDOWN}
+              emptyLabel="dropdown"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isDetailsLoading}
+              isMutating={isMutating}
+              renderMeta={(item) =>
+                item.type === "DROPDOWN" ? (
+                  <Text component="span" w={120} c="dimmed" fs="italic" ml="sm">
+                    ({item.count ?? getDropdownOptions(item).length} Options)
+                  </Text>
+                ) : null
+              }
+            />
+          </PageCard>
+        }
+        rightTop={
+          <PageCard
+            title="TEXT FIELD"
+            bodyPx="md"
+            bodyPy="sm"
+            hideBackButton
+            showDivider
             action={
               <ActionIcon
                 color="jltAccent.6"
                 onClick={() => openCreateModal("TEXT")}
+                disabled={isMutating}
               >
                 <Add />
               </ActionIcon>
             }
           >
-            {renderRows(
-              groupedRows.TEXT,
-              "TEXT FIELD",
-              openEditModal,
-              handleDelete,
-              dropdownOptionCountById,
-            )}
+            <ConfigRowsTable
+              rows={groupedRows.TEXT}
+              emptyLabel="text field"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isDetailsLoading}
+              isMutating={isMutating}
+            />
           </PageCard>
-
+        }
+        rightBottom={
           <PageCard
             title="DATE PICKER"
-            hideBackButton
             bodyPx="md"
             bodyPy="sm"
+            hideBackButton
+            showDivider
             action={
               <ActionIcon
                 color="jltAccent.6"
                 onClick={() => openCreateModal("DATE PICKER")}
+                disabled={isMutating}
               >
                 <Add />
               </ActionIcon>
             }
           >
-            {renderRows(
-              groupedRows["DATE PICKER"],
-              "DATE PICKER",
-              openEditModal,
-              handleDelete,
-              dropdownOptionCountById,
-            )}
+            <ConfigRowsTable
+              rows={groupedRows["DATE PICKER"]}
+              emptyLabel="date picker"
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isDetailsLoading}
+              isMutating={isMutating}
+            />
           </PageCard>
-        </Box>
-      </Box>
+        }
+      />
 
       <Modal
         opened={Boolean(activeType)}
@@ -440,61 +516,4 @@ export function DetailsConfigurationPage() {
 
 function getDropdownOptions(item: DetailConfigResource): DetailConfigOption[] {
   return item.dropdown_options ?? item.dropdownOptions ?? [];
-}
-
-function renderRows(
-  rows: DetailConfigResource[],
-  emptyLabel: string,
-  onEdit: (item: DetailConfigResource) => void,
-  onDelete: (item: DetailConfigResource) => void,
-  dropdownOptionCountById: Record<number, number>,
-) {
-  return (
-    <Table withRowBorders withColumnBorders withTableBorder>
-      <Table.Tbody>
-        {rows.map((item, index) => (
-          <Table.Tr key={item.id}>
-            <Table.Td w={56} ta={"center"}>
-              {String(index + 1).padStart(2, "0")}
-            </Table.Td>
-            <Table.Td>
-              {item.label}
-              <Text component="span" w={120} c="dimmed" fs="italic" ml={"sm"}>
-                {item.type === "DROPDOWN"
-                  ? `(${dropdownOptionCountById[item.id] ?? getDropdownOptions(item).length} Options)`
-                  : ""}
-              </Text>
-            </Table.Td>
-            <Table.Td w={88}>
-              <Group gap={8} justify="flex-end" wrap="nowrap">
-                <ActionIcon
-                  variant="subtle"
-                  color="jltAccent.6"
-                  onClick={() => onEdit(item)}
-                >
-                  <Edit width={24} height={24} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={() => onDelete(item)}
-                >
-                  <Delete width={24} height={24} />
-                </ActionIcon>
-              </Group>
-            </Table.Td>
-          </Table.Tr>
-        ))}
-        {rows.length === 0 && (
-          <Table.Tr>
-            <Table.Td colSpan={4}>
-              <Text c="dimmed" size="sm">
-                No {emptyLabel.toLowerCase()} configs yet.
-              </Text>
-            </Table.Td>
-          </Table.Tr>
-        )}
-      </Table.Tbody>
-    </Table>
-  );
 }
