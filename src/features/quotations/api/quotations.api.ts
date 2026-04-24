@@ -144,7 +144,6 @@ interface FetchRequestedQuotationsParams {
 export async function fetchRequestedQuotations(
   params: FetchRequestedQuotationsParams,
 ): Promise<RequestedQuotationsResponse> {
-  console.log("khate", params)
   const response = await apiClient.get<{
     data: RequestedQuotationsResponse | [];
   }>("/quotations", {

@@ -35,14 +35,12 @@ export function QuotationsRequested() {
   );
 
   const [serviceFilter, setServiceFilter] = useState<
-    "LOGISTICS" | "REGULATORY" | "ALL"
-  >("ALL");
+    "LOGISTICS" | "REGULATORY" | null
+  >(null);
 
   const [statusFilter, setStatusFilter] = useState<
-    "AVAILABLE" | "ASSIGNED" | "REASSIGNMENT REQUESTED" | "ALL"
-  >("ALL");
-
-  const [dateFilter, setDateFilter] = useState('')
+    "AVAILABLE" | "REASSIGN REQUESTED" | null
+  >(null);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -64,17 +62,12 @@ export function QuotationsRequested() {
       searchQuery,
       asSearchQuery: secondarySearchQuery,
       clientFilter,
-      serviceFilter,
-      statusFilter,
-      dateFilter,
       perPage,
     }),
     queryFn: () =>
       fetchRequestedQuotations({
-        "filter[assignment_status]":
-          statusFilter === "ALL" ? undefined : statusFilter,
-        "filter[service]": serviceFilter === "ALL" ? undefined : serviceFilter,
-        "filter[created_at]":  dateFilter || undefined,
+        "filter[assignment_status]": statusFilter || undefined,
+        "filter[service]": serviceFilter || undefined,
         search: searchQuery || undefined,
         as_search: secondarySearchQuery || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
@@ -82,9 +75,9 @@ export function QuotationsRequested() {
       }),
   });
 
-  console.log("khate", dateFilter)
-
-
+  const rows =
+    jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || [];
+  const total = data?.pagination.total ?? 0;
   // assigning ops or client
   // const { data: specialistsResponse } = useQuery({
   //   queryKey: requestedQueryKeys.accountSpecialists(),
@@ -129,6 +122,7 @@ export function QuotationsRequested() {
         jobSwitchSecondaryLabel="MY ITEMS"
       >
         <Stack gap="xs">
+
           <RequestFilterClient
             clientFilter={clientFilter}
             setClientFilter={setClientFilter}
@@ -144,7 +138,7 @@ export function QuotationsRequested() {
           >
             <Box>
               <RequestFilterTable
-                quotations={jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || []}
+                quotations={rows}
                 clientSearchValue={search}
                 onClientSearchChange={handleSearchChange}
                 onClientSearch={handleSearch}
@@ -157,16 +151,14 @@ export function QuotationsRequested() {
                 setServiceFilter={setServiceFilter}
                 statusFilter={statusFilter}
                 setStatusFilter={setStatusFilter}
-                dateFilter={dateFilter}
-                setDateFilter={setDateFilter}
                 total={data?.counts.all_quotations}
               />
 
               <RequestTable
-                rows={jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || []}
+                rows={rows}
                 isLoading={isLoading || isFetching}
                 showingCount={data?.pagination.count}
-                total={data?.counts.all_quotations}
+                total={total}
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
                 onRowClick={(row: RequestedQuotationListItem) => {

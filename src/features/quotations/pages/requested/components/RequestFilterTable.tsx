@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Button,
   Divider,
@@ -6,10 +6,9 @@ import {
   Group,
   Select,
   Text,
+  TextInput,
   Input,
 } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
-import dayjs from "dayjs";
 import {
   ChevronRight,
   CalendarMonth,
@@ -18,12 +17,8 @@ import {
 import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
 
 type RequestedQuotationRow = RequestedQuotationListItem;
-type ServiceFilterValue = "LOGISTICS" | "REGULATORY" | "ALL";
-type StatusFilterValue =
-  | "AVAILABLE"
-  | "ASSIGNED"
-  | "REASSIGNMENT REQUESTED"
-  | "ALL";
+type ServiceFilterValue = "LOGISTICS" | "REGULATORY" | null;
+type StatusFilterValue = "AVAILABLE" | "REASSIGN REQUESTED" | null;
 
 interface RequestFilterTableProps {
   quotations: RequestedQuotationRow[];
@@ -39,14 +34,27 @@ interface RequestFilterTableProps {
   setServiceFilter: (value: ServiceFilterValue) => void;
   statusFilter: StatusFilterValue;
   setStatusFilter: (value: StatusFilterValue) => void;
-  dateFilter: string,
-  setDateFilter: (value: string) => void;
   searchPlaceholder?: string;
   total?: number;
 }
 
+function toTitleCase(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getStatusLabel(row: RequestedQuotationRow) {
+  return row.assignment_status === "AVAILABLE"
+    ? "Accept"
+    : row.assignment_status === "ASSIGNED"
+      ? "Accepted"
+      : "Reassignment Requested";
+}
+
 export function RequestFilterTable({
-  quotations: _quotations,
+  quotations,
   clientSearchValue,
   onClientSearchChange,
   onClientSearch,
@@ -59,10 +67,9 @@ export function RequestFilterTable({
   statusFilter,
   setStatusFilter,
   setPerPage,
-  dateFilter,
-  setDateFilter,
   total = 10,
 }: RequestFilterTableProps) {
+  const [dateFilter, setDateFilter] = useState("");
 
   //for drop down ahow entries
   const entryOptions = useMemo(() => {
@@ -84,14 +91,15 @@ export function RequestFilterTable({
 
   const serviceOptions = ["LOGISTICS", "REGULATORY", "ALL SERVICES"];
 
-  const statusOptions = useMemo(
-    () => [
-      { value: "AVAILABLE", label: "ACCEPT" },
-      { value: "ASSIGNED", label: "ACCEPTED" },
-      { value: "REASSIGNMENT REQUESTED", label: "REASSIGNMENT " },
-    ],
-    [],
-  );
+  const statusOptions = useMemo(() => {
+    const values = new Set<string>();
+
+    quotations.forEach((row) => {
+      values.add(getStatusLabel(row));
+    });
+
+    return Array.from(values).map((value) => ({ value, label: value }));
+  }, [quotations]);
 
   return (
     <>
@@ -103,9 +111,7 @@ export function RequestFilterTable({
             rightSectionWidth={45}
             placeholder={"SEARCH CLIENT OR REF NO."}
             value={clientSearchValue}
-            onChange={(event) =>
-              onClientSearchChange(event.currentTarget.value)
-            }
+            onChange={(event) => onClientSearchChange(event.currentTarget.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 onClientSearch(clientSearchValue);
@@ -129,16 +135,13 @@ export function RequestFilterTable({
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 2 }}>
-          <DateInput
+          <TextInput
             w="100%"
             size="sm"
             rightSectionWidth={45}
             placeholder="REQ. DATE"
             value={dateFilter}
-            onChange={(date) => {
-              const formatted = date ? dayjs(date).format("YYYY-MM-DD") : "";
-              setDateFilter(formatted);
-            }}
+            onChange={(event) => setDateFilter(event.currentTarget.value)}
             rightSection={
               <Button
                 type="button"
@@ -161,13 +164,7 @@ export function RequestFilterTable({
             placeholder="ALL SERVICES"
             data={serviceOptions}
             value={serviceFilter}
-            onChange={(value) => {
-              if (value === "LOGISTICS" || value === "REGULATORY") {
-                setServiceFilter(value);
-                return;
-              }
-              setServiceFilter("ALL");
-            }}
+            onChange={() => setServiceFilter}
             rightSection={<ChevronRight width={16} />}
           />
         </Grid.Col>
@@ -179,17 +176,7 @@ export function RequestFilterTable({
             placeholder="SELECT STATUS"
             data={statusOptions}
             value={statusFilter}
-            onChange={(value) => {
-              if (
-                value === "AVAILABLE" ||
-                value === "ASSIGNED" ||
-                value === "REASSIGNMENT REQUESTED"
-              ) {
-                setStatusFilter(value);
-                return;
-              }
-              setStatusFilter("ALL");
-            }}
+            onChange={()=> setStatusFilter}
             rightSection={<ChevronRight width={16} />}
           />
         </Grid.Col>
@@ -234,8 +221,8 @@ export function RequestFilterTable({
             color="#4f657d"
             onClick={() => {
               setDateFilter("");
-              setServiceFilter("ALL");
-              setStatusFilter("ALL");
+              setServiceFilter(null);
+              setStatusFilter(null);
               onClientSearchChange("");
               onClientSearch("");
               onAsSearchChange("");

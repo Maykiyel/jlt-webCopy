@@ -7,7 +7,6 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 
-
 import type { ClientCounts } from "@/features/quotations/types/quotations.types";
 
 interface RequestFilterClientProps {

@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
-  ArrowRightAlt,
+  RequestQuote,
   Autorenew,
   CheckCircle,
   PanToolAlt,
@@ -20,13 +20,7 @@ import type { RequestedQuotationListItem } from "@/features/quotations/types/quo
 
 type RequestedQuotationRow = RequestedQuotationListItem;
 
-const tableHead = [
-  "REQUEST",
-  "DETAILS",
-  "PERSON IN CHARGE",
-  "STATUS",
-  "",
-] as const;
+const tableHead = ["REQUEST", "DETAILS", "STATUS", ""] as const;
 
 interface RequestTableProps {
   rows: RequestedQuotationRow[];
@@ -61,7 +55,6 @@ function getServiceLabel(service: string) {
 
 function statusButtonBg(row: RequestedQuotationRow) {
   if (row.assignment_status === "AVAILABLE") return "#007406";
-  if (row.assignment_status === "ASSIGNED") return "#3B82F6";
   return "#1D274E";
 }
 
@@ -124,7 +117,7 @@ export function RequestTable({
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   style={onRowClick ? { cursor: "pointer" } : undefined}
                 >
-                  <Table.Td style={{maxWidth: "150px"}}>
+                  <Table.Td style={{ minWidth: "16.25rem" }}>
                     <Stack gap={2}>
                       <Text c="#334155" fz="0.875rem" fw={700}>
                         {row.reference_number}
@@ -138,7 +131,7 @@ export function RequestTable({
                     </Stack>
                   </Table.Td>
 
-                  <Table.Td style={{maxWidth: "250px"}}>
+                  <Table.Td style={{ minWidth: "22.5rem" }}>
                     <Stack gap={2}>
                       <Text c="#2a4058" fz="0.875rem" fw={700}>
                         {getServiceLabel(row.service)}
@@ -154,7 +147,7 @@ export function RequestTable({
                             ---&gt; {""}
                             {toTitleCase(row.logistics_service.transport_mode)}
                           </Text>
-                          <Group gap={6} align="center" wrap="nowrap">
+                          <Group align="center" wrap="nowrap">
                             <Text c="#475569" fz="0.813rem" lh={1.45}>
                               {row.logistics_service.origin}
                             </Text>
@@ -165,7 +158,7 @@ export function RequestTable({
                           </Group>
                         </>
                       ) : row.regulatory_service ? (
-                        <Group gap={6} align="center" wrap="nowrap">
+                        <Group>
                           <Text c="#475569" fz="0.813rem" lh={1.45}>
                             Application Type
                           </Text>
@@ -184,30 +177,35 @@ export function RequestTable({
                     </Stack>
                   </Table.Td>
 
-                  <Table.Td>
-                    {row.account_specialist !== null ? (
-                      <Text c="#334155" fz="0.75rem" lh={1.4}>
-                        {row.account_specialist}
-                      </Text>
-                    ) : (
-                      <Text c="#334155" fz="0.75rem" lh={1.4}>
-                        Unassigned
-                      </Text>
-                    )}
-                  </Table.Td>
-
-                  <Table.Td style={{maxWidth: "150px"}}>
+                  <Table.Td style={{ minWidth: "18.125rem" }}>
                     <Stack gap={4}>
+                      {row.assignment_status === "ASSIGNED" && (
+                        <Button
+                          styles={{ root: { background: "#FF8800" } }}
+                          leftSection={<RequestQuote width={20} />}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (row.assignment_status === "AVAILABLE") {
+                              onAcceptClick?.(row);
+                              return;
+                            }
+
+                            if (row.assignment_status !== "ASSIGNED") {
+                            onReassignClick?.(row);
+                          }
+                          }}
+                        >
+                          Make Quotation
+                        </Button>
+                      )}
+
                       <Button
                         styles={{ root: { background: statusButtonBg(row) } }}
                         leftSection={
                           row.assignment_status === "AVAILABLE" ? (
                             <PanToolAlt width={20} />
-                          ) : row.assignment_status === "ASSIGNED" ? (
-                            <CheckCircle width={20} />
-                          ) : (
-                            <Autorenew width={20} />
-                          )
+                          ) : <Autorenew width={20} />
+                        
                         }
                         onClick={(event) => {
                           event.stopPropagation();
@@ -220,10 +218,15 @@ export function RequestTable({
                             onReassignClick?.(row);
                           }
                         }}
-                        disabled={row.assignment_status === "ASSIGNED"}
                       >
-                        {getStatusLabel(row)}
+                        {row.assignment_status === "ASSIGNED" ? "Reassignment Requested" : getStatusLabel(row)}
                       </Button>
+
+                      {row.account_specialist && (
+                        <Text c="#334155" fz="0.75rem" lh={1.4}>
+                          {row.account_specialist}
+                        </Text>
+                      )}
                       {row.assignment_status === "AVAILABLE" && (
                         <Text c="#16803d" fz="0.75rem" fw={700} lh={1.4}>
                           {toTitleCase(row.assignment_status)}
