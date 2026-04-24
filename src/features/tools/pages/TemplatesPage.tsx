@@ -37,7 +37,7 @@ const SETTINGS: SettingsOption[] = [
   {
     id: "standard_quotation_templates",
     label: "Standard Quotation Templates",
-    path: "",
+    path: "/tools/templates/config/standard-quotation-template",
   },
 ];
 
