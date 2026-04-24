@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
 import { PageCard } from "@/components/PageCard";
+import { toolsQueryKeys } from "../config/queryKeys";
 import { ConfigLayout } from "../components/ConfigLayout";
 import { ConfigPageHeader } from "../components/ConfigPageHeader";
 import { ConfigRowsTable } from "../components/ConfigRowsTable";
@@ -20,18 +21,18 @@ export function BillingConfigurationPage() {
   const [label, setLabel] = useState("");
 
   const { data: billingResponse, isLoading: isBillingLoading } = useQuery({
-    queryKey: ["billing-configs"],
+    queryKey: toolsQueryKeys.billingConfigs,
     queryFn: () => billingConfigsService.getBillingConfigs(),
   });
 
   const createMutation = useMutation({
     mutationFn: billingConfigsService.createBillingConfig,
     onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: ["billing-configs"] });
-      const previous = queryClient.getQueryData(["billing-configs"]);
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.billingConfigs });
+      const previous = queryClient.getQueryData(toolsQueryKeys.billingConfigs);
 
       queryClient.setQueryData(
-        ["billing-configs"],
+        toolsQueryKeys.billingConfigs,
         (
           current:
             | { data?: Record<BillingConfigType, BillingConfigResource[]> }
@@ -65,7 +66,7 @@ export function BillingConfigurationPage() {
       return { previous };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing-configs"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.billingConfigs });
       notifications.show({
         title: "Success",
         message: "Billing configuration added",
@@ -75,7 +76,7 @@ export function BillingConfigurationPage() {
     },
     onError: (_error, _payload, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["billing-configs"], context.previous);
+        queryClient.setQueryData(toolsQueryKeys.billingConfigs, context.previous);
       }
       notifications.show({
         title: "Error",
@@ -89,11 +90,11 @@ export function BillingConfigurationPage() {
     mutationFn: ({ id, payload }: { id: number; payload: { label: string } }) =>
       billingConfigsService.updateBillingConfig(id, payload),
     onMutate: async ({ id, payload }) => {
-      await queryClient.cancelQueries({ queryKey: ["billing-configs"] });
-      const previous = queryClient.getQueryData(["billing-configs"]);
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.billingConfigs });
+      const previous = queryClient.getQueryData(toolsQueryKeys.billingConfigs);
 
       queryClient.setQueryData(
-        ["billing-configs"],
+        toolsQueryKeys.billingConfigs,
         (
           current:
             | { data?: Record<BillingConfigType, BillingConfigResource[]> }
@@ -125,7 +126,7 @@ export function BillingConfigurationPage() {
       return { previous };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing-configs"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.billingConfigs });
       notifications.show({
         title: "Success",
         message: "Billing configuration updated",
@@ -135,7 +136,7 @@ export function BillingConfigurationPage() {
     },
     onError: (_error, _payload, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["billing-configs"], context.previous);
+        queryClient.setQueryData(toolsQueryKeys.billingConfigs, context.previous);
       }
       notifications.show({
         title: "Error",
@@ -148,11 +149,11 @@ export function BillingConfigurationPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => billingConfigsService.deleteBillingConfig(id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["billing-configs"] });
-      const previous = queryClient.getQueryData(["billing-configs"]);
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.billingConfigs });
+      const previous = queryClient.getQueryData(toolsQueryKeys.billingConfigs);
 
       queryClient.setQueryData(
-        ["billing-configs"],
+        toolsQueryKeys.billingConfigs,
         (
           current:
             | { data?: Record<BillingConfigType, BillingConfigResource[]> }
@@ -181,7 +182,7 @@ export function BillingConfigurationPage() {
       return { previous };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["billing-configs"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.billingConfigs });
       notifications.show({
         title: "Success",
         message: "Billing configuration deleted",
@@ -190,7 +191,7 @@ export function BillingConfigurationPage() {
     },
     onError: (_error, _payload, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["billing-configs"], context.previous);
+        queryClient.setQueryData(toolsQueryKeys.billingConfigs, context.previous);
       }
       notifications.show({
         title: "Error",

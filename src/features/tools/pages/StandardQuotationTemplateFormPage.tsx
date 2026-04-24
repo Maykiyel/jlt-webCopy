@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router";
 import { LabeledTextareaSection } from "@/components/LabeledTextareaSection";
 import { PageCard } from "@/components/PageCard";
 import { AppButton } from "@/components/ui/AppButton";
+import { toolsQueryKeys } from "../config/queryKeys";
 import {
   standardTemplatesService,
   type StandardTemplateSummaryResource,
@@ -52,7 +53,7 @@ export function StandardQuotationTemplateFormPage({
     useState<StoreStandardTemplateRequest | null>(null);
 
   const { data: templateResponse, isLoading: isTemplateLoading } = useQuery({
-    queryKey: ["standard-template", templateId],
+    queryKey: toolsQueryKeys.standardTemplate(templateId),
     queryFn: () =>
       standardTemplatesService.getStandardTemplate(Number(templateId)),
     enabled: isEditMode && Boolean(templateId),
@@ -75,11 +76,11 @@ export function StandardQuotationTemplateFormPage({
     mutationFn: (payload: StoreStandardTemplateRequest) =>
       standardTemplatesService.createStandardTemplate(payload),
     onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: ["standard-templates"] });
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.standardTemplates });
 
-      const previousTemplates = queryClient.getQueryData([
-        "standard-templates",
-      ]) as { data?: StandardTemplateSummaryResource[] } | undefined;
+      const previousTemplates = queryClient.getQueryData(
+        toolsQueryKeys.standardTemplates,
+      ) as { data?: StandardTemplateSummaryResource[] } | undefined;
 
       const optimisticItem: StandardTemplateSummaryResource = {
         id: Date.now(),
@@ -87,7 +88,7 @@ export function StandardQuotationTemplateFormPage({
       };
 
       queryClient.setQueryData(
-        ["standard-templates"],
+        toolsQueryKeys.standardTemplates,
         (
           current: { data?: StandardTemplateSummaryResource[] } | undefined,
         ) => ({
@@ -99,7 +100,7 @@ export function StandardQuotationTemplateFormPage({
       return { previousTemplates };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["standard-templates"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.standardTemplates });
       notifications.show({
         title: "Success",
         message: "Standard quotation template created successfully",
@@ -110,7 +111,7 @@ export function StandardQuotationTemplateFormPage({
     onError: (_error, _payload, context) => {
       if (context?.previousTemplates) {
         queryClient.setQueryData(
-          ["standard-templates"],
+          toolsQueryKeys.standardTemplates,
           context.previousTemplates,
         );
       }
@@ -130,21 +131,20 @@ export function StandardQuotationTemplateFormPage({
         payload,
       ),
     onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: ["standard-templates"] });
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.standardTemplates });
       await queryClient.cancelQueries({
-        queryKey: ["standard-template", templateId],
+        queryKey: toolsQueryKeys.standardTemplate(templateId),
       });
 
-      const previousTemplates = queryClient.getQueryData([
-        "standard-templates",
-      ]) as { data?: StandardTemplateSummaryResource[] } | undefined;
-      const previousTemplate = queryClient.getQueryData([
-        "standard-template",
-        templateId,
-      ]);
+      const previousTemplates = queryClient.getQueryData(
+        toolsQueryKeys.standardTemplates,
+      ) as { data?: StandardTemplateSummaryResource[] } | undefined;
+      const previousTemplate = queryClient.getQueryData(
+        toolsQueryKeys.standardTemplate(templateId),
+      );
 
       queryClient.setQueryData(
-        ["standard-templates"],
+        toolsQueryKeys.standardTemplates,
         (
           current: { data?: StandardTemplateSummaryResource[] } | undefined,
         ) => ({
@@ -158,7 +158,7 @@ export function StandardQuotationTemplateFormPage({
       );
 
       queryClient.setQueryData(
-        ["standard-template", templateId],
+        toolsQueryKeys.standardTemplate(templateId),
         (
           current:
             | { data?: StoreStandardTemplateRequest & { id?: number } }
@@ -175,9 +175,9 @@ export function StandardQuotationTemplateFormPage({
       return { previousTemplates, previousTemplate };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["standard-templates"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.standardTemplates });
       queryClient.invalidateQueries({
-        queryKey: ["standard-template", templateId],
+        queryKey: toolsQueryKeys.standardTemplate(templateId),
       });
       notifications.show({
         title: "Success",
@@ -189,14 +189,14 @@ export function StandardQuotationTemplateFormPage({
     onError: (_error, _payload, context) => {
       if (context?.previousTemplates) {
         queryClient.setQueryData(
-          ["standard-templates"],
+          toolsQueryKeys.standardTemplates,
           context.previousTemplates,
         );
       }
 
       if (context?.previousTemplate) {
         queryClient.setQueryData(
-          ["standard-template", templateId],
+          toolsQueryKeys.standardTemplate(templateId),
           context.previousTemplate,
         );
       }

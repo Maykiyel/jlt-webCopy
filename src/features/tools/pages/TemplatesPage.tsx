@@ -13,6 +13,7 @@ import { AppTable, type AppTableColumn } from "@/components/AppTable";
 import { NumberedOptionButton } from "@/components/NumberedOptionButton";
 import type { QuotationTemplateResource } from "@/types/templates";
 import { templatesService } from "../api/templates.service";
+import { toolsQueryKeys } from "../config/queryKeys";
 import { ToolModal } from "../components/ToolModal";
 
 interface TemplateType {
@@ -67,7 +68,7 @@ export function TemplatesPage() {
 
   const { data: templatesResponse, isFetching: isTemplatesFetching } = useQuery(
     {
-      queryKey: ["templates"],
+      queryKey: toolsQueryKeys.templates,
       queryFn: () => templatesService.getTemplates(),
     },
   );
@@ -80,7 +81,7 @@ export function TemplatesPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => templatesService.deleteTemplate(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.templates });
       notifications.show({
         title: "Success",
         message: "Template deleted successfully",
@@ -145,7 +146,7 @@ export function TemplatesPage() {
         { id, status: value },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: toolsQueryKeys.templates });
             notifications.show({
               title: "Success",
               message: "Template status updated",

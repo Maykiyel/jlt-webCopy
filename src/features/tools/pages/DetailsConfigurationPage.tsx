@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Add, Delete } from "@nine-thirty-five/material-symbols-react/rounded";
 import { notifications } from "@mantine/notifications";
 import { PageCard } from "@/components/PageCard";
+import { toolsQueryKeys } from "../config/queryKeys";
 import { ConfigLayout } from "../components/ConfigLayout";
 import { ConfigPageHeader } from "../components/ConfigPageHeader";
 import { ConfigRowsTable } from "../components/ConfigRowsTable";
@@ -35,18 +36,18 @@ export function DetailsConfigurationPage() {
   const [options, setOptions] = useState<OptionDraft[]>([{ name: "" }]);
 
   const { data: detailsResponse, isLoading: isDetailsLoading } = useQuery({
-    queryKey: ["details-configs"],
+    queryKey: toolsQueryKeys.detailsConfigs,
     queryFn: () => detailsConfigsService.getDetailsConfigs(),
   });
 
   const createMutation = useMutation({
     mutationFn: detailsConfigsService.createDetailsConfig,
     onMutate: async (payload) => {
-      await queryClient.cancelQueries({ queryKey: ["details-configs"] });
-      const previous = queryClient.getQueryData(["details-configs"]);
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.detailsConfigs });
+      const previous = queryClient.getQueryData(toolsQueryKeys.detailsConfigs);
 
       queryClient.setQueryData(
-        ["details-configs"],
+        toolsQueryKeys.detailsConfigs,
         (
           current:
             | { data?: Record<DetailConfigType, DetailConfigResource[]> }
@@ -83,7 +84,7 @@ export function DetailsConfigurationPage() {
       return { previous };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["details-configs"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.detailsConfigs });
       notifications.show({
         title: "Success",
         message: "Details configuration added",
@@ -93,7 +94,7 @@ export function DetailsConfigurationPage() {
     },
     onError: (_error, _payload, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["details-configs"], context.previous);
+        queryClient.setQueryData(toolsQueryKeys.detailsConfigs, context.previous);
       }
       notifications.show({
         title: "Error",
@@ -116,11 +117,11 @@ export function DetailsConfigurationPage() {
       payload: { label: string; options?: DetailConfigOption[] };
     }) => detailsConfigsService.updateDetailsConfig(id, payload),
     onMutate: async ({ id, payload }) => {
-      await queryClient.cancelQueries({ queryKey: ["details-configs"] });
-      const previous = queryClient.getQueryData(["details-configs"]);
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.detailsConfigs });
+      const previous = queryClient.getQueryData(toolsQueryKeys.detailsConfigs);
 
       queryClient.setQueryData(
-        ["details-configs"],
+        toolsQueryKeys.detailsConfigs,
         (
           current:
             | { data?: Record<DetailConfigType, DetailConfigResource[]> }
@@ -158,7 +159,7 @@ export function DetailsConfigurationPage() {
       return { previous };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["details-configs"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.detailsConfigs });
       notifications.show({
         title: "Success",
         message: "Details configuration updated",
@@ -168,7 +169,7 @@ export function DetailsConfigurationPage() {
     },
     onError: (_error, _payload, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["details-configs"], context.previous);
+        queryClient.setQueryData(toolsQueryKeys.detailsConfigs, context.previous);
       }
       notifications.show({
         title: "Error",
@@ -181,11 +182,11 @@ export function DetailsConfigurationPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => detailsConfigsService.deleteDetailsConfig(id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["details-configs"] });
-      const previous = queryClient.getQueryData(["details-configs"]);
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.detailsConfigs });
+      const previous = queryClient.getQueryData(toolsQueryKeys.detailsConfigs);
 
       queryClient.setQueryData(
-        ["details-configs"],
+        toolsQueryKeys.detailsConfigs,
         (
           current:
             | { data?: Record<DetailConfigType, DetailConfigResource[]> }
@@ -214,7 +215,7 @@ export function DetailsConfigurationPage() {
       return { previous };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["details-configs"] });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.detailsConfigs });
       notifications.show({
         title: "Success",
         message: "Details configuration deleted",
@@ -223,7 +224,7 @@ export function DetailsConfigurationPage() {
     },
     onError: (_error, _payload, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(["details-configs"], context.previous);
+        queryClient.setQueryData(toolsQueryKeys.detailsConfigs, context.previous);
       }
       notifications.show({
         title: "Error",
