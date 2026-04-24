@@ -17,6 +17,8 @@ import {
 import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
 
 type RequestedQuotationRow = RequestedQuotationListItem;
+type ServiceFilterValue = "LOGISTICS" | "REGULATORY" | null;
+type StatusFilterValue = "AVAILABLE" | "REASSIGN REQUESTED" | null;
 
 interface RequestFilterTableProps {
   quotations: RequestedQuotationRow[];
@@ -28,8 +30,19 @@ interface RequestFilterTableProps {
   onAsSearch: (value: string) => void;
   perPage: number;
   setPerPage?: (value: number) => void;
+  serviceFilter: ServiceFilterValue;
+  setServiceFilter: (value: ServiceFilterValue) => void;
+  statusFilter: StatusFilterValue;
+  setStatusFilter: (value: StatusFilterValue) => void;
   searchPlaceholder?: string;
   total?: number;
+}
+
+function toTitleCase(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function getStatusLabel(row: RequestedQuotationRow) {
@@ -49,12 +62,14 @@ export function RequestFilterTable({
   onAsSearchChange,
   onAsSearch,
   perPage,
+  serviceFilter,
+  setServiceFilter,
+  statusFilter,
+  setStatusFilter,
   setPerPage,
   total = 10,
 }: RequestFilterTableProps) {
   const [dateFilter, setDateFilter] = useState("");
-  const [serviceFilter, setServiceFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   //for drop down ahow entries
   const entryOptions = useMemo(() => {
@@ -63,12 +78,10 @@ export function RequestFilterTable({
     const options = new Set<number>();
     const increment = 10;
 
-    // Add increments of 10
     for (let i = increment; i < total; i += increment) {
       options.add(i);
     }
 
-    // Always add the total at the end
     options.add(total);
 
     return Array.from(options)
@@ -76,17 +89,7 @@ export function RequestFilterTable({
       .map(String);
   }, [total]);
 
-  const serviceOptions = useMemo(() => {
-    const values = new Set<string>();
-
-    quotations.forEach((row) => {
-      if (row.service) {
-        values.add(row.service);
-      }
-    });
-
-    return Array.from(values).map((value) => ({ value, label: value }));
-  }, [quotations]);
+  const serviceOptions = ["LOGISTICS", "REGULATORY", "ALL SERVICES"];
 
   const statusOptions = useMemo(() => {
     const values = new Set<string>();

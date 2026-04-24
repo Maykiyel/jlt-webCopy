@@ -34,7 +34,7 @@ const tableHead = ["REQUEST", "DETAILS", "STATUS", ""] as const;
 
 export interface AppTable2Props {
   quotations: RequestedQuotationRow[];
-  jobFilter: "all" | "my-jobs" | "my-quotes";
+  jobFilter: "all" | "my-items";
   isLoading?: boolean;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -165,7 +165,7 @@ export default function AppTable2({
 
           <UnstyledButton
             styles={topTabStyles}
-            style={{ borderBottomColor: jobFilter === "my-jobs" ? "#ef8f27" : "transparent" }}
+            style={{ borderBottomColor: jobFilter === "my-items" ? "#ef8f27" : "transparent" }}
           >
             <Badge circle size="8" color="teal" p={0} />
             <Text fz="0.82rem" fw={700} c="#2c3f55">NEW CLIENT</Text>
@@ -176,7 +176,7 @@ export default function AppTable2({
 
           <UnstyledButton
             styles={topTabStyles}
-            style={{ borderBottomColor: jobFilter === "my-quotes" ? "#ef8f27" : "transparent" }}
+            style={{ borderBottomColor: jobFilter === "my-items" ? "#ef8f27" : "transparent" }}
           >
             <Badge circle size="8" color="blue" p={0} />
             <Text fz="0.82rem" fw={700} c="#2c3f55">OLD CLIENT</Text>

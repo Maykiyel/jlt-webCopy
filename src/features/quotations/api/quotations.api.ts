@@ -136,6 +136,9 @@ interface FetchRequestedQuotationsParams {
   as_search?: string;
   client_type?: "NEW" | "OLD";
   perPage?: number;
+  "filter[assignment_status]"?: string;
+  "filter[created_at]"?: string;
+  "filter[service]"?: string;
 }
 
 export async function fetchRequestedQuotations(
@@ -146,6 +149,15 @@ export async function fetchRequestedQuotations(
   }>("/quotations", {
     params: {
       "filter[status]": "REQUESTED",
+      ...(params["filter[assignment_status]"]
+        ? { "filter[assignment_status]": params["filter[assignment_status]"] }
+        : {}),
+      ...(params["filter[created_at]"]
+        ? { "filter[created_at]": params["filter[created_at]"] }
+        : {}),
+      ...(params["filter[service]"]
+        ? { "filter[service]": params["filter[service]"] }
+        : {}),
       ...(params.search ? { search: params.search } : {}),
       ...(params.as_search ? { as_search: params.as_search } : {}),
       ...(params.client_type ? { client_type: params.client_type } : {}),

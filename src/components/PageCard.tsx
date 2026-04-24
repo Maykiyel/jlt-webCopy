@@ -26,9 +26,9 @@ interface PageCardProps {
   bodyPx?: string | number;
   bodyPy?: string | number;
   showJobSwitch?: boolean;
-  jobSwitchValue?: "all" | "my-jobs" | "my-quotes";
-  onJobSwitchChange?: (value: "all" | "my-jobs" | "my-quotes") => void;
-  jobSwitchSecondaryValue?: "my-jobs" | "my-quotes";
+  jobSwitchValue?: "all" | "my-items";
+  onJobSwitchChange?: (value: "all" | "my-items") => void;
+  jobSwitchSecondaryValue?: "my-items";
   jobSwitchSecondaryLabel?: string;
 }
 
@@ -49,8 +49,8 @@ export function PageCard({
   showJobSwitch = false,
   jobSwitchValue = "all",
   onJobSwitchChange,
-  jobSwitchSecondaryValue = "my-jobs",
-  jobSwitchSecondaryLabel = "MY JOBS",
+  jobSwitchSecondaryValue = "my-items",
+  jobSwitchSecondaryLabel = "MY ITEMS",
 }: PageCardProps) {
   const navigate = useNavigate();
 

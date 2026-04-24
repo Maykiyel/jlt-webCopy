@@ -24,15 +24,23 @@ import AcceptModal from "./components/AcceptModal";
 export function QuotationsRequested() {
   const [selectedQuotation, setSelectedQuotation] =
     useState<RequestedQuotationListItem | null>(null);
+
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
 
-  const [jobFilter, setJobFilter] = useState<"all" | "my-jobs" | "my-quotes">(
-    "all",
-  );
+  const [jobFilter, setJobFilter] = useState<"all" | "my-items">("all");
+
   const [clientFilter, setClientFilter] = useState<"ALL" | "NEW" | "OLD">(
     "ALL",
   );
+
+  const [serviceFilter, setServiceFilter] = useState<
+    "LOGISTICS" | "REGULATORY" | null
+  >(null);
+
+  const [statusFilter, setStatusFilter] = useState<
+    "AVAILABLE" | "REASSIGN REQUESTED" | null
+  >(null);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -58,6 +66,8 @@ export function QuotationsRequested() {
     }),
     queryFn: () =>
       fetchRequestedQuotations({
+        "filter[assignment_status]": statusFilter || undefined,
+        "filter[service]": serviceFilter || undefined,
         search: searchQuery || undefined,
         as_search: secondarySearchQuery || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
@@ -97,15 +107,19 @@ export function QuotationsRequested() {
     setReassignModalOpen(true);
   };
 
+  const handleJobSwitchChange = (value: "all" | "my-items") => {
+    setJobFilter(value);
+  };
+
   return (
     <>
       <PageCard
         title="LIST OF NEW REQUEST"
         showJobSwitch
         jobSwitchValue={jobFilter}
-        onJobSwitchChange={setJobFilter}
-        jobSwitchSecondaryValue="my-quotes"
-        jobSwitchSecondaryLabel="MY QUOTES"
+        onJobSwitchChange={handleJobSwitchChange}
+        jobSwitchSecondaryValue="my-items"
+        jobSwitchSecondaryLabel="MY ITEMS"
       >
         <Stack gap="xs">
 
@@ -133,6 +147,10 @@ export function QuotationsRequested() {
                 onAsSearch={handleSecondarySearch}
                 perPage={perPage}
                 setPerPage={setPerPage}
+                serviceFilter={serviceFilter}
+                setServiceFilter={setServiceFilter}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
                 total={data?.counts.all_quotations}
               />
 
