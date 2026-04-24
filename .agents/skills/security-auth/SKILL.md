@@ -33,9 +33,11 @@ Use these references as the source of truth while executing this skill.
 3. Choose token storage intentionally with explicit XSS tradeoff notes.
 4. Centralize authenticated user state and ensure consistent app-wide access semantics.
 5. Enforce authorization at both route and action levels.
-6. Add PBAC checks for ownership or policy-sensitive operations.
-7. Validate that untrusted content is sanitized before rendering.
-8. Report residual risk and required server-side safeguards.
+6. For auth-sensitive mutations, use optimistic UI only when permission outcomes are predictable and rollback/fail-closed behavior is explicit.
+7. Add PBAC checks for ownership or policy-sensitive operations.
+8. Validate that untrusted content is sanitized before rendering.
+9. Prefer global fixes in auth middleware/guards/permission helpers over local permission patches repeated across screens.
+10. Report residual risk and required server-side safeguards.
 
 ## Operating Modes
 
@@ -50,3 +52,5 @@ Use these references as the source of truth while executing this skill.
 - Route-level protection must be paired with action-level permission checks.
 - Untrusted user content must not be rendered without sanitization.
 - Security-sensitive behavior must fail closed on missing or invalid auth context.
+- Optimistic updates must never bypass or weaken authorization guarantees; failures must rollback and fail closed.
+- Repeated auth/security fixes should be centralized (guards, permission services, API policy) rather than copy-pasted locally.

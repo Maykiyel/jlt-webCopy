@@ -54,3 +54,24 @@ Use this checklist for any implementation, refactor, or review touching architec
 2. Record one concrete reason for each fail item.
 3. Record exact command evidence for validation gates.
 4. If skipping a required gate, record rationale and risk.
+
+## 9. Optimistic Mutation Placement
+
+1. Mutation orchestration is implemented in reusable hooks/API/store abstractions when shared behavior exists.
+2. Rollback/reconciliation logic is colocated with mutation abstraction, not duplicated across pages.
+3. If optimistic UI is not used for a touched mutation flow, exception rationale is documented.
+
+## 10. Global Remediation Requirement
+
+1. Repeated issue patterns are fixed at shared/global ownership level when feasible.
+2. Local-only patches include explicit reason for not centralizing.
+3. New shared abstraction placement still respects Shared -> Features -> App direction.
+
+## 11. Strict Enforcement Gates (Required)
+
+A task is considered incomplete if any applicable item below is missing:
+
+1. Boundary and placement sections pass for touched files.
+2. Mutation placement/rollback decision is documented for touched mutation flows.
+3. Global-vs-local remediation decision is documented with rationale.
+4. Required validation gates are executed or skipped with explicit risk notes.

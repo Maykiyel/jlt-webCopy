@@ -33,7 +33,15 @@ Use this checklist to implement and validate tests with consistent quality.
 - At least one meaningful failure/edge path is covered when risk justifies it.
 - Critical navigation and data-loading boundaries are tested.
 
-## 6. Validation Commands
+## 6. Optimistic Mutation Coverage (When Applicable)
+
+- Test immediate optimistic UI state transition after mutation trigger.
+- Test failure rollback path and final UI consistency.
+- Test reconciliation behavior after server success/error (cache/store correctness).
+- If optimistic UI is intentionally not used, test confirms deliberate non-optimistic behavior and rationale is documented.
+- For global fixes, cover at least two representative consumers or one shared abstraction proving cross-surface effect.
+
+## 7. Validation Commands
 
 Run the smallest relevant set first, then broaden:
 
@@ -41,7 +49,16 @@ Run the smallest relevant set first, then broaden:
 2. `pnpm test:watch` (during local iteration)
 3. Project lint/build gates when test-impacting code changes are broad.
 
-## 7. Reporting
+## 8. Strict Enforcement Gates (Required)
+
+A task is considered incomplete if any applicable item below is missing:
+
+1. Mutation changes include optimistic success/failure coverage when applicable.
+2. Global-remediation changes include cross-surface proof.
+3. At least one negative-path assertion exists for medium/high risk behavior.
+4. Test command evidence is included.
+
+## 9. Reporting
 
 Include this summary after changes:
 
@@ -49,3 +66,5 @@ Include this summary after changes:
 2. Test levels used (unit/integration/e2e)
 3. Commands run and result
 4. Remaining risk or known gaps
+5. Optimistic decision and rollback test evidence
+6. Global-remediation coverage evidence

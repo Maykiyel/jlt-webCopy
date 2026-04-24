@@ -34,8 +34,10 @@ Use these references as the source of truth while executing this skill.
 4. Add integration tests for feature flows and component-to-component/API interaction.
 5. Add e2e tests for critical journeys that must work in production-like conditions.
 6. Use API mocking through MSW when backend contracts are unavailable or when deterministic test control is required.
-7. Run targeted tests first, then broader test suites.
-8. Report what is covered, what remains untested, and why.
+7. For mutations, test optimistic UI paths explicitly: immediate UI update, rollback on failure, and eventual cache/state reconciliation.
+8. Prefer testing shared/global fixes when behavior spans multiple surfaces; avoid regression tests that only validate one local instance of a repeated pattern.
+9. Run targeted tests first, then broader test suites.
+10. Report what is covered, what remains untested, and why.
 
 ## Operating Modes
 
@@ -50,3 +52,5 @@ Use these references as the source of truth while executing this skill.
 - Keep unit tests for reusable logic, shared functions, and hard-to-reason transformations.
 - Avoid brittle tests that depend on internal state shape when UI behavior is the real contract.
 - Keep tests deterministic and isolated from external network flakiness.
+- Mutation-related tests must verify optimistic success, optimistic failure rollback, and post-error consistency.
+- When a fix is intentionally global, regression coverage must include at least two representative consuming surfaces or one shared abstraction test that proves cross-surface effect.
