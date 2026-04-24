@@ -3,22 +3,34 @@ import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys
 
 interface RequestedListKeyParams {
   searchQuery: string;
+  asSearchQuery: string;
+  clientFilter: "ALL" | "NEW" | "OLD";
   perPage: number;
 }
 
-interface RequestedClientListKeyParams extends RequestedListKeyParams {
+interface RequestedClientListKeyParams {
   clientId?: string;
+  searchQuery: string;
+  perPage: number;
 }
 
 export const requestedQueryKeys = {
   quotationsRoot: quotationQueryKeys.quotationsRoot,
   requestedRoot: () =>
     quotationQueryKeys.byStatusRoot(QUOTATION_STATUS.REQUESTED),
-  requestedList: ({ searchQuery, perPage }: RequestedListKeyParams) =>
-    quotationQueryKeys.byStatusList(QUOTATION_STATUS.REQUESTED, {
+  requestedList: ({
+    searchQuery,
+    asSearchQuery,
+    clientFilter,
+    perPage,
+  }: RequestedListKeyParams) =>
+    [
+      ...requestedQueryKeys.requestedRoot(),
       searchQuery,
+      asSearchQuery,
+      clientFilter,
       perPage,
-    }),
+    ] as const,
   requestedClientList: ({
     clientId,
     searchQuery,

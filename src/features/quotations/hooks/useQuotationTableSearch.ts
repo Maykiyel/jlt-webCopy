@@ -14,8 +14,18 @@ export function useQuotationTableSearch(
   const [search, setSearch] = useState("");
   const [immediateQuery, setImmediateQuery] = useState<string | null>(null);
   const [debouncedSearch] = useDebouncedValue(search, debounceMs);
+  const [secondarySearch, setSecondarySearch] = useState("");
+  const [immediateSecondaryQuery, setImmediateSecondaryQuery] = useState<
+    string | null
+  >(null);
+  const [debouncedSecondarySearch] = useDebouncedValue(
+    secondarySearch,
+    debounceMs,
+  );
   const [perPage, setPerPage] = useState(initialPerPage);
   const searchQuery = immediateQuery ?? debouncedSearch.trim();
+  const secondarySearchQuery =
+    immediateSecondaryQuery ?? debouncedSecondarySearch.trim();
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -31,12 +41,30 @@ export function useQuotationTableSearch(
     setImmediateQuery(nextValue);
   };
 
+  const handleSecondarySearchChange = (value: string) => {
+    setSecondarySearch(value);
+    setImmediateSecondaryQuery(null);
+    if (!value.trim()) {
+      setImmediateSecondaryQuery("");
+    }
+  };
+
+  const handleSecondarySearch = (value: string) => {
+    const nextValue = value.trim();
+    setSecondarySearch(nextValue);
+    setImmediateSecondaryQuery(nextValue);
+  };
+
   return {
     search,
     searchQuery,
+    secondarySearch,
+    secondarySearchQuery,
     perPage,
     setPerPage,
     handleSearch,
     handleSearchChange,
+    handleSecondarySearch,
+    handleSecondarySearchChange,
   };
 }

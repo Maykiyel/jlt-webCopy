@@ -133,6 +133,7 @@ interface FetchRespondedQuotationsParams {
 
 interface FetchRequestedQuotationsParams {
   search?: string;
+  as_search?: string;
   client_type?: "NEW" | "OLD";
   perPage?: number;
 }
@@ -140,13 +141,13 @@ interface FetchRequestedQuotationsParams {
 export async function fetchRequestedQuotations(
   params: FetchRequestedQuotationsParams,
 ): Promise<RequestedQuotationsResponse> {
-  console.log("khate", params);
   const response = await apiClient.get<{
     data: RequestedQuotationsResponse | [];
   }>("/quotations", {
     params: {
       "filter[status]": "REQUESTED",
       ...(params.search ? { search: params.search } : {}),
+      ...(params.as_search ? { as_search: params.as_search } : {}),
       ...(params.client_type ? { client_type: params.client_type } : {}),
       ...(params.perPage ? { perPage: params.perPage } : {}),
     },

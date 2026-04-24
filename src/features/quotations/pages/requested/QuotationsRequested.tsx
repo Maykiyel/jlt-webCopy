@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Box, Button, Group, Modal, Stack, Text } from "@mantine/core";
+import { useState } from "react";
+import { Box, Stack } from "@mantine/core";
 import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -26,9 +26,6 @@ export function QuotationsRequested() {
     useState<RequestedQuotationListItem | null>(null);
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
-  const [selectedReassignAsId, setSelectedReassignAsId] = useState<
-    string | null
-  >(null);
 
   const [jobFilter, setJobFilter] = useState<"all" | "my-jobs" | "my-quotes">(
     "all",
@@ -42,27 +39,31 @@ export function QuotationsRequested() {
   const {
     search,
     searchQuery,
+    secondarySearch,
+    secondarySearchQuery,
     perPage,
     setPerPage,
     handleSearch,
     handleSearchChange,
+    handleSecondarySearch,
+    handleSecondarySearchChange,
   } = useQuotationTableSearch();
 
-  const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: requestedQueryKeys.requestedList({ searchQuery, perPage }),
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: requestedQueryKeys.requestedList({
+      searchQuery,
+      asSearchQuery: secondarySearchQuery,
+      clientFilter,
+      perPage,
+    }),
     queryFn: () =>
       fetchRequestedQuotations({
         search: searchQuery || undefined,
+        as_search: secondarySearchQuery || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
         perPage,
       }),
   });
-
-  useEffect(() => {
-  void refetch();
-}, [clientFilter, refetch])
-
-  console.log("khate", data)
 
   const rows =
     jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || [];
@@ -93,7 +94,6 @@ export function QuotationsRequested() {
 
   const openReassignModal = (row: RequestedQuotationListItem) => {
     setSelectedQuotation(row);
-    setSelectedReassignAsId(null);
     setReassignModalOpen(true);
   };
 
@@ -125,11 +125,14 @@ export function QuotationsRequested() {
             <Box>
               <RequestFilterTable
                 quotations={rows}
-                searchValue={search}
-                onSearchChange={handleSearchChange}
-                onSearch={handleSearch}
+                clientSearchValue={search}
+                onClientSearchChange={handleSearchChange}
+                onClientSearch={handleSearch}
+                asSearchValue={secondarySearch}
+                onAsSearchChange={handleSecondarySearchChange}
+                onAsSearch={handleSecondarySearch}
                 perPage={perPage}
-                onPerPageChange={setPerPage}
+                setPerPage={setPerPage}
                 total={data?.counts.all_quotations}
               />
 
