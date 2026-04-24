@@ -29,6 +29,8 @@ Even when no single skill is an exact match, agents must still enforce these bas
 3. Prefer existing utilities/components over duplication.
 4. Keep business/domain logic inside `src/features` unless it is truly shared.
 5. Run appropriate validation for touched code (lint, typecheck, tests, or skill-recommended checks).
+6. Default to optimistic UI for user-triggered mutations (create/update/delete) with explicit rollback/error recovery, unless a safer non-optimistic flow is required by business or security constraints.
+7. When fixing bugs or adding features, prefer global/centralized remediation (shared utility, hook, store, API policy, or boundary rule) over isolated local patches when the same issue can appear in multiple surfaces.
 
 ## Skill Routing Expectations
 
@@ -39,6 +41,7 @@ Use `.agents/skills/` as the primary routing mechanism:
 - `error-handling` for resilient API/runtime error flows and boundaries.
 - `security-auth` for authentication, authorization, token handling, and OWASP-sensitive changes.
 - `testing-strategy` for integration/e2e coverage and regression prevention.
+- Apply optimistic-update rules across these skills by default for mutation flows (including rollback handling, cache consistency, and deterministic testing).
 
 If multiple concerns apply, combine the minimum necessary set of skills and execute them in a clear sequence.
 
@@ -49,3 +52,5 @@ Do not finalize work until you have confirmed:
 - Relevant `.agents` skill instructions were actually applied.
 - Changed code aligns with architecture and state-management standards in `.agents` docs.
 - Validation has been run and results are reported clearly.
+- Optimistic mutation behavior is implemented/validated (or explicitly documented as intentionally not used).
+- The fix was evaluated for global applicability and centralized when practical.
