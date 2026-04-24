@@ -44,6 +44,19 @@ Follow these project rules for all changes in this workspace.
 - Keep feature-specific API logic under `src/features/<feature>/api`.
 - Use a shared/global API module only when contracts are truly cross-feature.
 
+## Mutation Strategy (Optimistic UI First)
+
+- Default to optimistic UI updates for user-triggered mutations whenever server semantics permit it.
+- Always define rollback behavior for failed optimistic mutations.
+- Keep cache/store synchronization explicit after optimistic writes (React Query invalidation/update, Zustand reconciliation, or equivalent).
+- If optimistic updates are intentionally not used, document the reason (for example destructive/high-risk operations, strict server sequencing, or compliance constraints).
+
+## Global Remediation Bias
+
+- When a defect/pattern appears reusable across screens or features, prefer fixing it in shared abstractions before local call-site patching.
+- For repeated logic, move behavior into feature/shared utilities, hooks, or centralized API policies instead of duplicating fixes.
+- Treat local-only fixes as an exception and briefly justify why broader remediation is not practical.
+
 ## Quotations Feature
 
 - Keep preview/PDF derivations consistent by sharing utility logic.
@@ -115,3 +128,4 @@ const [state, setState] = React.useState(() => expensiveInit());
 - Preserve behavior/UI unless explicitly asked to change.
 - Make smallest change set possible.
 - Verify touched files for TypeScript/lint problems.
+- Smallest change set should still prefer centralized/global correction where recurrence risk is non-trivial.

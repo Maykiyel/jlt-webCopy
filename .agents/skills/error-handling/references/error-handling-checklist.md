@@ -48,8 +48,18 @@ For error flows, also perform scenario checks:
 2. network failure behavior
 3. boundary fallback rendering
 4. notification display correctness
+5. optimistic mutation rollback behavior (when any mutation path is touched)
 
-## 7. Reporting
+## 7. Strict Enforcement Gates (Required)
+
+A task is considered incomplete if any applicable item below is missing:
+
+- Mutation flows include explicit optimistic behavior decision (`used` or `not used with reason`).
+- If optimistic behavior is used, rollback/reconciliation path is implemented and verified.
+- If the same error pattern appears in multiple surfaces, remediation is centralized (or a documented exception explains why not).
+- Validation report includes command evidence and scenario evidence.
+
+## 8. Reporting
 
 Include in final report:
 
@@ -57,3 +67,5 @@ Include in final report:
 2. User-facing behavior changes
 3. Tracking instrumentation status
 4. Residual risks and assumptions
+5. Optimistic decision (`used` or `not used + reason`) and rollback evidence
+6. Global-remediation decision (`centralized` or `local + reason`)

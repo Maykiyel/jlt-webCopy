@@ -8,7 +8,8 @@ Use this output structure after running the enforcement workflow.
 2. Open Questions
 3. Change Summary
 4. Validation Summary
-5. Residual Risk
+5. Optimistic/Global Decisions
+6. Residual Risk
 
 ## Findings
 
@@ -41,6 +42,15 @@ Give a short summary only after findings and open questions.
 Report exactly which commands were run and pass/fail status.
 
 Include command lines and whether each gate is required or optional for the given scope.
+
+## Optimistic/Global Decisions
+
+Always include:
+
+1. Optimistic mutation decision: used, or not used with reason.
+2. Rollback/reconciliation evidence when optimistic behavior is used.
+3. Global remediation decision: centralized, or local-only with rationale.
+4. Test/verification evidence that proves the decision.
 
 ## Residual Risk
 

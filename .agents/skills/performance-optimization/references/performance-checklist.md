@@ -40,15 +40,32 @@ Use this checklist to execute and verify optimizations consistently.
 - Query key is stable and domain-based.
 - Prefetch scope does not create unnecessary network pressure.
 
-## 7. Validation and Reporting
+## 7. Mutation Responsiveness and Consistency
+
+- For user-triggered mutations, optimistic UI is used by default when server semantics permit.
+- Rollback path is defined for optimistic failure.
+- Cache/store reconciliation prevents stale or flickering post-error UI.
+- If optimistic UI is not used, an explicit reason is documented.
+
+## 8. Validation and Reporting
 
 - Run required project validation commands for touched scope.
 - Confirm no behavior regressions in affected flows.
 - Record what changed, measured impact, and remaining tradeoffs.
+- Record whether remediation was centralized or local, with rationale.
+
+## 9. Strict Enforcement Gates (Required)
+
+A task is considered incomplete if any applicable item below is missing:
+
+- Baseline metric and post-change evidence are provided for optimization tasks.
+- Mutation flows include optimistic decision evidence and rollback/reconciliation verification.
+- Repeated performance pattern is fixed in shared/global abstraction when practical (or exception documented).
 
 ## Suggested Report Format
 
 1. Problem and baseline metric
 2. Optimization applied
 3. Validation evidence (commands, screenshots, metrics)
-4. Outcome and residual risk
+4. Mutation/global-remediation decisions and evidence
+5. Outcome and residual risk

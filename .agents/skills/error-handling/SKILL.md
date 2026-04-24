@@ -32,10 +32,12 @@ Use these references as the source of truth while executing this skill.
 2. Normalize API errors through a central interceptor policy.
 3. Map errors to user-facing messaging with actionable feedback where possible.
 4. Handle authentication-related failures consistently (for example 401 logout and token-refresh flow if present).
-5. Contain render-time crashes using localized error boundaries instead of a single global boundary only.
-6. Capture unhandled and high-severity errors in production tracking tools.
-7. Validate fallback UX, retry behavior, and recovery paths.
-8. Report residual risk and observability gaps.
+5. For optimistic mutations, require explicit rollback/error-recovery behavior and verify user-visible state consistency after failures.
+6. Contain render-time crashes using localized error boundaries instead of a single global boundary only.
+7. Capture unhandled and high-severity errors in production tracking tools.
+8. Prefer central/global remediation (interceptors, shared handlers, reusable hooks) over one-off local catch-path patches when patterns recur.
+9. Validate fallback UX, retry behavior, optimistic rollback paths, and recovery flows.
+10. Report residual risk and observability gaps.
 
 ## Operating Modes
 
@@ -50,3 +52,5 @@ Use these references as the source of truth while executing this skill.
 - User-facing error messaging should be clear but must avoid leaking sensitive internals.
 - Error boundaries should isolate failures to affected regions when feasible.
 - Production errors must be observable with actionable context.
+- Optimistic UI mutation failures must always have deterministic rollback/reconciliation behavior.
+- Repeated failure-handling patterns must be fixed at a shared/global layer when feasible.

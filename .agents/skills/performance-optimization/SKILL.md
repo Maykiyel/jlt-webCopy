@@ -31,8 +31,9 @@ Use these references as the source of truth while executing this skill.
 1. Identify the bottleneck category first: route load, rerenders, network/data latency, or media delivery.
 2. Apply the smallest high-impact change first (route split, state relocation, selector use, or targeted prefetch).
 3. Avoid broad rewrites; keep architecture boundaries intact.
-4. Re-check affected flows for behavioral regressions.
-5. Validate with lint/tests and collect measurable evidence (Lighthouse/PageSpeed/Core Web Vitals when applicable).
+4. For mutation-heavy interactions, prefer optimistic UI to reduce perceived latency and tune reconciliation to avoid jittery rerenders.
+5. Re-check affected flows for behavioral regressions (including optimistic rollback and stale-cache correction paths).
+6. Validate with lint/tests and collect measurable evidence (Lighthouse/PageSpeed/Core Web Vitals when applicable).
 
 ## Operating Modes
 
@@ -49,3 +50,5 @@ Use these references as the source of truth while executing this skill.
 - Use `children` composition when it isolates unaffected subtrees.
 - Prefer low-runtime-cost styling strategies for performance-sensitive paths.
 - Use image lazy loading and modern formats where practical.
+- For eligible user-triggered mutations, optimistic UI is the default to improve responsiveness.
+- If the same performance issue appears across multiple areas, prioritize shared/global remediation over repeated local micro-fixes.

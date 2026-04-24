@@ -20,6 +20,9 @@ Use this matrix to choose required validation gates based on structure-change sc
 2. Record pass/fail result.
 3. Record why any required command was skipped.
 4. Record whether failures are touched-code regressions or pre-existing issues.
+5. Record optimistic mutation decision (`used` or `not used + reason`) when mutations are touched.
+6. Record rollback/reconciliation verification evidence for optimistic flows.
+7. Record global-remediation decision (`centralized` or `local + reason`).
 
 ## Suggested Sequence
 
@@ -32,3 +35,7 @@ Use this matrix to choose required validation gates based on structure-change sc
 
 1. If touched-code failure occurs, fix and re-run required gates.
 2. If unrelated failure occurs, report it clearly and continue only if safe.
+
+## Strict Gate Reminder
+
+A task is incomplete if required command gates are missing, or if mutation/global decision evidence is absent for applicable scope.

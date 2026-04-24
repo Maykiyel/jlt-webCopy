@@ -50,7 +50,23 @@ Run minimum required quality gates:
 
 If adding auth/security logic tests, include focused regression tests for allowed and denied paths.
 
-## 8. Reporting
+## 8. Auth Mutation and Optimistic Safety
+
+- For auth-sensitive mutations, optimistic UI is used only when permission outcome is predictable.
+- Unauthorized/error outcomes fail closed and rollback optimistic state.
+- Optimistic choice is documented (`used` or `not used + reason`).
+- Permission logic is centralized in guards/policy helpers where reusable.
+
+## 9. Strict Enforcement Gates (Required)
+
+A task is considered incomplete if any applicable item below is missing:
+
+- Route + action authorization checks are both present for sensitive operations.
+- Optimistic auth mutation paths include rollback/fail-closed behavior when applicable.
+- Repeated auth checks are centralized (or explicit local exception rationale is documented).
+- Validation evidence includes denied-path behavior.
+
+## 10. Reporting
 
 Capture and report:
 
@@ -58,3 +74,5 @@ Capture and report:
 2. Risks mitigated and residual risks
 3. Server-side assumptions and dependencies
 4. Validation commands and results
+5. Optimistic decision and rollback/fail-closed evidence
+6. Global-remediation decision and rationale
