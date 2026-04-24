@@ -129,6 +129,10 @@ export const router = createBrowserRouter([
           // ── Tools routes ──
           { path: "tools/templates/config/billing", Component: Tools },
           { path: "tools/templates/config/details", Component: Tools },
+          {
+            path: "tools/templates/config/standard-quotation-template",
+            Component: Tools,
+          },
           { path: "tools/services", Component: Tools },
           { path: "tools/messages", Component: Tools },
           { path: "tools/templates", Component: Tools },
