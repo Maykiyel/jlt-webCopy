@@ -1,6 +1,6 @@
-import { Box, Paper, Stack, Text, Textarea } from "@mantine/core";
-import type { CSSProperties } from "react";
+import { Box, Paper, Stack, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
+import { LabeledTextareaSection } from "@/components/LabeledTextareaSection";
 import type { TermsValues } from "@/features/quotations/schemas/compose.schema";
 import type { StandardTemplate } from "@/features/quotations/types/compose.types";
 
@@ -43,22 +43,6 @@ export function TermsViewer({
   initialValues,
   onChange,
 }: TermsViewerProps) {
-  const fixedTextareaHeight = "8rem";
-  const textareaInputStyles: CSSProperties = {
-    border: 0,
-    boxShadow: "none",
-    background: "transparent",
-    height: fixedTextareaHeight,
-    minHeight: fixedTextareaHeight,
-    maxHeight: fixedTextareaHeight,
-    overflowY: "auto",
-    resize: "none",
-  };
-
-  const textareaStyles = {
-    input: textareaInputStyles,
-  };
-
   const [values, setValues] = useState<TermsValues>(() =>
     buildInitialTermsValues(template, initialValues),
   );
@@ -85,20 +69,13 @@ export function TermsViewer({
       </Paper>
 
       {TERMS_TEXT_FIELDS.map(({ key, label }) => (
-        <Paper key={key} withBorder radius="sm" mb="sm">
-          <Box px="md" py="xs" bg="gray.1">
-            <Text size="sm" fw={600} tt="uppercase">
-              {label}
-            </Text>
-          </Box>
-          <Box px="md" py="sm">
-            <Textarea
-              value={values[key] ?? ""}
-              onChange={(event) => updateValue(key, event.currentTarget.value)}
-              styles={textareaStyles}
-            />
-          </Box>
-        </Paper>
+        <LabeledTextareaSection
+          key={key}
+          label={label}
+          value={values[key] ?? ""}
+          onChange={(nextValue) => updateValue(key, nextValue)}
+          mode="edit"
+        />
       ))}
     </Stack>
   );
