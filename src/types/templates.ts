@@ -3,6 +3,31 @@ import type { ApiResponse } from "./api";
 export type TemplateFilterType = "EXPORT" | "IMPORT" | "BUSINESS SOLUTION";
 export type ServiceType = "LOGISTICS" | "REGULATORY";
 
+export interface TemplateReceiptOptionResource {
+  id: number;
+  label: string;
+  type?: string;
+}
+
+export interface QuotationTemplateChargeResource {
+  id: number;
+  name: string;
+  allowed_receipt_charges?: TemplateReceiptOptionResource[];
+  receipt_charge_options?: TemplateReceiptOptionResource[];
+}
+
+export interface TemplateDetailConfigResource {
+  id: number;
+  label: string;
+  type: "DROPDOWN" | "TEXT" | "DATE PICKER";
+}
+
+export interface TemplateQuotationFieldResource {
+  id: number;
+  field_name: string;
+  display_name: string;
+}
+
 export interface QuotationTemplateResource {
   id: number;
   name: string;
@@ -10,6 +35,9 @@ export interface QuotationTemplateResource {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  detail_configs?: TemplateDetailConfigResource[];
+  template_charges?: QuotationTemplateChargeResource[];
+  quotation_fields?: TemplateQuotationFieldResource[];
 }
 
 export interface TemplateCharge {

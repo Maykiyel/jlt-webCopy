@@ -329,6 +329,10 @@ export function TemplatesPage() {
               key={type.id}
               number={index + 1}
               label={type.label}
+              onClick={() => {
+                closeAddModal();
+                navigate(`/tools/templates/new?serviceType=${type.id}`);
+              }}
             />
           ))}
         </Group>
