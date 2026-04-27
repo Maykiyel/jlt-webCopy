@@ -1,0 +1,26 @@
+.splitPanels {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cardShell {
+  min-width: 0;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  overflow: hidden;
+}
+
+.cardShell > * {
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardShell > * > :last-child {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}

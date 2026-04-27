@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Badge,
   Box,
   Checkbox,
   Group,
@@ -29,10 +30,12 @@ import type {
   UpdateTemplateRequest,
 } from "@/types/templates";
 import { billingConfigsService } from "../api/billing-configs.service";
+import { ConfigPageHeader } from "../components/ConfigPageHeader";
 import { detailsConfigsService } from "../api/details-configs.service";
 import { quotationFieldsService } from "../api/quotation-fields.service";
 import { templatesService } from "../api/templates.service";
 import { toolsQueryKeys } from "../config/queryKeys";
+import classes from "./TemplateFormPage.module.css";
 
 type TemplateChargeDraft = {
   key: number;
@@ -269,6 +272,7 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     isBillingFetching ||
     isFieldsFetching ||
     (isEditMode && isTemplateFetching);
+  const modeLabel = isEditMode ? "Editing" : "Creating";
 
   const canSave =
     form.name.trim().length > 0 &&
@@ -357,12 +361,24 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
           "calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2)",
       }}
     >
+      <ConfigPageHeader title="TEMPLATE FORM" />
+
+      <Group gap="xs">
+        <Badge variant="light" color="jltBlue.8" radius="sm">
+          {modeLabel}
+        </Badge>
+        <Badge variant="outline" color="gray.7" radius="sm">
+          {SERVICE_LABELS[resolvedServiceType]}
+        </Badge>
+      </Group>
+
       <Group justify="space-between" align="center">
         <TextInput
           value={form.name}
-          onChange={(event) =>
-            updateForm((current) => ({ ...current, name: event.currentTarget.value }))
-          }
+          onChange={(event) => {
+            const nextName = event.currentTarget.value;
+            updateForm((current) => ({ ...current, name: nextName }));
+          }}
           placeholder="TEMPLATE NAME"
           maw={520}
           style={{ flex: 1 }}
@@ -380,8 +396,8 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
         </AppButton>
       </Group>
 
-      <Group align="stretch" grow style={{ flex: 1, minHeight: 0 }}>
-        <Box style={{ minWidth: 0, flex: 1, minHeight: 0, display: "grid" }}>
+      <Group align="stretch" grow className={classes.splitPanels}>
+        <Box className={classes.cardShell}>
           <PageCard
             title="Quotation Details"
             hideBackButton
@@ -439,7 +455,7 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
           </PageCard>
         </Box>
 
-        <Box style={{ minWidth: 0, flex: 1, minHeight: 0, display: "grid" }}>
+        <Box className={classes.cardShell}>
           <PageCard
             title="Billing Details"
             hideBackButton
@@ -523,12 +539,6 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
           </PageCard>
         </Box>
       </Group>
-
-      <Text size="xs" c="dimmed">
-        {isEditMode
-          ? `Editing ${SERVICE_LABELS[resolvedServiceType]}`
-          : `Creating ${SERVICE_LABELS[resolvedServiceType]}`}
-      </Text>
     </Stack>
   );
 }

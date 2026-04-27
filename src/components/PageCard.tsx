@@ -144,7 +144,11 @@ export function PageCard({
       )}
 
       {/* ── Body ── */}
-      <Box className={classes.body} px={bodyPx} py={bodyPy}>
+      <Box
+        className={classes.body}
+        px={bodyPx}
+        py={bodyPy}
+      >
         {children}
       </Box>
     </Card>
