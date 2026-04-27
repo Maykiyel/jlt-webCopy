@@ -4,19 +4,28 @@ import {
   Checkbox,
   Group,
   MultiSelect,
-  Paper,
   Stack,
   Text,
   TextInput,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { Add, Delete, Save } from "@nine-thirty-five/material-symbols-react/rounded";
+import {
+  Add,
+  Delete,
+  Save,
+} from "@nine-thirty-five/material-symbols-react/rounded";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { PageCard } from "@/components/PageCard";
 import { AppButton } from "@/components/ui/AppButton";
-import type { QuotationTemplateResource, ServiceType, StoreTemplateRequest } from "@/types/templates";
+import type {
+  QuotationTemplateChargeResource,
+  QuotationTemplateResource,
+  ServiceType,
+  StoreTemplateRequest,
+  UpdateTemplateRequest,
+} from "@/types/templates";
 import { billingConfigsService } from "../api/billing-configs.service";
 import { detailsConfigsService } from "../api/details-configs.service";
 import { quotationFieldsService } from "../api/quotation-fields.service";
@@ -25,13 +34,31 @@ import { toolsQueryKeys } from "../config/queryKeys";
 
 type TemplateChargeDraft = {
   key: number;
+  id?: number;
   name: string;
   receipt_option_ids: string[];
 };
 
+interface TemplateFormDraft {
+  name: string;
+  selectedDetailIds: number[];
+  selectedFieldIds: number[];
+  charges: TemplateChargeDraft[];
+  nextChargeKey: number;
+}
+
 const INITIAL_CHARGE_KEY = 1;
 
+const EMPTY_DRAFT: TemplateFormDraft = {
+  name: "",
+  selectedDetailIds: [],
+  selectedFieldIds: [],
+  charges: [{ key: INITIAL_CHARGE_KEY, name: "", receipt_option_ids: [] }],
+  nextChargeKey: INITIAL_CHARGE_KEY + 1,
+};
+
 interface TemplateFormPageProps {
+  mode: "create" | "edit";
   serviceType: ServiceType;
 }
 
@@ -40,16 +67,22 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   LOGISTICS: "Logistics Services",
 };
 
-export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
+const getChargeReceiptOptionIds = (
+  charge: QuotationTemplateChargeResource,
+): number[] => {
+  const allowedCharges = charge.allowed_receipt_charges;
+  const legacyCharges = charge.receipt_charge_options;
+
+  return (allowedCharges ?? legacyCharges ?? []).map((option) => option.id);
+};
+
+export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
   const navigate = useNavigate();
+  const { templateId } = useParams<{ templateId: string }>();
   const queryClient = useQueryClient();
-  const [name, setName] = useState("");
-  const [selectedDetailIds, setSelectedDetailIds] = useState<number[]>([]);
-  const [selectedFieldIds, setSelectedFieldIds] = useState<number[]>([]);
-  const [charges, setCharges] = useState<TemplateChargeDraft[]>([
-    { key: INITIAL_CHARGE_KEY, name: "", receipt_option_ids: [] },
-  ]);
-  const [nextChargeKey, setNextChargeKey] = useState(INITIAL_CHARGE_KEY + 1);
+  const isEditMode = mode === "edit";
+
+  const [draft, setDraft] = useState<TemplateFormDraft | null>(null);
 
   const { data: detailsResponse } = useQuery({
     queryKey: toolsQueryKeys.detailsConfigs,
@@ -61,13 +94,57 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
     queryFn: () => billingConfigsService.getBillingConfigs(),
   });
 
-  const { data: fieldsResponse } = useQuery({
-    queryKey: toolsQueryKeys.quotationFields(serviceType),
-    queryFn: () => quotationFieldsService.getQuotationFields(serviceType),
+  const { data: templateResponse, isFetching: isTemplateFetching } = useQuery({
+    queryKey: toolsQueryKeys.template(templateId),
+    queryFn: () => templatesService.getTemplate(Number(templateId)),
+    enabled: isEditMode && Boolean(templateId),
   });
 
+  const resolvedServiceType = isEditMode
+    ? templateResponse?.data?.service_type ?? serviceType
+    : serviceType;
+
+  const { data: fieldsResponse } = useQuery({
+    queryKey: toolsQueryKeys.quotationFields(resolvedServiceType),
+    queryFn: () => quotationFieldsService.getQuotationFields(resolvedServiceType),
+  });
+
+  const loadedDraft = useMemo<TemplateFormDraft | null>(() => {
+    if (!isEditMode || !templateResponse?.data) {
+      return null;
+    }
+
+    const template = templateResponse.data;
+    const mappedCharges = (template.template_charges ?? []).map(
+      (charge, index) => ({
+        key: index + 1,
+        id: charge.id,
+        name: charge.name,
+        receipt_option_ids: getChargeReceiptOptionIds(charge).map(String),
+      }),
+    );
+
+    return {
+      name: template.name,
+      selectedDetailIds: template.detail_configs?.map((detail) => detail.id) ?? [],
+      selectedFieldIds: template.quotation_fields?.map((field) => field.id) ?? [],
+      charges:
+        mappedCharges.length > 0
+          ? mappedCharges
+          : [{ key: INITIAL_CHARGE_KEY, name: "", receipt_option_ids: [] }],
+      nextChargeKey: (mappedCharges.length || INITIAL_CHARGE_KEY) + 1,
+    };
+  }, [isEditMode, templateResponse?.data]);
+
+  const form = draft ?? loadedDraft ?? EMPTY_DRAFT;
+
+  const updateForm = (updater: (current: TemplateFormDraft) => TemplateFormDraft) => {
+    setDraft((currentDraft) => updater(currentDraft ?? loadedDraft ?? EMPTY_DRAFT));
+  };
+
   const createMutation = useMutation({
-    mutationFn: (payload: StoreTemplateRequest) => templatesService.createTemplate(payload),
+    mutationFn: (payload: StoreTemplateRequest) =>
+      templatesService.createTemplate(payload),
     onMutate: async (payload) => {
       await queryClient.cancelQueries({ queryKey: toolsQueryKeys.templates });
 
@@ -110,6 +187,56 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: (payload: UpdateTemplateRequest) =>
+      templatesService.updateTemplate(Number(templateId), payload),
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.templates });
+      await queryClient.cancelQueries({ queryKey: toolsQueryKeys.template(templateId) });
+
+      const previousTemplates = queryClient.getQueryData(toolsQueryKeys.templates);
+      const previousTemplate = queryClient.getQueryData(
+        toolsQueryKeys.template(templateId),
+      );
+
+      queryClient.setQueryData(
+        toolsQueryKeys.templates,
+        (current: { data?: QuotationTemplateResource[] } | undefined) => ({
+          ...current,
+          data: (current?.data ?? []).map((template) =>
+            template.id === Number(templateId)
+              ? { ...template, name: payload.name }
+              : template,
+          ),
+        }),
+      );
+
+      return { previousTemplates, previousTemplate };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.templates });
+      queryClient.invalidateQueries({ queryKey: toolsQueryKeys.template(templateId) });
+      notifications.show({
+        title: "Success",
+        message: "Template updated successfully",
+        color: "teal",
+      });
+      navigate("/tools/templates");
+    },
+    onError: (_error, _payload, context) => {
+      queryClient.setQueryData(toolsQueryKeys.templates, context?.previousTemplates);
+      queryClient.setQueryData(
+        toolsQueryKeys.template(templateId),
+        context?.previousTemplate,
+      );
+      notifications.show({
+        title: "Error",
+        message: "Failed to update template",
+        color: "red",
+      });
+    },
+  });
+
   const detailConfigs = useMemo(
     () => [
       ...(detailsResponse?.data?.DROPDOWN ?? []),
@@ -133,92 +260,120 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
     [fieldsResponse?.data],
   );
 
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+
   const canSave =
-    name.trim().length > 0 &&
-    selectedDetailIds.length > 0 &&
-    selectedFieldIds.length > 0 &&
-    charges.length > 0 &&
-    charges.every(
-      (charge) => charge.name.trim().length > 0 && charge.receipt_option_ids.length > 0,
+    form.name.trim().length > 0 &&
+    form.selectedDetailIds.length > 0 &&
+    form.selectedFieldIds.length > 0 &&
+    form.charges.length > 0 &&
+    form.charges.every(
+      (charge) =>
+        charge.name.trim().length > 0 && charge.receipt_option_ids.length > 0,
     );
 
   const handleDetailToggle = (id: number, checked: boolean) => {
-    setSelectedDetailIds((prev) =>
-      checked ? [...prev, id] : prev.filter((itemId) => itemId !== id),
-    );
+    updateForm((current) => ({
+      ...current,
+      selectedDetailIds: checked
+        ? [...current.selectedDetailIds, id]
+        : current.selectedDetailIds.filter((itemId) => itemId !== id),
+    }));
   };
 
   const handleFieldToggle = (id: number, checked: boolean) => {
-    setSelectedFieldIds((prev) =>
-      checked ? [...prev, id] : prev.filter((itemId) => itemId !== id),
-    );
+    updateForm((current) => ({
+      ...current,
+      selectedFieldIds: checked
+        ? [...current.selectedFieldIds, id]
+        : current.selectedFieldIds.filter((itemId) => itemId !== id),
+    }));
   };
 
   const handleAddCharge = () => {
-    setCharges((prev) => [
-      ...prev,
-      { key: nextChargeKey, name: "", receipt_option_ids: [] },
-    ]);
-    setNextChargeKey((prev) => prev + 1);
+    updateForm((current) => ({
+      ...current,
+      charges: [
+        ...current.charges,
+        { key: current.nextChargeKey, name: "", receipt_option_ids: [] },
+      ],
+      nextChargeKey: current.nextChargeKey + 1,
+    }));
   };
 
   const handleChargeChange = (
     key: number,
     updates: Partial<Pick<TemplateChargeDraft, "name" | "receipt_option_ids">>,
   ) => {
-    setCharges((prev) =>
-      prev.map((charge) => (charge.key === key ? { ...charge, ...updates } : charge)),
-    );
+    updateForm((current) => ({
+      ...current,
+      charges: current.charges.map((charge) =>
+        charge.key === key ? { ...charge, ...updates } : charge,
+      ),
+    }));
   };
 
   const handleDeleteCharge = (key: number) => {
-    setCharges((prev) => prev.filter((charge) => charge.key !== key));
+    updateForm((current) => ({
+      ...current,
+      charges: current.charges.filter((charge) => charge.key !== key),
+    }));
   };
 
   const handleSave = () => {
-    const payload: StoreTemplateRequest = {
-      name: name.trim(),
-      service_type: serviceType,
-      detail_config_ids: selectedDetailIds,
-      quotation_field_ids: selectedFieldIds,
-      template_charges: charges.map((charge) => ({
+    const payload: StoreTemplateRequest | UpdateTemplateRequest = {
+      name: form.name.trim(),
+      service_type: resolvedServiceType,
+      detail_config_ids: form.selectedDetailIds,
+      quotation_field_ids: form.selectedFieldIds,
+      template_charges: form.charges.map((charge) => ({
+        id: charge.id,
         name: charge.name.trim(),
         receipt_option_ids: charge.receipt_option_ids.map(Number),
       })),
     };
 
+    if (isEditMode) {
+      updateMutation.mutate(payload);
+      return;
+    }
+
     createMutation.mutate(payload);
   };
 
   return (
-    <PageCard title={`Create Template (${SERVICE_LABELS[serviceType]})`} fullHeight>
-      <Stack gap="md" mt="md">
-        <Group justify="space-between" align="flex-end">
-          <TextInput
-            value={name}
-            onChange={(event) => setName(event.currentTarget.value)}
-            placeholder="TEMPLATE NAME"
-            maw={520}
-            style={{ flex: 1 }}
-          />
-          <AppButton
-            onClick={handleSave}
-            disabled={!canSave}
-            loading={createMutation.isPending}
-            icon={Save}
-            w="10rem"
-            h="2.6rem"
+    <Stack gap="sm">
+      <Group justify="space-between" align="center">
+        <TextInput
+          value={form.name}
+          onChange={(event) =>
+            updateForm((current) => ({ ...current, name: event.currentTarget.value }))
+          }
+          placeholder="TEMPLATE NAME"
+          maw={520}
+          style={{ flex: 1 }}
+          disabled={isTemplateFetching || isSaving}
+        />
+        <AppButton
+          onClick={handleSave}
+          disabled={!canSave || isTemplateFetching}
+          loading={isSaving}
+          icon={Save}
+          w="10rem"
+          h="2.6rem"
+        >
+          SAVE
+        </AppButton>
+      </Group>
+
+      <Group align="stretch" grow>
+        <Box style={{ minWidth: 0 }}>
+          <PageCard
+            title="Quotation Details"
+            hideBackButton
+            bodyPx="md"
+            bodyPy="md"
           >
-            SAVE
-          </AppButton>
-        </Group>
-
-        <Group align="stretch" grow>
-          <Paper withBorder radius="sm" p="md">
-            <Text fw={600} mb="sm">
-              QUOTATION DETAILS
-            </Text>
-
             <Stack gap="md">
               <Box>
                 <Text size="sm" fw={600} mb="xs">
@@ -229,7 +384,7 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
                     <Checkbox
                       key={config.id}
                       label={config.label}
-                      checked={selectedDetailIds.includes(config.id)}
+                      checked={form.selectedDetailIds.includes(config.id)}
                       onChange={(event) =>
                         handleDetailToggle(config.id, event.currentTarget.checked)
                       }
@@ -247,7 +402,7 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
                     <Checkbox
                       key={field.id}
                       label={field.display_name}
-                      checked={selectedFieldIds.includes(field.id)}
+                      checked={form.selectedFieldIds.includes(field.id)}
                       onChange={(event) =>
                         handleFieldToggle(field.id, event.currentTarget.checked)
                       }
@@ -256,19 +411,24 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
                 </Stack>
               </Box>
             </Stack>
-          </Paper>
+          </PageCard>
+        </Box>
 
-          <Paper withBorder radius="sm" p="md">
-            <Group justify="space-between" mb="sm">
-              <Text fw={600}>BILLING DETAILS</Text>
+        <Box style={{ minWidth: 0 }}>
+          <PageCard
+            title="Billing Details"
+            hideBackButton
+            action={
               <ActionIcon color="jltAccent.6" onClick={handleAddCharge}>
                 <Add />
               </ActionIcon>
-            </Group>
-
+            }
+            bodyPx="md"
+            bodyPy="md"
+          >
             <Stack gap="sm">
-              {charges.map((charge) => (
-                <Paper key={charge.key} withBorder p="sm" radius="sm">
+              {form.charges.map((charge) => (
+                <Box key={charge.key} p="sm" bd="1px solid var(--mantine-color-gray-3)">
                   <Group align="flex-start" wrap="nowrap">
                     <Stack style={{ flex: 1 }} gap={8}>
                       <TextInput
@@ -297,17 +457,23 @@ export function TemplateFormPage({ serviceType }: TemplateFormPageProps) {
                       color="red"
                       mt={4}
                       onClick={() => handleDeleteCharge(charge.key)}
-                      disabled={charges.length === 1}
+                      disabled={form.charges.length === 1}
                     >
                       <Delete />
                     </ActionIcon>
                   </Group>
-                </Paper>
+                </Box>
               ))}
             </Stack>
-          </Paper>
-        </Group>
-      </Stack>
-    </PageCard>
+          </PageCard>
+        </Box>
+      </Group>
+
+      <Text size="xs" c="dimmed">
+        {isEditMode
+          ? `Editing ${SERVICE_LABELS[resolvedServiceType]}`
+          : `Creating ${SERVICE_LABELS[resolvedServiceType]}`}
+      </Text>
+    </Stack>
   );
 }

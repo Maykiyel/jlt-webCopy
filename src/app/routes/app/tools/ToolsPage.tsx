@@ -23,6 +23,7 @@ export default function ToolsPage() {
     "/tools/templates/config/standard-quotation-template/:templateId/edit",
   );
   const createTemplateMatch = useMatch("/tools/templates/new");
+  const editTemplateMatch = useMatch("/tools/templates/:templateId/edit");
   const servicesMatch = useMatch("/tools/services");
   const messagesMatch = useMatch("/tools/messages");
   const templatesMatch = useMatch("/tools/templates");
@@ -42,9 +43,14 @@ export default function ToolsPage() {
 
     return (
       <TemplateFormPage
+        mode="create"
         serviceType={serviceType === "logistics" ? "LOGISTICS" : "REGULATORY"}
       />
     );
+  }
+
+  if (editTemplateMatch) {
+    return <TemplateFormPage mode="edit" serviceType="REGULATORY" />;
   }
   if (servicesMatch) return <ServicesPage />;
   if (messagesMatch) return <MessagesPage />;
