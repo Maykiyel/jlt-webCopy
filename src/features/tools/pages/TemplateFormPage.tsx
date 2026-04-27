@@ -35,7 +35,6 @@ import { detailsConfigsService } from "../api/details-configs.service";
 import { quotationFieldsService } from "../api/quotation-fields.service";
 import { templatesService } from "../api/templates.service";
 import { toolsQueryKeys } from "../config/queryKeys";
-import classes from "./TemplateFormPage.module.css";
 
 type TemplateChargeDraft = {
   key: number;
@@ -273,6 +272,8 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     isFieldsFetching ||
     (isEditMode && isTemplateFetching);
   const modeLabel = isEditMode ? "Editing" : "Creating";
+  const panelBodyMaxHeight =
+    "calc(100vh - var(--app-shell-header-height) - 19rem)";
 
   const canSave =
     form.name.trim().length > 0 &&
@@ -396,66 +397,68 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
         </AppButton>
       </Group>
 
-      <Group align="stretch" grow className={classes.splitPanels}>
-        <Box className={classes.cardShell}>
+      <Group align="stretch" grow style={{ flex: 1, minHeight: 0 }}>
+        <Box style={{ minWidth: 0, flex: 1, minHeight: 0 }}>
           <PageCard
             title="Quotation Details"
             hideBackButton
             bodyPx="md"
             bodyPy="md"
           >
-            {isInitialLoading ? (
-              <Stack gap="sm">
-                <Skeleton height={18} width="40%" />
-                <Skeleton height={14} />
-                <Skeleton height={14} />
-                <Skeleton height={18} width="55%" mt="md" />
-                <Skeleton height={14} />
-                <Skeleton height={14} />
-              </Stack>
-            ) : (
-              <Stack gap="md">
-                <Box>
-                  <Text size="sm" fw={600} mb="xs">
-                    Detail Configurations
-                  </Text>
-                  <Stack gap={6}>
-                    {detailConfigs.map((config) => (
-                      <Checkbox
-                        key={config.id}
-                        label={config.label}
-                        checked={form.selectedDetailIds.includes(config.id)}
-                        onChange={(event) =>
-                          handleDetailToggle(config.id, event.currentTarget.checked)
-                        }
-                      />
-                    ))}
-                  </Stack>
-                </Box>
+            <Box style={{ maxHeight: panelBodyMaxHeight, overflowY: "auto" }}>
+              {isInitialLoading ? (
+                <Stack gap="sm">
+                  <Skeleton height={18} width="40%" />
+                  <Skeleton height={14} />
+                  <Skeleton height={14} />
+                  <Skeleton height={18} width="55%" mt="md" />
+                  <Skeleton height={14} />
+                  <Skeleton height={14} />
+                </Stack>
+              ) : (
+                <Stack gap="md">
+                  <Box>
+                    <Text size="sm" fw={600} mb="xs">
+                      Detail Configurations
+                    </Text>
+                    <Stack gap={6}>
+                      {detailConfigs.map((config) => (
+                        <Checkbox
+                          key={config.id}
+                          label={config.label}
+                          checked={form.selectedDetailIds.includes(config.id)}
+                          onChange={(event) =>
+                            handleDetailToggle(config.id, event.currentTarget.checked)
+                          }
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
 
-                <Box>
-                  <Text size="sm" fw={600} mb="xs">
-                    From Client Inputs/Information
-                  </Text>
-                  <Stack gap={6}>
-                    {quotationFields.map((field) => (
-                      <Checkbox
-                        key={field.id}
-                        label={field.display_name}
-                        checked={form.selectedFieldIds.includes(field.id)}
-                        onChange={(event) =>
-                          handleFieldToggle(field.id, event.currentTarget.checked)
-                        }
-                      />
-                    ))}
-                  </Stack>
-                </Box>
-              </Stack>
-            )}
+                  <Box>
+                    <Text size="sm" fw={600} mb="xs">
+                      From Client Inputs/Information
+                    </Text>
+                    <Stack gap={6}>
+                      {quotationFields.map((field) => (
+                        <Checkbox
+                          key={field.id}
+                          label={field.display_name}
+                          checked={form.selectedFieldIds.includes(field.id)}
+                          onChange={(event) =>
+                            handleFieldToggle(field.id, event.currentTarget.checked)
+                          }
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                </Stack>
+              )}
+            </Box>
           </PageCard>
         </Box>
 
-        <Box className={classes.cardShell}>
+        <Box style={{ minWidth: 0, flex: 1, minHeight: 0 }}>
           <PageCard
             title="Billing Details"
             hideBackButton
@@ -471,71 +474,73 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
             bodyPx="md"
             bodyPy="md"
           >
-            {isInitialLoading ? (
-              <Stack gap="sm">
-                <Skeleton height={40} />
-                <Skeleton height={40} />
-                <Skeleton height={40} />
-              </Stack>
-            ) : (
-              <Stack gap="sm">
-                {form.charges.map((charge, index) => (
-                  <Paper
-                    key={charge.key}
-                    p="sm"
-                    radius="md"
-                    withBorder
-                    bg="var(--mantine-color-gray-0)"
-                  >
-                    <Stack gap="xs">
-                      <Group justify="space-between" align="center">
-                        <Text size="sm" fw={600} c="jltBlue.8">
-                          Charge Section {index + 1}
-                        </Text>
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={() => handleDeleteCharge(charge.key)}
-                          disabled={form.charges.length === 1}
-                        >
-                          <Delete />
-                        </ActionIcon>
-                      </Group>
+            <Box style={{ maxHeight: panelBodyMaxHeight, overflowY: "auto" }}>
+              {isInitialLoading ? (
+                <Stack gap="sm">
+                  <Skeleton height={40} />
+                  <Skeleton height={40} />
+                  <Skeleton height={40} />
+                </Stack>
+              ) : (
+                <Stack gap="sm">
+                  {form.charges.map((charge, index) => (
+                    <Paper
+                      key={charge.key}
+                      p="sm"
+                      radius="md"
+                      withBorder
+                      bg="var(--mantine-color-gray-0)"
+                    >
+                      <Stack gap="xs">
+                        <Group justify="space-between" align="center">
+                          <Text size="sm" fw={600} c="jltBlue.8">
+                            Charge Section {index + 1}
+                          </Text>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            onClick={() => handleDeleteCharge(charge.key)}
+                            disabled={form.charges.length === 1}
+                          >
+                            <Delete />
+                          </ActionIcon>
+                        </Group>
 
-                      <Stack style={{ flex: 1 }} gap={8}>
-                        <Text size="xs" c="dimmed" fw={500}>
-                          Table Name
-                        </Text>
-                        <TextInput
-                          placeholder="TABLE NAME"
-                          value={charge.name}
-                          onChange={(event) =>
-                            handleChargeChange(charge.key, {
-                              name: event.currentTarget.value,
-                            })
-                          }
-                        />
+                        <Stack style={{ flex: 1 }} gap={8}>
+                          <Text size="xs" c="dimmed" fw={500}>
+                            Table Name
+                          </Text>
+                          <TextInput
+                            placeholder="TABLE NAME"
+                            value={charge.name}
+                            onChange={(event) =>
+                              handleChargeChange(charge.key, {
+                                name: event.currentTarget.value,
+                              })
+                            }
+                          />
 
-                        <Text size="xs" c="dimmed" fw={500} mt={4}>
-                          Receipt Charges
-                        </Text>
-                        <MultiSelect
-                          placeholder="SELECT RECEIPT CHARGES"
-                          data={receiptOptions}
-                          value={charge.receipt_option_ids}
-                          onChange={(value) =>
-                            handleChargeChange(charge.key, {
-                              receipt_option_ids: value,
-                            })
-                          }
-                          searchable
-                        />
+                          <Text size="xs" c="dimmed" fw={500} mt={4}>
+                            Receipt Charges
+                          </Text>
+                          <MultiSelect
+                            placeholder="SELECT RECEIPT CHARGES"
+                            data={receiptOptions}
+                            value={charge.receipt_option_ids}
+                            onChange={(value) =>
+                              handleChargeChange(charge.key, {
+                                receipt_option_ids: value,
+                              })
+                            }
+                            searchable
+                          />
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  </Paper>
-                ))}
-              </Stack>
-            )}
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+            </Box>
           </PageCard>
         </Box>
       </Group>
