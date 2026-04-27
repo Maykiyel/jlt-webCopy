@@ -7,6 +7,7 @@ import {
   Stack,
   Text,
   TextInput,
+  Skeleton,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
@@ -84,12 +85,12 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
 
   const [draft, setDraft] = useState<TemplateFormDraft | null>(null);
 
-  const { data: detailsResponse } = useQuery({
+  const { data: detailsResponse, isFetching: isDetailsFetching } = useQuery({
     queryKey: toolsQueryKeys.detailsConfigs,
     queryFn: () => detailsConfigsService.getDetailsConfigs(),
   });
 
-  const { data: billingResponse } = useQuery({
+  const { data: billingResponse, isFetching: isBillingFetching } = useQuery({
     queryKey: toolsQueryKeys.billingConfigs,
     queryFn: () => billingConfigsService.getBillingConfigs(),
   });
@@ -104,7 +105,7 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
     ? templateResponse?.data?.service_type ?? serviceType
     : serviceType;
 
-  const { data: fieldsResponse } = useQuery({
+  const { data: fieldsResponse, isFetching: isFieldsFetching } = useQuery({
     queryKey: toolsQueryKeys.quotationFields(resolvedServiceType),
     queryFn: () => quotationFieldsService.getQuotationFields(resolvedServiceType),
   });
@@ -262,6 +263,12 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
+  const isInitialLoading =
+    isDetailsFetching ||
+    isBillingFetching ||
+    isFieldsFetching ||
+    (isEditMode && isTemplateFetching);
+
   const canSave =
     form.name.trim().length > 0 &&
     form.selectedDetailIds.length > 0 &&
@@ -342,7 +349,13 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
   };
 
   return (
-    <Stack gap="sm">
+    <Stack
+      gap="sm"
+      style={{
+        height:
+          "calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2)",
+      }}
+    >
       <Group justify="space-between" align="center">
         <TextInput
           value={form.name}
@@ -352,11 +365,11 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
           placeholder="TEMPLATE NAME"
           maw={520}
           style={{ flex: 1 }}
-          disabled={isTemplateFetching || isSaving}
+          disabled={isInitialLoading || isSaving}
         />
         <AppButton
           onClick={handleSave}
-          disabled={!canSave || isTemplateFetching}
+          disabled={!canSave || isInitialLoading}
           loading={isSaving}
           icon={Save}
           w="10rem"
@@ -366,105 +379,128 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
         </AppButton>
       </Group>
 
-      <Group align="stretch" grow>
-        <Box style={{ minWidth: 0 }}>
+      <Group align="stretch" grow style={{ flex: 1, minHeight: 0 }}>
+        <Box style={{ minWidth: 0, flex: 1, minHeight: 0, display: "grid" }}>
           <PageCard
             title="Quotation Details"
             hideBackButton
             bodyPx="md"
             bodyPy="md"
           >
-            <Stack gap="md">
-              <Box>
-                <Text size="sm" fw={600} mb="xs">
-                  Detail Configurations
-                </Text>
-                <Stack gap={6}>
-                  {detailConfigs.map((config) => (
-                    <Checkbox
-                      key={config.id}
-                      label={config.label}
-                      checked={form.selectedDetailIds.includes(config.id)}
-                      onChange={(event) =>
-                        handleDetailToggle(config.id, event.currentTarget.checked)
-                      }
-                    />
-                  ))}
-                </Stack>
-              </Box>
+            {isInitialLoading ? (
+              <Stack gap="sm">
+                <Skeleton height={18} width="40%" />
+                <Skeleton height={14} />
+                <Skeleton height={14} />
+                <Skeleton height={18} width="55%" mt="md" />
+                <Skeleton height={14} />
+                <Skeleton height={14} />
+              </Stack>
+            ) : (
+              <Stack gap="md">
+                <Box>
+                  <Text size="sm" fw={600} mb="xs">
+                    Detail Configurations
+                  </Text>
+                  <Stack gap={6}>
+                    {detailConfigs.map((config) => (
+                      <Checkbox
+                        key={config.id}
+                        label={config.label}
+                        checked={form.selectedDetailIds.includes(config.id)}
+                        onChange={(event) =>
+                          handleDetailToggle(config.id, event.currentTarget.checked)
+                        }
+                      />
+                    ))}
+                  </Stack>
+                </Box>
 
-              <Box>
-                <Text size="sm" fw={600} mb="xs">
-                  From Client Inputs/Information
-                </Text>
-                <Stack gap={6}>
-                  {quotationFields.map((field) => (
-                    <Checkbox
-                      key={field.id}
-                      label={field.display_name}
-                      checked={form.selectedFieldIds.includes(field.id)}
-                      onChange={(event) =>
-                        handleFieldToggle(field.id, event.currentTarget.checked)
-                      }
-                    />
-                  ))}
-                </Stack>
-              </Box>
-            </Stack>
+                <Box>
+                  <Text size="sm" fw={600} mb="xs">
+                    From Client Inputs/Information
+                  </Text>
+                  <Stack gap={6}>
+                    {quotationFields.map((field) => (
+                      <Checkbox
+                        key={field.id}
+                        label={field.display_name}
+                        checked={form.selectedFieldIds.includes(field.id)}
+                        onChange={(event) =>
+                          handleFieldToggle(field.id, event.currentTarget.checked)
+                        }
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              </Stack>
+            )}
           </PageCard>
         </Box>
 
-        <Box style={{ minWidth: 0 }}>
+        <Box style={{ minWidth: 0, flex: 1, minHeight: 0, display: "grid" }}>
           <PageCard
             title="Billing Details"
             hideBackButton
             action={
-              <ActionIcon color="jltAccent.6" onClick={handleAddCharge}>
+              <ActionIcon
+                color="jltAccent.6"
+                onClick={handleAddCharge}
+                disabled={isInitialLoading || isSaving}
+              >
                 <Add />
               </ActionIcon>
             }
             bodyPx="md"
             bodyPy="md"
           >
-            <Stack gap="sm">
-              {form.charges.map((charge) => (
-                <Box key={charge.key} p="sm" bd="1px solid var(--mantine-color-gray-3)">
-                  <Group align="flex-start" wrap="nowrap">
-                    <Stack style={{ flex: 1 }} gap={8}>
-                      <TextInput
-                        placeholder="TABLE NAME"
-                        value={charge.name}
-                        onChange={(event) =>
-                          handleChargeChange(charge.key, {
-                            name: event.currentTarget.value,
-                          })
-                        }
-                      />
-                      <MultiSelect
-                        placeholder="SELECT RECEIPT CHARGES"
-                        data={receiptOptions}
-                        value={charge.receipt_option_ids}
-                        onChange={(value) =>
-                          handleChargeChange(charge.key, {
-                            receipt_option_ids: value,
-                          })
-                        }
-                        searchable
-                      />
-                    </Stack>
-                    <ActionIcon
-                      variant="subtle"
-                      color="red"
-                      mt={4}
-                      onClick={() => handleDeleteCharge(charge.key)}
-                      disabled={form.charges.length === 1}
-                    >
-                      <Delete />
-                    </ActionIcon>
-                  </Group>
-                </Box>
-              ))}
-            </Stack>
+            {isInitialLoading ? (
+              <Stack gap="sm">
+                <Skeleton height={40} />
+                <Skeleton height={40} />
+                <Skeleton height={40} />
+              </Stack>
+            ) : (
+              <Stack gap="sm">
+                {form.charges.map((charge) => (
+                  <Box key={charge.key} p="sm" bd="1px solid var(--mantine-color-gray-3)">
+                    <Group align="flex-start" wrap="nowrap">
+                      <Stack style={{ flex: 1 }} gap={8}>
+                        <TextInput
+                          placeholder="TABLE NAME"
+                          value={charge.name}
+                          onChange={(event) =>
+                            handleChargeChange(charge.key, {
+                              name: event.currentTarget.value,
+                            })
+                          }
+                        />
+                        <MultiSelect
+                          placeholder="SELECT RECEIPT CHARGES"
+                          data={receiptOptions}
+                          value={charge.receipt_option_ids}
+                          onChange={(value) =>
+                            handleChargeChange(charge.key, {
+                              receipt_option_ids: value,
+                            })
+                          }
+                          searchable
+                        />
+                      </Stack>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        mt={4}
+                        onClick={() => handleDeleteCharge(charge.key)}
+                        disabled={form.charges.length === 1}
+                      >
+                        <Delete />
+                      </ActionIcon>
+                    </Group>
+                  </Box>
+                ))}
+              </Stack>
+            )}
           </PageCard>
         </Box>
       </Group>
