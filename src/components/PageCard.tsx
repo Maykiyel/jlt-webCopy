@@ -71,8 +71,15 @@ export function PageCard({
       className={classes.root}
       style={{
         height: fullHeight
-          ? "calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2)"
-          : undefined,
+          ? "min(100%, calc(100vh - var(--app-shell-header-height) - var(--mantine-spacing-md) * 2))"
+            : undefined,
+        ...(fullHeight
+          ? {
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+            }
+          : {}),
       }}
       pos="relative"
     >
@@ -148,6 +155,15 @@ export function PageCard({
         className={classes.body}
         px={bodyPx}
         py={bodyPy}
+        style={
+          fullHeight
+            ? {
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+              }
+            : undefined
+        }
       >
         {children}
       </Box>
