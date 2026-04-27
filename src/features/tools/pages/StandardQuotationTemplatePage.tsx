@@ -6,6 +6,7 @@ import { notifications } from "@mantine/notifications";
 import { Add } from "@nine-thirty-five/material-symbols-react/rounded";
 import { PageCard } from "@/components/PageCard";
 import { AppTable, type AppTableColumn } from "@/components/AppTable";
+import { toolsQueryKeys } from "../config/queryKeys";
 import {
   standardTemplatesService,
   type StandardTemplateSummaryResource,
@@ -19,7 +20,7 @@ export function StandardQuotationTemplatePage() {
   const [perPage, setPerPage] = useState(10);
 
   const { data: templatesResponse } = useQuery({
-    queryKey: ["standard-templates"],
+    queryKey: toolsQueryKeys.standardTemplates,
     queryFn: () => standardTemplatesService.getStandardTemplates(),
   });
 
@@ -27,7 +28,9 @@ export function StandardQuotationTemplatePage() {
     mutationFn: (id: number) =>
       standardTemplatesService.deleteStandardTemplate(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["standard-templates"] });
+      queryClient.invalidateQueries({
+        queryKey: toolsQueryKeys.standardTemplates,
+      });
       notifications.show({
         title: "Success",
         message: "Template deleted successfully",
