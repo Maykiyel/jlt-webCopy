@@ -4,6 +4,7 @@ import {
   Checkbox,
   Group,
   MultiSelect,
+  Paper,
   Stack,
   Text,
   TextInput,
@@ -462,10 +463,33 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
               </Stack>
             ) : (
               <Stack gap="sm">
-                {form.charges.map((charge) => (
-                  <Box key={charge.key} p="sm" bd="1px solid var(--mantine-color-gray-3)">
-                    <Group align="flex-start" wrap="nowrap">
+                {form.charges.map((charge, index) => (
+                  <Paper
+                    key={charge.key}
+                    p="sm"
+                    radius="md"
+                    withBorder
+                    bg="var(--mantine-color-gray-0)"
+                  >
+                    <Stack gap="xs">
+                      <Group justify="space-between" align="center">
+                        <Text size="sm" fw={600} c="jltBlue.8">
+                          Charge Section {index + 1}
+                        </Text>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => handleDeleteCharge(charge.key)}
+                          disabled={form.charges.length === 1}
+                        >
+                          <Delete />
+                        </ActionIcon>
+                      </Group>
+
                       <Stack style={{ flex: 1 }} gap={8}>
+                        <Text size="xs" c="dimmed" fw={500}>
+                          Table Name
+                        </Text>
                         <TextInput
                           placeholder="TABLE NAME"
                           value={charge.name}
@@ -475,6 +499,10 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
                             })
                           }
                         />
+
+                        <Text size="xs" c="dimmed" fw={500} mt={4}>
+                          Receipt Charges
+                        </Text>
                         <MultiSelect
                           placeholder="SELECT RECEIPT CHARGES"
                           data={receiptOptions}
@@ -487,17 +515,8 @@ export function TemplateFormPage({ mode, serviceType }: TemplateFormPageProps) {
                           searchable
                         />
                       </Stack>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        mt={4}
-                        onClick={() => handleDeleteCharge(charge.key)}
-                        disabled={form.charges.length === 1}
-                      >
-                        <Delete />
-                      </ActionIcon>
-                    </Group>
-                  </Box>
+                    </Stack>
+                  </Paper>
                 ))}
               </Stack>
             )}
