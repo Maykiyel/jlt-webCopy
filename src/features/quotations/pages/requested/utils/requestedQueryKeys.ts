@@ -9,6 +9,7 @@ interface RequestedListKeyParams {
   statusFilter: "AVAILABLE" | "ASSIGNED" | "REASSIGNMENT REQUESTED" | "ALL";
   dateFilter: string;
   perPage: number;
+  jobFilter: "all" | "my-items";
 }
 
 interface RequestedClientListKeyParams {
@@ -29,6 +30,7 @@ export const requestedQueryKeys = {
     statusFilter,
     dateFilter,
     perPage,
+    jobFilter
   }: RequestedListKeyParams) =>
     [
       ...requestedQueryKeys.requestedRoot(),
@@ -39,6 +41,7 @@ export const requestedQueryKeys = {
       statusFilter,
       dateFilter,
       perPage,
+      jobFilter,
     ] as const,
   requestedClientList: ({
     clientId,

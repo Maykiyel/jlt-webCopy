@@ -2,12 +2,26 @@ import { apiClient } from "@/lib/api/client";
 import type {
   IssuedQuotationResource,
   QuotationsIndexResponse,
-  RequestedQuotationsResponse,
-  RespondedQuotationsResponse,
-  RespondedQuotationListItem,
   QuotationResource,
   QuotationStatus,
 } from "../types/quotations.types";
+
+export {
+  fetchRequestedQuotations,
+  acceptQuotation,
+  reassignQuotationEnums,
+  reassignQuotationSpecificDetails,
+  reassignQuotation,
+} from "./quotations-api/requested.api";
+
+export {
+  fetchRespondedQuotations,
+  type FetchRespondedQuotationsParams,
+} from "./quotations-api/responded.api";
+
+export { fetchAcceptedQuotations } from "./quotations-api/accepted.api";
+
+export { fetchDiscardedQuotations } from "./quotations-api/discarded.api";
 
 export type ComposeTemplateType = "IMPORT" | "EXPORT" | "BUSINESS SOLUTION";
 
@@ -123,125 +137,6 @@ export async function updateQuotationAssignee(
       as_id: asId,
     },
   );
-  return response.data.data;
-}
-
-interface FetchRespondedQuotationsParams {
-  search?: string;
-  perPage?: number;
-}
-
-interface FetchRequestedQuotationsParams {
-  search?: string;
-  as_search?: string;
-  client_type?: "NEW" | "OLD";
-  perPage?: number;
-  "filter[assignment_status]"?: string;
-  "filter[created_at]"?: string;
-  "filter[service]"?: string;
-}
-
-export async function fetchRequestedQuotations(
-  params: FetchRequestedQuotationsParams,
-): Promise<RequestedQuotationsResponse> {
-  console.log("khate", params)
-  const response = await apiClient.get<{
-    data: RequestedQuotationsResponse | [];
-  }>("/quotations", {
-    params: {
-      "filter[status]": "REQUESTED",
-      ...(params["filter[assignment_status]"]
-        ? { "filter[assignment_status]": params["filter[assignment_status]"] }
-        : {}),
-      ...(params["filter[created_at]"]
-        ? { "filter[created_at]": params["filter[created_at]"] }
-        : {}),
-      ...(params["filter[service]"]
-        ? { "filter[service]": params["filter[service]"] }
-        : {}),
-      ...(params.search ? { search: params.search } : {}),
-      ...(params.as_search ? { as_search: params.as_search } : {}),
-      ...(params.client_type ? { client_type: params.client_type } : {}),
-      ...(params.perPage ? { perPage: params.perPage } : {}),
-    },
-  });
-
-  if (Array.isArray(response.data.data)) {
-    return {
-      counts: {
-        all_quotations: 0,
-        old_user_quotations: 0,
-        new_user_quotations: 0,
-      },
-      quotations: [],
-      my_quotations: [],
-      pagination: {
-        count: 0,
-        per_page: params.perPage ?? 10,
-        total: 0,
-      },
-      my_quotations_pagination: {
-        count: 0,
-        per_page: params.perPage ?? 10,
-        total: 0,
-      },
-    };
-  }
-
-  return response.data.data;
-}
-
-export async function fetchRespondedQuotations(
-  params: FetchRespondedQuotationsParams,
-): Promise<RespondedQuotationsResponse> {
-  const response = await apiClient.get<{
-    data: RespondedQuotationsResponse | [];
-  }>("/quotations", {
-    params: {
-      "filter[status]": "RESPONDED",
-      ...(params.search ? { search: params.search } : {}),
-      ...(params.perPage ? { perPage: params.perPage } : {}),
-    },
-  });
-
-  if (Array.isArray(response.data.data)) {
-    return {
-      quotations: [] as RespondedQuotationListItem[],
-      pagination: {
-        count: 0,
-        per_page: params.perPage ?? 10,
-        total: 0,
-      },
-    };
-  }
-
-  return response.data.data;
-}
-
-export async function fetchAcceptedQuotations(
-  params: FetchRespondedQuotationsParams,
-): Promise<RespondedQuotationsResponse> {
-  const response = await apiClient.get<{
-    data: RespondedQuotationsResponse | [];
-  }>("/quotations", {
-    params: {
-      "filter[status]": "ACCEPTED",
-      ...(params.search ? { search: params.search } : {}),
-      ...(params.perPage ? { perPage: params.perPage } : {}),
-    },
-  });
-
-  if (Array.isArray(response.data.data)) {
-    return {
-      quotations: [] as RespondedQuotationListItem[],
-      pagination: {
-        count: 0,
-        per_page: params.perPage ?? 10,
-        total: 0,
-      },
-    };
-  }
-
   return response.data.data;
 }
 

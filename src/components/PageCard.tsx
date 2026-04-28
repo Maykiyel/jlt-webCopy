@@ -30,6 +30,8 @@ interface PageCardProps {
   onJobSwitchChange?: (value: "all" | "my-items") => void;
   jobSwitchSecondaryValue?: "my-items";
   jobSwitchSecondaryLabel?: string;
+  bgColor?: string;
+
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -40,17 +42,16 @@ export function PageCard({
   subtextColor = "dimmed",
   action,
   fullHeight = false,
-  hideBackButton = false,
   showDivider = false,
   children,
   onBack,
+  hideBackButton = false,
+  bgColor = "white",
   bodyPx = "xl",
   bodyPy = "lg",
   showJobSwitch = false,
   jobSwitchValue = "all",
   onJobSwitchChange,
-  jobSwitchSecondaryValue = "my-items",
-  jobSwitchSecondaryLabel = "MY ITEMS",
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -66,8 +67,9 @@ export function PageCard({
     <Card
       withBorder={false}
       radius={10}
-      shadow={"sm"}
+      shadow={bgColor === "transparent" ? "none" : "sm"}
       padding={0}
+      bg={bgColor}
       className={classes.root}
       style={{
         height: fullHeight
@@ -125,13 +127,13 @@ export function PageCard({
                 type="button"
                 className={classes.jobSwitchOption}
                 data-active={
-                  jobSwitchValue === jobSwitchSecondaryValue || undefined
+                  jobSwitchValue === "my-items" || undefined
                 }
-                aria-pressed={jobSwitchValue === jobSwitchSecondaryValue}
-                onClick={() => onJobSwitchChange?.(jobSwitchSecondaryValue)}
+                aria-pressed={jobSwitchValue === "my-items"}
+                onClick={() => onJobSwitchChange?.("my-items")}
               >
                 <span className={classes.jobSwitchLabel}>
-                  {jobSwitchSecondaryLabel}
+                  MY ITEMS
                 </span>
               </UnstyledButton>
             </Group>
