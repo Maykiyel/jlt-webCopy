@@ -649,7 +649,6 @@ export function ComposeQuotationPage() {
     <PageCard
       title={quotationTemplate.name}
       fullHeight
-      hideDivider
       bodyPx={0}
       bodyPy={0}
       action={

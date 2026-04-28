@@ -115,7 +115,7 @@ export function QuotationDocuments() {
         </Text>
       </Group>
 
-      <PageCard title="" fullHeight hideDivider hideBackButton onBack={() => navigate(-1)}>
+      <PageCard title="" fullHeight hideBackButton onBack={() => navigate(-1)}>
         {isLoading ? (
           <Text size="0.8rem" c="dimmed">
             Loading documents...
