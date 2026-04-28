@@ -286,7 +286,7 @@ export function QuotationsRequested() {
       <AcceptModal
         acceptModalOpen={acceptModalOpen}
         setAcceptModalOpen={setAcceptModalOpen}
-        onConfirm={handleReassignConfirm}
+        onConfirm={handleAcceptConfirm}
         isSubmitting={acceptQuotationMutation.isPending}
       />
 
