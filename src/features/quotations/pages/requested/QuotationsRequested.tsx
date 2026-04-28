@@ -40,16 +40,18 @@ export function QuotationsRequested() {
 
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
-  const [reassignAcceptModalOpen, setReassignAccceptModalOpen] = useState(false);
+  const [reassignAcceptModalOpen, setReassignAccceptModalOpen] =
+    useState(false);
   const [reassignRejectModalOpen, setReassignRejectModalOpen] = useState(false);
-  const [requestReassignModalOpen, setRequestReassignModalOpen] = useState(false);
+  const [requestReassignModalOpen, setRequestReassignModalOpen] =
+    useState(false);
 
   const [reassignStatus, setReassignStatus] = useState<string>("");
   const [reassignASId, setReassignASId] = useState<number | null>(null);
   const [reassignAS, setReassignAS] = useState<string>("");
 
   const [jobFilter, setJobFilter] = useState<"all" | "my-items">("all");
-  const [dateFilter, setDateFilter] = useState("");  
+  const [dateFilter, setDateFilter] = useState("");
   const [clientFilter, setClientFilter] = useState<"ALL" | "NEW" | "OLD">(
     "ALL",
   );
@@ -59,8 +61,6 @@ export function QuotationsRequested() {
   const [statusFilter, setStatusFilter] = useState<
     "AVAILABLE" | "ASSIGNED" | "REASSIGNMENT REQUESTED" | "ALL"
   >("ALL");
-
-  
 
   const {
     search,
@@ -144,13 +144,22 @@ export function QuotationsRequested() {
   };
 
   console.log("khate", reassignAS);
-  console.log("khate2", reassignStatus)
+  console.log("khate2", reassignStatus);
 
   const reassignQuotationMutation = useMutation({
-    mutationFn: ({ id, status, as_id }: { id: number | string; status: string; as_id: number }) =>
-      reassignQuotation(id, status, as_id),
+    mutationFn: ({
+      id,
+      status,
+      as_id,
+    }: {
+      id: number | string;
+      status: string;
+      as_id: number;
+    }) => reassignQuotation(id, status, as_id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: requestedQueryKeys.requestedRoot() });
+      queryClient.invalidateQueries({
+        queryKey: requestedQueryKeys.requestedRoot(),
+      });
       setReassignModalOpen(false);
       setSelectedQuotation(null);
       setReassignASId(null);
@@ -162,7 +171,6 @@ export function QuotationsRequested() {
   });
 
   const handleReassignConfirm = () => {
-    
     if (!selectedQuotation) return;
     if (!reassignStatus || reassignASId == null) return;
 
@@ -253,6 +261,16 @@ export function QuotationsRequested() {
                 total={data?.counts.all_quotations}
                 onAcceptClick={openAcceptModal}
                 onReassignClick={openReassignModal}
+                onMakeQuotationClick={(row: RequestedQuotationListItem) => {
+                  const quotationId = String(row.id);
+                  prefetchQuotationDetails(quotationId);
+                  navigate(
+                    quotationRoutes.compose({
+                      tab: "requested",
+                      quotationId,
+                    }),
+                  );
+                }}
                 onRowClick={(row: RequestedQuotationListItem) => {
                   const quotationId = String(row.id);
                   prefetchQuotationDetails(quotationId);
@@ -301,15 +319,11 @@ export function QuotationsRequested() {
           setReassignASId(null);
           setReassignStatus("");
         }}
-       />
-
-      <ReassignRejectModal
-
       />
 
-      <ReassignRejectModal
-      
-      />
+      <ReassignRejectModal />
+
+      <ReassignRejectModal />
     </>
   );
 }

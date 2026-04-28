@@ -13,7 +13,6 @@ import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
   RequestQuote,
   Autorenew,
-  CheckCircle,
   PanToolAlt,
 } from "@nine-thirty-five/material-symbols-react/outlined";
 import type { RequestedQuotationListItem } from "@/features/quotations/types/quotations.types";
@@ -37,6 +36,7 @@ interface RequestTableProps {
   onRowClick?: (row: RequestedQuotationRow) => void;
   onAcceptClick?: (row: RequestedQuotationRow) => void;
   onReassignClick?: (row: RequestedQuotationRow) => void;
+  onMakeQuotationClick?: (row: RequestedQuotationRow) => void;
 }
 
 function toTitleCase(value: string) {
@@ -65,6 +65,7 @@ export function RequestTable({
   onRowClick,
   onAcceptClick,
   onReassignClick,
+  onMakeQuotationClick,
 }: RequestTableProps) {
   const currentShowingCount = showingCount ?? rows.length;
   const currentTotal = total ?? rows.length;
@@ -200,23 +201,22 @@ export function RequestTable({
                             onClick={(event) => {
                               event.stopPropagation();
 
-                              if (row.assignment_status !== "ASSIGNED") {
-                                onReassignClick?.(row);
-                              }
+                              onMakeQuotationClick?.(row);
                             }}
                           >
                             Make Quotation
                           </Button>
-                          {/* Michael */}
                           <Button
                             styles={{ root: { background: "#1D274E" } }}
                             leftSection={<Autorenew width={20} />}
                             onClick={(event) => {
                               event.stopPropagation();
 
-                              row.assignment_status === "AVAILABLE"
-                                ? onAcceptClick?.(row)
-                                : onReassignClick?.(row);
+                              if (row.assignment_status === "AVAILABLE") {
+                                onAcceptClick?.(row);
+                              } else {
+                                onReassignClick?.(row);
+                              }
                             }}
                           >
                             Request Reassignment
@@ -226,19 +226,21 @@ export function RequestTable({
 
                       {row.assignment_status === "REASSIGNMENT REQUESTED" && (
                         <>
-                        <Button
-                          styles={{ root: { background: statusButtonBg(row) } }}
-                          leftSection={<Autorenew width={20} />}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onReassignClick?.(row);
-                          }}
-                        >
-                          Reassignment Request
-                        </Button>
-                        <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
-                          Req. Reassignmet: 
-                        </Text>
+                          <Button
+                            styles={{
+                              root: { background: statusButtonBg(row) },
+                            }}
+                            leftSection={<Autorenew width={20} />}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onReassignClick?.(row);
+                            }}
+                          >
+                            Reassignment Request
+                          </Button>
+                          <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
+                            Req. Reassignmet:
+                          </Text>
                         </>
                       )}
 
@@ -248,7 +250,7 @@ export function RequestTable({
                           leftSection={<PanToolAlt width={20} />}
                           onClick={(event) => {
                             event.stopPropagation();
-                            onAcceptClick?.(row)
+                            onAcceptClick?.(row);
                           }}
                         >
                           Accept
@@ -257,7 +259,7 @@ export function RequestTable({
 
                       {row.assignment_status === "ASSIGNED" && (
                         <Text c="#334155" fz="0.75rem" fw={400} lh={1.4}>
-                          Req. Accepted: 
+                          Req. Accepted:
                         </Text>
                       )}
                     </Stack>

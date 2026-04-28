@@ -15,11 +15,11 @@ import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
 import { usePDFActions } from "@/features/quotations/pdf/usePDFActions";
 import { QuotationPreview } from "@/features/quotations/components/QuotationPreview";
 import { ScaledA4PreviewFrame } from "@/features/quotations/components/ScaledA4PreviewFrame";
+import { fetchQuotation } from "@/features/quotations/api/quotations.api";
 import {
   fetchIssuedQuotation,
-  fetchQuotation,
   fetchQuotationTemplate,
-} from "@/features/quotations/api/quotations.api";
+} from "@/features/quotations/api/quotations-api/compose.api";
 import { buildViewerStateFromIssuedQuotation } from "@/features/quotations/utils/issuedQuotationViewerState";
 import { mapQuotationTemplateDetailToComposeTemplate } from "@/features/quotations/utils/quotationTemplateMapper";
 import classes from "./QuotationFileViewer.module.css";
