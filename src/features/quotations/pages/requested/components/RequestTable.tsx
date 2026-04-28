@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { MoreVert } from "@nine-thirty-five/material-symbols-react/rounded";
 import {
-  ArrowRightAlt,
+  RequestQuote,
   Autorenew,
   CheckCircle,
   PanToolAlt,
@@ -45,15 +45,6 @@ function toTitleCase(value: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function getStatusLabel(row: RequestedQuotationRow) {
-  return toTitleCase(
-    row.assignment_status === "AVAILABLE"
-      ? "Accept"
-      : row.assignment_status === "ASSIGNED"
-        ? "Accepted"
-        : "Reassignment Requested",
-  );
-}
 
 function getServiceLabel(service: string) {
   return toTitleCase(service);
@@ -198,47 +189,52 @@ export function RequestTable({
 
                   <Table.Td style={{maxWidth: "150px"}}>
                     <Stack gap={4}>
+                      {row.assignment_status === "ASSIGNED" && (
+                        <Button
+                          styles={{ root: { background: "#FF8800" } }}
+                          leftSection={<RequestQuote width={20} />}
+                          onClick={(event) => {
+                            event.stopPropagation();
+
+                            if (row.assignment_status !== "ASSIGNED") {
+                            onReassignClick?.(row);
+                          }
+                          }}
+                        >
+                          Make Quotation
+                        </Button>
+                      )}
+
                       <Button
                         styles={{ root: { background: statusButtonBg(row) } }}
                         leftSection={
                           row.assignment_status === "AVAILABLE" ? (
                             <PanToolAlt width={20} />
                           ) : row.assignment_status === "ASSIGNED" ? (
-                            <CheckCircle width={20} />
-                          ) : (
                             <Autorenew width={20} />
+                          ) : (
+                            <CheckCircle width={20} />
                           )
                         }
                         onClick={(event) => {
                           event.stopPropagation();
-                          if (row.assignment_status === "AVAILABLE") {
-                            onAcceptClick?.(row);
-                            return;
-                          }
-
-                          if (row.assignment_status !== "ASSIGNED") {
-                            onReassignClick?.(row);
-                          }
+                          
+                          row.assignment_status === "AVAILABLE" ?
+                            onAcceptClick?.(row) : onReassignClick?.(row)
+                          
+                          
                         }}
-                        disabled={row.assignment_status === "ASSIGNED"}
                       >
-                        {getStatusLabel(row)}
+                        {row.assignment_status === "AVAILABLE" ? "Accept" : "Reassignment Request"}
                       </Button>
+
+                      
                       {row.assignment_status === "AVAILABLE" && (
                         <Text c="#16803d" fz="0.75rem" fw={700} lh={1.4}>
                           {toTitleCase(row.assignment_status)}
                         </Text>
                       )}
-                      {row.assigned_at && (
-                        <Text c="#334155" fz="0.75rem" lh={1.4}>
-                          Assigned at: {row.assigned_at}
-                        </Text>
-                      )}
-                      {row.prepared_by && (
-                        <Text c="#334155" fz="0.75rem" lh={1.4}>
-                          Prepared by: {row.prepared_by}
-                        </Text>
-                      )}
+                      
                     </Stack>
                   </Table.Td>
 

@@ -1,11 +1,18 @@
-import { Button, Group, Modal, Select, Text } from "@mantine/core";
+import { Button, Group, Modal, Text } from "@mantine/core";
 
 type AcceptProps = {
     acceptModalOpen: boolean;
     setAcceptModalOpen: (open: boolean) => void;
+    onConfirm: () => void;
+    isSubmitting?: boolean;
 }
 
-export default function AcceptModal({ acceptModalOpen, setAcceptModalOpen }: AcceptProps) {
+export default function AcceptModal({
+  acceptModalOpen,
+  setAcceptModalOpen,
+  onConfirm,
+  isSubmitting = false,
+}: AcceptProps) {
     return(
         <>
         <Modal
@@ -64,7 +71,7 @@ export default function AcceptModal({ acceptModalOpen, setAcceptModalOpen }: Acc
                 "&:hover": {
                   background: "#17214c",
                 },
-                "&:focus-visible": {
+                "&:focusVisible": {
                   outline: "2px solid #2d458f",
                   outlineOffset: "2px",
                 },
@@ -76,10 +83,9 @@ export default function AcceptModal({ acceptModalOpen, setAcceptModalOpen }: Acc
                 letterSpacing: "0.01em",
               },
             }}
-            onClick={() => {
-              // connect accept mutation here.
-              setAcceptModalOpen(false);
-            }}
+            onClick={onConfirm}
+            loading={isSubmitting}
+            disabled={isSubmitting}
           >
             ACCEPT REQUEST
           </Button>

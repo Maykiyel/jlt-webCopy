@@ -52,8 +52,6 @@ export function PageCard({
   showJobSwitch = false,
   jobSwitchValue = "all",
   onJobSwitchChange,
-  jobSwitchSecondaryValue = "my-items",
-  jobSwitchSecondaryLabel = "MY ITEMS",
 }: PageCardProps) {
   const navigate = useNavigate();
 
@@ -129,13 +127,13 @@ export function PageCard({
                 type="button"
                 className={classes.jobSwitchOption}
                 data-active={
-                  jobSwitchValue === jobSwitchSecondaryValue || undefined
+                  jobSwitchValue === "my-items" || undefined
                 }
-                aria-pressed={jobSwitchValue === jobSwitchSecondaryValue}
-                onClick={() => onJobSwitchChange?.(jobSwitchSecondaryValue)}
+                aria-pressed={jobSwitchValue === "my-items"}
+                onClick={() => onJobSwitchChange?.("my-items")}
               >
                 <span className={classes.jobSwitchLabel}>
-                  {jobSwitchSecondaryLabel}
+                  MY ITEMS
                 </span>
               </UnstyledButton>
             </Group>

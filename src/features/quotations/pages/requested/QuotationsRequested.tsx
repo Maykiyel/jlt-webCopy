@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { Box, Stack } from "@mantine/core";
 import { useNavigate } from "react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { PageCard } from "@/components/PageCard";
+
 import {
   fetchQuotation,
   fetchRequestedQuotations,
+  acceptQuotation,
+  reassignQuotationEnums,
+  reassignQuotationSpecificDetails,
 } from "@/features/quotations/api/quotations.api";
+
 import { quotationQueryKeys } from "@/features/quotations/api/quotationQueryKeys";
 import { useQuotationTableSearch } from "@/features/quotations/hooks/useQuotationTableSearch";
 import { quotationRoutes } from "@/features/quotations/utils/quotationRoutes";
@@ -17,16 +22,22 @@ import { requestedQueryKeys } from "./utils/requestedQueryKeys";
 
 import { RequestFilterClient } from "./components/RequestFilterClient";
 import { RequestFilterTable } from "./components/RequestFilterTable";
-import { RequestTable } from "./components/requestTable";
+import { RequestTable } from "./components/RequestTable";
 import ReassignModal from "./components/ReassignModal";
 import AcceptModal from "./components/AcceptModal";
 
 export function QuotationsRequested() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const [selectedQuotation, setSelectedQuotation] =
     useState<RequestedQuotationListItem | null>(null);
 
   const [acceptModalOpen, setAcceptModalOpen] = useState(false);
   const [reassignModalOpen, setReassignModalOpen] = useState(false);
+
+  const [reassignStatus, setReassignStatus] = useState<string>("");
+  const [reassignASId, setReassignASId] = useState<number | null>(null);
 
   const [jobFilter, setJobFilter] = useState<"all" | "my-items">("all");
 
@@ -42,10 +53,8 @@ export function QuotationsRequested() {
     "AVAILABLE" | "ASSIGNED" | "REASSIGNMENT REQUESTED" | "ALL"
   >("ALL");
 
-  const [dateFilter, setDateFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState("");
 
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const {
     search,
     searchQuery,
@@ -68,13 +77,14 @@ export function QuotationsRequested() {
       statusFilter,
       dateFilter,
       perPage,
+      jobFilter,
     }),
     queryFn: () =>
       fetchRequestedQuotations({
         "filter[assignment_status]":
           statusFilter === "ALL" ? undefined : statusFilter,
         "filter[service]": serviceFilter === "ALL" ? undefined : serviceFilter,
-        "filter[created_at]":  dateFilter || undefined,
+        "filter[created_at]": dateFilter || undefined,
         search: searchQuery || undefined,
         as_search: secondarySearchQuery || undefined,
         client_type: clientFilter === "ALL" ? undefined : clientFilter,
@@ -82,19 +92,51 @@ export function QuotationsRequested() {
       }),
   });
 
-  console.log("khate", dateFilter)
+  const acceptQuotationMutation = useMutation({
+    mutationFn: (id: number | string) => acceptQuotation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: requestedQueryKeys.requestedRoot(),
+      });
+      setAcceptModalOpen(false);
+      setSelectedQuotation(null);
+    },
+    onError: (error) => {
+      console.error("Error accepting quotation:", error);
+    },
+  });
 
+  const { data: reassignEnumsData } = useQuery({
+    queryKey: requestedQueryKeys.requestedRoot(),
+    queryFn: () => reassignQuotationEnums("fetch", "fetch", ""),
+  });
 
-  // assigning ops or client
-  // const { data: specialistsResponse } = useQuery({
-  //   queryKey: requestedQueryKeys.accountSpecialists(),
-  //   queryFn: () => userService.getAccountSpecialists(),
-  // });
+  const reassignPersonels =
+    reassignEnumsData?.account_specialists.concat(
+      reassignEnumsData?.operations || [],
+    ) || [];
 
-  // const specialistOptions = (specialistsResponse?.data ?? []).map((specialist) => ({
-  //   value: String(specialist.id),
-  //   label: specialist.full_name,
-  // }));
+  const { data: reassignSpecificDetails } = useQuery({
+    queryKey: [
+      "reassignment-details",
+      selectedQuotation?.reassignment_request_id,
+    ],
+    queryFn: () =>
+      reassignQuotationSpecificDetails(
+        selectedQuotation?.reassignment_request_id || null,
+      ),
+    enabled: !!selectedQuotation?.reassignment_request_id,
+  });
+
+  const handleAcceptConfirm = () => {
+    if (!selectedQuotation) {
+      return;
+    }
+
+    acceptQuotationMutation.mutate(selectedQuotation.id);
+  };
+
+  console.log("khate", reassignSpecificDetails);
 
   const prefetchQuotationDetails = (quotationId: string) => {
     void queryClient.prefetchQuery({
@@ -125,8 +167,6 @@ export function QuotationsRequested() {
         showJobSwitch
         jobSwitchValue={jobFilter}
         onJobSwitchChange={handleJobSwitchChange}
-        jobSwitchSecondaryValue="my-items"
-        jobSwitchSecondaryLabel="MY ITEMS"
       >
         <Stack gap="xs">
           <RequestFilterClient
@@ -144,7 +184,11 @@ export function QuotationsRequested() {
           >
             <Box>
               <RequestFilterTable
-                quotations={jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || []}
+                quotations={
+                  jobFilter === "all"
+                    ? data?.quotations || []
+                    : data?.my_quotations || []
+                }
                 clientSearchValue={search}
                 onClientSearchChange={handleSearchChange}
                 onClientSearch={handleSearch}
@@ -163,7 +207,11 @@ export function QuotationsRequested() {
               />
 
               <RequestTable
-                rows={jobFilter === "all" ? data?.quotations || [] : data?.my_quotations || []}
+                rows={
+                  jobFilter === "all"
+                    ? data?.quotations || []
+                    : data?.my_quotations || []
+                }
                 isLoading={isLoading || isFetching}
                 showingCount={data?.pagination.count}
                 total={data?.counts.all_quotations}
@@ -185,16 +233,31 @@ export function QuotationsRequested() {
         </Stack>
       </PageCard>
 
-      {/* underconstruction */}
       <ReassignModal
         reassignModalOpen={reassignModalOpen}
         setReassignModalOpen={setReassignModalOpen}
         selectedQuotation={selectedQuotation}
+        reassignPersonels={reassignPersonels}
+        reassignSpecificDetails={reassignSpecificDetails}
+        reassignStatus={reassignStatus}
+        setReassignStatus={setReassignStatus}
+        reassignASId={reassignASId}
+        setReassignASId={setReassignASId}
+
+        // onSuccess={() => {
+        //   queryClient.invalidateQueries({
+        //     queryKey: requestedQueryKeys.requestedRoot(),
+        //   });
+        //   setReassignModalOpen(false);
+        //   setSelectedQuotation(null);
+        // }}
       />
 
       <AcceptModal
         acceptModalOpen={acceptModalOpen}
         setAcceptModalOpen={setAcceptModalOpen}
+        onConfirm={handleAcceptConfirm}
+        isSubmitting={acceptQuotationMutation.isPending}
       />
     </>
   );

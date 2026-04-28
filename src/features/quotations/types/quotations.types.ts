@@ -70,6 +70,8 @@ export interface RequestedQuotationListItem {
   service: string;
   logistics_service: RequestedQuotationLogisticsService | null;
   regulatory_service: RequestedQuotationRegulatoryService | null;
+  reassignment_request_id: number | null;
+  reassignment_requested_at: number | null;
   conversation_id: string | null;
   prepared_by: string | null;
   issued_quotation_id: string | null;
@@ -232,5 +234,33 @@ export const QUOTATION_STATUS = {
 export type QuotationStatus =
   (typeof QUOTATION_STATUS)[keyof typeof QUOTATION_STATUS];
 
+// ─── Status filter ─────────────────────────────────────────────────────────────
 
-  
+export type FetchRequestedQuotationsParams = {
+  search?: string;
+  as_search?: string;
+  client_type?: "NEW" | "OLD";
+  perPage?: number;
+  "filter[assignment_status]"?: string;
+  "filter[created_at]"?: string;
+  "filter[service]"?: string;
+}
+
+export type ReassignEnumsResponse = {
+  reassign_reasons: string[];
+  account_specialists: { id: number; username: string, full_name: string }[];
+  operations: {id: number; username: string, full_name: string }[];
+}
+
+    export type ReassignQuotationSpecificDetailsResponse = {
+  id: number;
+  quotation_id: number;
+  job_order_id: number | null;
+  as_id: number;
+  ops_id: number | null;
+  reason: string;
+  additional_details: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
